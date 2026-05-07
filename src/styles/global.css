@@ -1,1 +1,160 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+
+:root {
+	--font-sans: 'Manrope', 'Segoe UI', sans-serif;
+	--font-serif: 'Cormorant Garamond', Georgia, serif;
+	--color-bg: #f5f1ea;
+	--color-bg-soft: #fbf8f3;
+	--color-panel: rgba(255, 255, 255, 0.82);
+	--color-panel-strong: #ffffff;
+	--color-ink: #34414a;
+	--color-ink-strong: #18252d;
+	--color-muted: #67757d;
+	--color-border: rgba(24, 37, 45, 0.12);
+	--color-border-strong: rgba(24, 37, 45, 0.22);
+	--color-accent: #b79b68;
+	--color-accent-strong: #9d8458;
+	--color-sage: #9ca794;
+	--color-terracotta: #b37a63;
+	--shadow-soft: 0 20px 50px rgba(24, 37, 45, 0.08);
+	--shadow-line: 0 8px 24px rgba(24, 37, 45, 0.04);
+}
+
+html {
+	background:
+		radial-gradient(circle at top left, rgba(183, 155, 104, 0.12), transparent 30%),
+		linear-gradient(180deg, #fbf8f3 0%, #f4efe7 100%);
+}
+
+body {
+	font-family: var(--font-sans);
+	color: var(--color-ink);
+	background: transparent;
+	min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: var(--font-serif);
+	color: var(--color-ink-strong);
+	letter-spacing: -0.02em;
+}
+
+a,
+button,
+input,
+textarea,
+select {
+	transition:
+		color 180ms ease,
+		border-color 180ms ease,
+		background-color 180ms ease,
+		box-shadow 180ms ease,
+		transform 180ms ease;
+}
+
+::selection {
+	background: rgba(183, 155, 104, 0.22);
+	color: var(--color-ink-strong);
+}
+
+.shell {
+	width: min(100% - 2rem, 76rem);
+	margin-inline: auto;
+}
+
+.section {
+	padding-block: 4.75rem;
+}
+
+.section-lg {
+	padding-block: 6rem;
+}
+
+.eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.65rem;
+	font-size: 0.78rem;
+	line-height: 1;
+	font-weight: 700;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	color: var(--color-muted);
+}
+
+.eyebrow::before {
+	content: '';
+	width: 2.5rem;
+	height: 1px;
+	background: linear-gradient(90deg, var(--color-accent), transparent);
+}
+
+.surface-panel {
+	background: var(--color-panel);
+	border: 1px solid var(--color-border);
+	box-shadow: var(--shadow-soft);
+	backdrop-filter: blur(18px);
+}
+
+.surface-muted {
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+	border: 1px solid rgba(24, 37, 45, 0.08);
+	box-shadow: var(--shadow-line);
+}
+
+.article-content {
+	display: grid;
+	gap: 1.25rem;
+	color: var(--color-ink);
+}
+
+.article-content h2,
+.article-content h3 {
+	margin-top: 1rem;
+}
+
+.article-content h2 {
+	font-size: clamp(1.8rem, 3vw, 2.5rem);
+}
+
+.article-content h3 {
+	font-size: 1.5rem;
+}
+
+.article-content p,
+.article-content li {
+	font-size: 1.05rem;
+	line-height: 1.9;
+	color: var(--color-ink);
+}
+
+.article-content ul {
+	padding-left: 1.2rem;
+}
+
+.article-content a {
+	color: var(--color-ink-strong);
+	text-decoration: underline;
+	text-decoration-color: rgba(183, 155, 104, 0.6);
+	text-underline-offset: 0.18rem;
+}
+
+.balanced-text {
+	text-wrap: balance;
+}
+
+@media (max-width: 767px) {
+	.section {
+		padding-block: 4rem;
+	}
+
+	.section-lg {
+		padding-block: 4.75rem;
+	}
+}

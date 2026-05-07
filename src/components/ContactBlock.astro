@@ -1,0 +1,83 @@
+---
+interface Props {
+  phone: string;
+  email: string;
+  coveredAreas: string[];
+  mickaelName: string;
+  marionName: string;
+}
+
+const { phone, email, coveredAreas, mickaelName, marionName } = Astro.props;
+---
+
+<section class="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+  <div class="surface-panel rounded-[2rem] p-8">
+    <p class="eyebrow">Coordonnées</p>
+    <h2 class="mt-5 text-4xl">Parler de votre projet</h2>
+    <p class="mt-4 text-[0.98rem] leading-7 text-[color:var(--color-muted)]">
+      {mickaelName} et {marionName} vous répondent pour vendre, acheter, faire estimer un bien ou préparer une cession de fonds de commerce.
+    </p>
+
+    <div class="mt-8 grid gap-4 text-sm text-[color:var(--color-ink)]">
+      <a href={`tel:${phone.replace(/\s+/g, '')}`} class="surface-muted rounded-[1.35rem] px-5 py-4 font-semibold">
+        {phone}
+      </a>
+      <a href={`mailto:${email}`} class="surface-muted rounded-[1.35rem] px-5 py-4 font-semibold break-all">
+        {email}
+      </a>
+    </div>
+
+    <div class="mt-8">
+      <p class="text-xs font-bold uppercase tracking-[0.22em] text-[color:var(--color-muted)]">Secteur couvert</p>
+      <div class="mt-4 flex flex-wrap gap-2">
+        {coveredAreas.map((area) => (
+          <span class="rounded-full border border-[color:var(--color-border)] bg-white/70 px-3 py-2 text-xs font-semibold text-[color:var(--color-ink)]">
+            {area}
+          </span>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <form class="surface-panel rounded-[2rem] p-8" action="#" method="post">
+    <div class="grid gap-5 md:grid-cols-2">
+      <label class="grid gap-2 text-sm font-semibold text-[color:var(--color-ink-strong)]">
+        Nom
+        <input class="rounded-2xl border border-[color:var(--color-border)] bg-white px-4 py-3 font-medium text-[color:var(--color-ink)] outline-none focus:border-[color:var(--color-accent)]" type="text" name="name" placeholder="Votre nom" required />
+      </label>
+      <label class="grid gap-2 text-sm font-semibold text-[color:var(--color-ink-strong)]">
+        Email
+        <input class="rounded-2xl border border-[color:var(--color-border)] bg-white px-4 py-3 font-medium text-[color:var(--color-ink)] outline-none focus:border-[color:var(--color-accent)]" type="email" name="email" placeholder="vous@exemple.fr" required />
+      </label>
+      <label class="grid gap-2 text-sm font-semibold text-[color:var(--color-ink-strong)]">
+        Téléphone
+        <input class="rounded-2xl border border-[color:var(--color-border)] bg-white px-4 py-3 font-medium text-[color:var(--color-ink)] outline-none focus:border-[color:var(--color-accent)]" type="tel" name="phone" placeholder="06 00 00 00 00" />
+      </label>
+      <label class="grid gap-2 text-sm font-semibold text-[color:var(--color-ink-strong)]">
+        Sujet
+        <select class="rounded-2xl border border-[color:var(--color-border)] bg-white px-4 py-3 font-medium text-[color:var(--color-ink)] outline-none focus:border-[color:var(--color-accent)]" name="subject" required>
+          <option value="">Choisir un sujet</option>
+          <option value="vendre">Je veux vendre</option>
+          <option value="acheter">Je veux acheter</option>
+          <option value="estimation">Je souhaite une estimation</option>
+          <option value="fonds">Fonds de commerce</option>
+          <option value="autre">Autre demande</option>
+        </select>
+      </label>
+    </div>
+
+    <label class="mt-5 grid gap-2 text-sm font-semibold text-[color:var(--color-ink-strong)]">
+      Message
+      <textarea class="min-h-44 rounded-[1.5rem] border border-[color:var(--color-border)] bg-white px-4 py-3 font-medium text-[color:var(--color-ink)] outline-none focus:border-[color:var(--color-accent)]" name="message" placeholder="Décrivez votre projet, votre secteur et votre calendrier." required></textarea>
+    </label>
+
+    <label class="mt-5 flex items-start gap-3 text-sm leading-6 text-[color:var(--color-muted)]">
+      <input type="checkbox" name="privacy" required class="mt-1 h-4 w-4 rounded border-[color:var(--color-border)] text-[color:var(--color-accent)]" />
+      <span>J'accepte d'être recontacté au sujet de ma demande. Ce formulaire reste purement côté front dans cette version du site.</span>
+    </label>
+
+    <button type="submit" class="mt-6 inline-flex rounded-full border border-[color:var(--color-ink-strong)] bg-[color:var(--color-ink-strong)] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(24,37,45,0.18)] hover:-translate-y-0.5 hover:bg-[#22343d]">
+      Envoyer le message
+    </button>
+  </form>
+</section>

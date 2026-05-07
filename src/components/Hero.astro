@@ -1,0 +1,77 @@
+---
+import Button from './Button.astro';
+
+interface Action {
+  label: string;
+  href: string;
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+}
+
+interface Stat {
+  label: string;
+  value: string;
+}
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  subtitle: string;
+  actions?: Action[];
+  stats?: Stat[];
+  image?: string;
+}
+
+const { eyebrow, title, subtitle, actions = [], stats = [], image } = Astro.props;
+
+const panelStyle = image
+  ? `background-image: linear-gradient(180deg, rgba(24,37,45,0.12), rgba(24,37,45,0.5)), url('${image}'); background-size: cover; background-position: center;`
+  : undefined;
+---
+
+<section class="section section-lg">
+  <div class="shell">
+    <div class="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+      <div class="surface-panel rounded-[2.25rem] p-8 md:p-12">
+        {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+        <h1 class="balanced-text mt-6 text-5xl leading-none md:text-7xl">{title}</h1>
+        <p class="mt-6 max-w-3xl text-[1.06rem] leading-8 text-[color:var(--color-muted)] md:text-[1.12rem]">
+          {subtitle}
+        </p>
+        {actions.length > 0 && (
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+            {actions.map((action, index) => (
+              <Button href={action.href} variant={action.variant ?? (index === 0 ? 'primary' : 'outline')} size="lg">
+                {action.label}
+              </Button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div class="grid gap-5">
+        <div class="relative overflow-hidden rounded-[2.25rem] border border-[color:var(--color-border)] bg-[linear-gradient(135deg,rgba(183,155,104,0.18),rgba(24,37,45,0.88))] p-8 text-white shadow-[0_30px_70px_rgba(24,37,45,0.18)]" style={panelStyle}>
+          <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_35%)]"></div>
+          <div class="relative grid gap-5">
+            <p class="text-xs font-bold uppercase tracking-[0.24em] text-white/70">Couverture locale</p>
+            <div class="grid gap-4 sm:grid-cols-2">
+              {(stats.length > 0
+                ? stats
+                : [
+                    { value: 'Auxois', label: 'Territoire suivi' },
+                    { value: 'Morvan', label: 'Projet de vie' },
+                    { value: 'IAD', label: 'Réseau national' },
+                    { value: 'Sur mesure', label: 'Accompagnement' }
+                  ]).map((stat) => (
+                <div class="rounded-[1.5rem] border border-white/14 bg-white/8 p-4 backdrop-blur-sm">
+                  <p class="text-2xl font-semibold">{stat.value}</p>
+                  <p class="mt-1 text-sm text-white/70">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <slot name="aside" />
+      </div>
+    </div>
+  </div>
+</section>

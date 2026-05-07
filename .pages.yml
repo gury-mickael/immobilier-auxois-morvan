@@ -1,0 +1,288 @@
+media:
+  input: public/uploads
+  output: /uploads
+
+content:
+  - name: pages
+    label: Pages principales
+    type: collection
+    path: src/content/pages
+    filename: "{fields.slug}.md"
+    fields:
+      - name: title
+        label: Titre SEO
+        type: string
+      - name: metaDescription
+        label: Meta description
+        type: text
+      - name: slug
+        label: Slug
+        type: string
+      - name: h1
+        label: H1
+        type: string
+      - name: heroTitle
+        label: Titre hero
+        type: string
+      - name: heroSubtitle
+        label: Sous-titre hero
+        type: text
+      - name: heroImage
+        label: Image hero
+        type: image
+      - name: intro
+        label: Introduction
+        type: text
+      - name: sections
+        label: Sections
+        type: object
+        list: true
+        fields:
+          - name: eyebrow
+            label: Surtitre
+            type: string
+            required: false
+          - name: title
+            label: Titre
+            type: string
+          - name: text
+            label: Texte
+            type: text
+          - name: items
+            label: Liste
+            type: string
+            list: true
+            required: false
+      - name: ctaTitle
+        label: Titre CTA
+        type: string
+      - name: ctaText
+        label: Texte CTA
+        type: text
+      - name: ctaButtonLabel
+        label: Bouton CTA
+        type: string
+      - name: ctaButtonUrl
+        label: URL CTA
+        type: string
+
+  - name: local-pages
+    label: Pages locales SEO
+    type: collection
+    path: src/content/local-pages
+    filename: "{fields.slug}.md"
+    fields:
+      - name: title
+        label: Titre SEO
+        type: string
+      - name: metaDescription
+        label: Meta description
+        type: text
+      - name: slug
+        label: Slug
+        type: string
+      - name: city
+        label: Ville
+        type: string
+      - name: pageType
+        label: Type de page
+        type: string
+      - name: h1
+        label: H1
+        type: string
+      - name: heroTitle
+        label: Titre hero
+        type: string
+      - name: heroSubtitle
+        label: Sous-titre hero
+        type: text
+      - name: intro
+        label: Introduction
+        type: text
+      - name: sections
+        label: Sections
+        type: object
+        list: true
+        fields:
+          - name: eyebrow
+            label: Surtitre
+            type: string
+            required: false
+          - name: title
+            label: Titre
+            type: string
+          - name: text
+            label: Texte
+            type: text
+          - name: items
+            label: Liste
+            type: string
+            list: true
+            required: false
+      - name: localAdvantages
+        label: Atouts locaux
+        type: string
+        list: true
+      - name: nearbyCities
+        label: Villes proches
+        type: string
+        list: true
+      - name: featuredImage
+        label: Image principale
+        type: image
+      - name: ctaTitle
+        label: Titre CTA
+        type: string
+      - name: ctaText
+        label: Texte CTA
+        type: text
+      - name: ctaButtonLabel
+        label: Bouton CTA
+        type: string
+      - name: ctaButtonUrl
+        label: URL CTA
+        type: string
+      - name: published
+        label: Publié
+        type: boolean
+
+  - name: blog
+    label: Articles de blog
+    type: collection
+    path: src/content/blog
+    filename: "{fields.slug}.md"
+    fields:
+      - name: title
+        label: Titre SEO
+        type: string
+      - name: metaDescription
+        label: Meta description
+        type: text
+      - name: slug
+        label: Slug
+        type: string
+      - name: category
+        label: Catégorie
+        type: string
+      - name: date
+        label: Date
+        type: date
+      - name: excerpt
+        label: Extrait
+        type: text
+      - name: featuredImage
+        label: Image principale
+        type: image
+      - name: published
+        label: Publié
+        type: boolean
+      - name: body
+        label: Contenu
+        type: rich-text
+
+  - name: testimonials
+    label: Avis clients
+    type: collection
+    path: src/content/testimonials
+    filename: "{primary}.md"
+    fields:
+      - name: name
+        label: Nom
+        type: string
+      - name: location
+        label: Localisation
+        type: string
+      - name: transactionType
+        label: Type de projet
+        type: string
+      - name: rating
+        label: Note
+        type: number
+      - name: published
+        label: Publié
+        type: boolean
+      - name: body
+        label: Témoignage
+        type: text
+
+  - name: settings
+    label: Paramètres globaux
+    type: file
+    path: src/content/settings/site.json
+    fields:
+      - name: siteName
+        label: Nom du site
+        type: string
+      - name: mickaelName
+        label: Nom Mickael
+        type: string
+      - name: marionName
+        label: Nom Marion
+        type: string
+      - name: phone
+        label: Téléphone
+        type: string
+      - name: email
+        label: Email
+        type: string
+      - name: primaryCity
+        label: Ville principale
+        type: string
+      - name: coveredAreas
+        label: Zones couvertes
+        type: string
+        list: true
+      - name: socialLinks
+        label: Réseaux sociaux
+        type: object
+        fields:
+          - name: linkedin
+            label: LinkedIn
+            type: string
+            required: false
+          - name: facebook
+            label: Facebook
+            type: string
+            required: false
+          - name: instagram
+            label: Instagram
+            type: string
+            required: false
+      - name: shortPresentation
+        label: Présentation courte
+        type: text
+      - name: primaryCta
+        label: CTA principal
+        type: object
+        fields:
+          - name: label
+            label: Libellé
+            type: string
+          - name: url
+            label: URL
+            type: string
+      - name: footer
+        label: Footer
+        type: object
+        fields:
+          - name: legalName
+            label: Nom légal
+            type: string
+          - name: legalNotice
+            label: Texte légal
+            type: text
+          - name: privacyLabel
+            label: Label confidentialité
+            type: string
+          - name: privacyUrl
+            label: URL confidentialité
+            type: string
+          - name: termsLabel
+            label: Label mentions légales
+            type: string
+          - name: termsUrl
+            label: URL mentions légales
+            type: string
+          - name: copyright
+            label: Copyright
+            type: string

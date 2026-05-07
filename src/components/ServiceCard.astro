@@ -2,38 +2,40 @@
 interface Props {
   title: string;
   description: string;
-  icon?: string;
   features?: string[];
   href?: string;
+  kicker?: string;
 }
 
-const { title, description, icon, features, href } = Astro.props;
+const { title, description, features, href, kicker = 'Service' } = Astro.props;
 const TagName = href ? 'a' : 'div';
 ---
 
 <TagName
   href={href}
-  class={`bg-white rounded-xl p-8 shadow-md hover:shadow-xl transition-shadow duration-300 h-full border border-slate-100 ${href ? 'cursor-pointer hover:border-amber-300' : ''}`}
+  class={`group flex h-full flex-col rounded-[1.75rem] border border-[color:var(--color-border)] bg-white/90 p-8 shadow-[0_20px_40px_rgba(24,37,45,0.06)] ${href ? 'hover:-translate-y-1 hover:border-[color:var(--color-accent)]' : ''}`}
 >
-  {icon && (
-    <div class="text-4xl mb-4">
-      {icon}
-    </div>
-  )}
-  <h3 class="text-xl font-bold text-slate-900 mb-3">
+  <p class="eyebrow mb-5">{kicker}</p>
+  <h3 class="text-[2rem] leading-tight text-[color:var(--color-ink-strong)]">
     {title}
   </h3>
-  <p class="text-slate-600 mb-4">
+  <p class="mt-4 text-[0.98rem] leading-7 text-[color:var(--color-muted)]">
     {description}
   </p>
   {features && features.length > 0 && (
-    <ul class="space-y-2">
+    <ul class="mt-6 grid gap-3">
       {features.map((feature) => (
-        <li class="flex items-start gap-2 text-slate-700">
-          <span class="text-amber-600 font-bold mt-1">✓</span>
+        <li class="flex items-start gap-3 text-sm text-[color:var(--color-ink)]">
+          <span class="mt-2 h-1.5 w-1.5 rounded-full bg-[color:var(--color-accent)]"></span>
           <span>{feature}</span>
         </li>
       ))}
     </ul>
+  )}
+  {href && (
+    <span class="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-[color:var(--color-ink-strong)]">
+      En savoir plus
+      <span class="transition-transform duration-200 group-hover:translate-x-1">→</span>
+    </span>
   )}
 </TagName>

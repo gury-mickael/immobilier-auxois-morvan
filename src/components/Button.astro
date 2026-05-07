@@ -1,10 +1,12 @@
 ---
 interface Props {
   href?: string;
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
   class?: string;
+  target?: string;
+  rel?: string;
 }
 
 const {
@@ -12,21 +14,28 @@ const {
   variant = 'primary',
   size = 'md',
   fullWidth = false,
-  class: customClass = ''
+  class: customClass = '',
+  target,
+  rel
 } = Astro.props;
 
-const baseStyles = 'inline-block font-semibold rounded-lg transition-all duration-300 ease-in-out';
+const baseStyles =
+  'inline-flex items-center justify-center gap-2 rounded-full border text-sm font-semibold tracking-[0.01em] transition duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-bg)]';
 
 const variantStyles = {
-  primary: 'bg-amber-600 text-white hover:bg-amber-700 shadow-md hover:shadow-lg',
-  secondary: 'bg-slate-700 text-white hover:bg-slate-800 shadow-md hover:shadow-lg',
-  outline: 'border-2 border-amber-600 text-amber-600 hover:bg-amber-50'
+  primary:
+    'border-[color:var(--color-accent)] bg-[color:var(--color-accent)] text-[color:var(--color-ink-strong)] shadow-[0_10px_24px_rgba(183,155,104,0.24)] hover:-translate-y-0.5 hover:bg-[color:var(--color-accent-strong)] hover:border-[color:var(--color-accent-strong)]',
+  secondary:
+    'border-[color:var(--color-ink-strong)] bg-[color:var(--color-ink-strong)] text-white shadow-[0_12px_28px_rgba(24,37,45,0.18)] hover:-translate-y-0.5 hover:bg-[#22343d]',
+  outline:
+    'border-[color:var(--color-border-strong)] bg-white/75 text-[color:var(--color-ink-strong)] hover:-translate-y-0.5 hover:border-[color:var(--color-ink-strong)] hover:bg-white',
+  ghost: 'border-transparent bg-transparent text-[color:var(--color-ink-strong)] hover:bg-white/70'
 };
 
 const sizeStyles = {
-  sm: 'px-4 py-2 text-sm',
-  md: 'px-6 py-3 text-base',
-  lg: 'px-8 py-4 text-lg'
+  sm: 'px-4 py-2.5',
+  md: 'px-5 py-3',
+  lg: 'px-6 py-3.5 text-[0.95rem]'
 };
 
 const widthClass = fullWidth ? 'w-full' : '';
@@ -38,6 +47,8 @@ const Tag = href ? 'a' : 'button';
 <Tag
   href={href}
   class={styleClass}
+  target={target}
+  rel={rel}
   {...(href === undefined && { type: 'button' })}
 >
   <slot />

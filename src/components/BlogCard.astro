@@ -1,0 +1,37 @@
+---
+interface Props {
+  title: string;
+  excerpt: string;
+  href: string;
+  category: string;
+  date: string;
+  image?: string;
+}
+
+const { title, excerpt, href, category, date, image } = Astro.props;
+const visualStyle = image
+  ? `background-image: linear-gradient(180deg, rgba(24,37,45,0.06), rgba(24,37,45,0.55)), url('${image}'); background-size: cover; background-position: center;`
+  : undefined;
+---
+
+<article class="group overflow-hidden rounded-[1.85rem] border border-[color:var(--color-border)] bg-white shadow-[0_20px_40px_rgba(24,37,45,0.06)]">
+  <a href={href} class="block">
+    <div class="relative h-60 bg-[linear-gradient(135deg,rgba(183,155,104,0.18),rgba(24,37,45,0.88))]" style={visualStyle}>
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.14),transparent_30%)]"></div>
+      <div class="absolute inset-x-5 bottom-5 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-white/85">
+        <span>{category}</span>
+        <span>{date}</span>
+      </div>
+    </div>
+    <div class="p-7">
+      <h3 class="text-[1.9rem] leading-tight transition-colors duration-200 group-hover:text-[color:var(--color-accent-strong)]">
+        {title}
+      </h3>
+      <p class="mt-4 text-[0.98rem] leading-7 text-[color:var(--color-muted)]">{excerpt}</p>
+      <span class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[color:var(--color-ink-strong)]">
+        Lire l'article
+        <span class="transition-transform duration-200 group-hover:translate-x-1">→</span>
+      </span>
+    </div>
+  </a>
+</article>
