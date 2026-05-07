@@ -1,0 +1,51 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+  primaryButtonText: string;
+  primaryButtonHref: string;
+  secondaryButtonText?: string;
+  secondaryButtonHref?: string;
+}
+
+const {
+  title,
+  description,
+  primaryButtonText,
+  primaryButtonHref,
+  secondaryButtonText,
+  secondaryButtonHref
+} = Astro.props;
+
+import Button from './Button.astro';
+---
+
+<section class="bg-gradient-to-r from-amber-600 to-amber-700 rounded-2xl p-12 md:p-16 text-center text-white shadow-lg">
+  <h2 class="text-3xl md:text-4xl font-bold mb-4">
+    {title}
+  </h2>
+  {description && (
+    <p class="text-lg text-amber-50 mb-8 max-w-2xl mx-auto">
+      {description}
+    </p>
+  )}
+  <div class="flex flex-col sm:flex-row gap-4 justify-center">
+    <Button
+      href={primaryButtonHref}
+      variant="secondary"
+      size="lg"
+    >
+      {primaryButtonText}
+    </Button>
+    {secondaryButtonText && secondaryButtonHref && (
+      <Button
+        href={secondaryButtonHref}
+        variant="outline"
+        size="lg"
+        class="text-white border-white hover:bg-white hover:bg-opacity-10"
+      >
+        {secondaryButtonText}
+      </Button>
+    )}
+  </div>
+</section>

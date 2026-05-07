@@ -1,0 +1,39 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  icon?: string;
+  features?: string[];
+  href?: string;
+}
+
+const { title, description, icon, features, href } = Astro.props;
+const TagName = href ? 'a' : 'div';
+---
+
+<TagName
+  href={href}
+  class={`bg-white rounded-xl p-8 shadow-md hover:shadow-xl transition-shadow duration-300 h-full border border-slate-100 ${href ? 'cursor-pointer hover:border-amber-300' : ''}`}
+>
+  {icon && (
+    <div class="text-4xl mb-4">
+      {icon}
+    </div>
+  )}
+  <h3 class="text-xl font-bold text-slate-900 mb-3">
+    {title}
+  </h3>
+  <p class="text-slate-600 mb-4">
+    {description}
+  </p>
+  {features && features.length > 0 && (
+    <ul class="space-y-2">
+      {features.map((feature) => (
+        <li class="flex items-start gap-2 text-slate-700">
+          <span class="text-amber-600 font-bold mt-1">✓</span>
+          <span>{feature}</span>
+        </li>
+      ))}
+    </ul>
+  )}
+</TagName>

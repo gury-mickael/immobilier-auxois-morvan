@@ -1,0 +1,244 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SectionTitle from '../components/SectionTitle.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import Button from '../components/Button.astro';
+import TestimonialCard from '../components/TestimonialCard.astro';
+import CTASection from '../components/CTASection.astro';
+---
+
+<Layout
+  title="Accueil"
+  description="Conseillers immobiliers IAD en Auxois et Morvan - Vendre, acheter, estimer. Mickael Gury et Marion Roulier"
+  currentPage="/"
+>
+  <!-- Hero Section -->
+  <section class="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-20 md:py-32 overflow-hidden">
+    <div class="absolute inset-0 opacity-20">
+      <div class="absolute top-10 right-10 w-72 h-72 bg-amber-600 rounded-full mix-blend-multiply filter blur-3xl"></div>
+      <div class="absolute bottom-10 left-10 w-72 h-72 bg-amber-500 rounded-full mix-blend-multiply filter blur-3xl animation-pulse"></div>
+    </div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+            Votre partenaire immobilier en <span class="text-amber-400">Auxois et Morvan</span>
+          </h1>
+          <p class="text-xl text-slate-300 mb-8 leading-relaxed">
+            Découvrez nos services d'accompagnement immobilier avec Mickael Gury et Marion Roulier, conseillers IAD. Nous vous guidons à chaque étape : vendre, acheter, estimer ou se développer.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <Button href="/estimation" variant="primary" size="lg">
+              Faire estimer mon bien
+            </Button>
+            <Button href="/contact" variant="outline" size="lg" class="text-white border-white hover:bg-white hover:bg-opacity-10">
+              Nous contacter
+            </Button>
+          </div>
+        </div>
+        <div class="hidden md:block">
+          <div class="relative h-96 bg-gradient-to-br from-amber-600 to-amber-700 rounded-2xl shadow-2xl flex items-center justify-center">
+            <div class="text-center">
+              <div class="text-7xl mb-4">🏘️</div>
+              <p class="text-xl font-semibold text-white">Auxois Morvan</p>
+              <p class="text-amber-100">Groupe IAD France</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pourquoi nous confier section -->
+  <section class="py-16 md:py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SectionTitle
+        title="Pourquoi nous confier votre projet ?"
+        subtitle="Une approche humaine et professionnelle au cœur de l'Auxois et du Morvan"
+      />
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <ServiceCard
+          title="Expertise locale"
+          description="Nous connaissons intimement chaque région, village et quartier. Une expertise terrain qui bénéficie à vos projets."
+          icon="📍"
+        />
+        <ServiceCard
+          title="Accompagnement total"
+          description="De la première visite à la signature, nous vous guidons. Estimation, marketing, négociation, conseil."
+          icon="🤝"
+        />
+        <ServiceCard
+          title="Réseau IAD"
+          description="Accès à un réseau national de plus de 4000 conseillers, pour trouver l'acheteur ou le bien idéal."
+          icon="🌐"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Services section -->
+  <section class="py-16 md:py-24 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SectionTitle
+        title="Nos services"
+        subtitle="Une offre complète pour tous vos projets immobiliers"
+      />
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <ServiceCard
+          href="/vendre"
+          title="Vendre"
+          description="Vendre votre bien aux meilleures conditions avec notre stratégie de prix et marketing professionnels."
+          icon="💰"
+          features={['Estimation gratuite', 'Marketing expert', 'Négociation']}
+        />
+        <ServiceCard
+          href="/acheter"
+          title="Acheter"
+          description="Trouvez votre bien rêvé avec l'appui de notre connaissance du marché local."
+          icon="🔑"
+          features={['Recherche ciblée', 'Conseils terrain', 'Financement']}
+        />
+        <ServiceCard
+          href="/estimation"
+          title="Estimation"
+          description="Connaître la valeur exacte de votre bien sur le marché actuel, rapidement et gratuitement."
+          icon="📊"
+          features={['Analyse précise', 'Rapport détaillé', 'Conseil']}
+        />
+        <ServiceCard
+          href="/fonds"
+          title="Fonds de commerce"
+          description="Spécialistes dans l'accompagnement des commerçants et entrepreneurs de la région."
+          icon="🏪"
+          features={['Estimation fonds', 'Dossier acheteur', 'Diffusion']}
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Secteur section -->
+  <section class="py-16 md:py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SectionTitle
+        title="Nous couvrons votre région"
+        subtitle="Présents sur l'ensemble de l'Auxois, du Morvan et les grandes villes alentours"
+      />
+
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        {['Autun', 'Arnay-le-Duc', 'Beaune', 'Dijon', 'Pouilly-en-Auxois', 'Saulieu', 'Semur-en-Auxois', 'Vitteaux', 'Auxois', 'Morvan'].map((city) => (
+          <div class="bg-slate-50 rounded-xl p-6 text-center hover:shadow-lg hover:bg-amber-50 transition-all duration-300 cursor-pointer">
+            <p class="font-semibold text-slate-900">{city}</p>
+          </div>
+        ))}
+      </div>
+
+      <div class="mt-12 text-center">
+        <Button href="/secteur" variant="outline" size="lg">
+          Découvrir toutes les zones
+        </Button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials section -->
+  <section class="py-16 md:py-24 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SectionTitle
+        title="Ce que nos clients disent"
+        subtitle="Des expériences positives et des projets réussis"
+      />
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <TestimonialCard
+          quote="Mickael a su trouver la maison de mes rêves en quelques mois. Son expertise locale et sa bienveillance font la différence."
+          author="Catherine Leblanc"
+          title="Acheteur, Beaune"
+          rating={5}
+        />
+        <TestimonialCard
+          quote="L'estimation était précise et nous avons vendu rapidement. Marion nous a accompagnés du début à la fin avec professionnalisme."
+          author="Jean-Marc Durand"
+          title="Vendeur, Semur-en-Auxois"
+          rating={5}
+        />
+        <TestimonialCard
+          quote="Vraiment satisfaits du service. Conseillers à l'écoute, réactifs et honnêtes. Nous les recommandons sans hésiter."
+          author="Sophie Martin"
+          title="Vendeur-Acheteur, Autun"
+          rating={5}
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Blog preview -->
+  <section class="py-16 md:py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SectionTitle
+        title="Lire nos derniers articles"
+        subtitle="Conseils, actualités et guides immobiliers"
+      />
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <article class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-slate-100">
+          <div class="h-48 bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-5xl">
+            🏠
+          </div>
+          <div class="p-6">
+            <div class="text-sm text-amber-600 font-semibold mb-2">Vendre</div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">Vendre sa maison en Auxois : guide pratique</h3>
+            <p class="text-slate-600 mb-4">Tous les conseils pour mettre en avant votre bien et obtenir le meilleur prix sur le marché local.</p>
+            <a href="/blog/vendre-maison-auxois" class="text-amber-600 hover:text-amber-700 font-semibold">Lire l'article →</a>
+          </div>
+        </article>
+
+        <article class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-slate-100">
+          <div class="h-48 bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-5xl">
+            📊
+          </div>
+          <div class="p-6">
+            <div class="text-sm text-amber-600 font-semibold mb-2">Estimation</div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">Bien estimer son bien immobilier</h3>
+            <p class="text-slate-600 mb-4">Les critères importants pour obtenir une estimation précise et fiable de votre maison ou appartement.</p>
+            <a href="/blog/estimer-bien-immobilier" class="text-amber-600 hover:text-amber-700 font-semibold">Lire l'article →</a>
+          </div>
+        </article>
+
+        <article class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-slate-100">
+          <div class="h-48 bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-5xl">
+            🔑
+          </div>
+          <div class="p-6">
+            <div class="text-sm text-amber-600 font-semibold mb-2">Acheter</div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">Acheter dans le Morvan : conseils d'expert</h3>
+            <p class="text-slate-600 mb-4">Guide complet pour bien choisir votre région, évaluer les pièges et sécuriser votre investissement.</p>
+            <a href="/blog/acheter-morvan" class="text-amber-600 hover:text-amber-700 font-semibold">Lire l'article →</a>
+          </div>
+        </article>
+      </div>
+
+      <div class="mt-12 text-center">
+        <Button href="/blog" variant="secondary" size="lg">
+          Voir tous les articles
+        </Button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="py-16 md:py-24 bg-slate-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <CTASection
+        title="Prêt à concrétiser votre projet immobilier ?"
+        description="Contactez Mickael et Marion pour une première évaluation sans engagement. Nous répondons à toutes vos questions en moins de 24h."
+        primaryButtonText="Demander une estimation"
+        primaryButtonHref="/estimation"
+        secondaryButtonText="Nous appeler"
+        secondaryButtonHref="tel:+330000000"
+      />
+    </div>
+  </section>
+</Layout>

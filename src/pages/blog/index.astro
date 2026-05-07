@@ -1,0 +1,174 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SectionTitle from '../../components/SectionTitle.astro';
+import Button from '../../components/Button.astro';
+---
+
+<Layout
+  title="Blog"
+  description="Articles immobiliers : conseils, guides, actualités en Auxois, Morvan et Bourgogne."
+  currentPage="/blog"
+>
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-br from-slate-800 to-slate-900 text-white py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-4xl md:text-5xl font-bold mb-6">Blog Immobilier</h1>
+      <p class="text-xl text-slate-300 max-w-3xl">
+        Conseils d'expert, guides pratiques et actualités du marché immobilier en Auxois, Morvan et Bourgogne.
+      </p>
+    </div>
+  </section>
+
+  <!-- Articles -->
+  <section class="py-16 md:py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SectionTitle
+        title="Nos derniers articles"
+        subtitle="Resté informé des tendances et conseils immobiliers"
+      />
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <article class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-slate-100">
+          <div class="h-48 bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-5xl">
+            🏠
+          </div>
+          <div class="p-6">
+            <div class="flex gap-2 mb-3">
+              <span class="bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">Vendre</span>
+              <span class="text-slate-400 text-xs">24 mai 2024</span>
+            </div>
+            <h2 class="text-xl font-bold text-slate-900 mb-3">Vendre sa maison en Auxois : guide pratique</h2>
+            <p class="text-slate-600 mb-4 leading-relaxed">
+              Vous envisagez de vendre votre propriété en Auxois ? Découvrez tous nos conseils pour préparer votre bien, fixer le bon prix et attirer les meilleurs acheteurs...
+            </p>
+            <a href="/blog/vendre-maison-auxois" class="text-amber-600 hover:text-amber-700 font-semibold inline-flex items-center gap-2">
+              Lire l'article
+              <span>→</span>
+            </a>
+          </div>
+        </article>
+
+        <article class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-slate-100">
+          <div class="h-48 bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-5xl">
+            📊
+          </div>
+          <div class="p-6">
+            <div class="flex gap-2 mb-3">
+              <span class="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">Estimation</span>
+              <span class="text-slate-400 text-xs">18 mai 2024</span>
+            </div>
+            <h2 class="text-xl font-bold text-slate-900 mb-3">Bien estimer son bien immobilier</h2>
+            <p class="text-slate-600 mb-4 leading-relaxed">
+              Une bonne estimation est la clé pour vendre rapidement. Apprenez quels facteurs influencent la valeur de votre bien et comment l'évaluer précisément...
+            </p>
+            <a href="/blog/estimer-bien-immobilier" class="text-amber-600 hover:text-amber-700 font-semibold inline-flex items-center gap-2">
+              Lire l'article
+              <span>→</span>
+            </a>
+          </div>
+        </article>
+
+        <article class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-slate-100">
+          <div class="h-48 bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-5xl">
+            🔑
+          </div>
+          <div class="p-6">
+            <div class="flex gap-2 mb-3">
+              <span class="bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1 rounded-full">Acheter</span>
+              <span class="text-slate-400 text-xs">12 mai 2024</span>
+            </div>
+            <h2 class="text-xl font-bold text-slate-900 mb-3">Acheter dans le Morvan : conseils d'expert</h2>
+            <p class="text-slate-600 mb-4 leading-relaxed">
+              Le Morvan offre un cadre naturel exceptionnel. Mais où chercher ? Comment évaluer un bien ? Quels pièges éviter ? Tous nos conseils pour bien se lancer...
+            </p>
+            <a href="/blog/acheter-morvan" class="text-amber-600 hover:text-amber-700 font-semibold inline-flex items-center gap-2">
+              Lire l'article
+              <span>→</span>
+            </a>
+          </div>
+        </article>
+
+        <article class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-slate-100">
+          <div class="h-48 bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-5xl">
+            🏪
+          </div>
+          <div class="p-6">
+            <div class="flex gap-2 mb-3">
+              <span class="bg-orange-100 text-orange-700 text-xs font-semibold px-3 py-1 rounded-full">Fonds</span>
+              <span class="text-slate-400 text-xs">5 mai 2024</span>
+            </div>
+            <h2 class="text-xl font-bold text-slate-900 mb-3">Vendre un fonds de commerce : le bon timing</h2>
+            <p class="text-slate-600 mb-4 leading-relaxed">
+              Transmettre son activité demande préparation et stratégie. Quand vendre ? À quel prix ? Comment attirer le bon repreneur ? Les clés du succès...
+            </p>
+            <a href="/blog/vendre-fonds-commerce" class="text-amber-600 hover:text-amber-700 font-semibold inline-flex items-center gap-2">
+              Lire l'article
+              <span>→</span>
+            </a>
+          </div>
+        </article>
+
+        <article class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-slate-100">
+          <div class="h-48 bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center text-5xl">
+            💰
+          </div>
+          <div class="p-6">
+            <div class="flex gap-2 mb-3">
+              <span class="bg-red-100 text-red-700 text-xs font-semibold px-3 py-1 rounded-full">Marché</span>
+              <span class="text-slate-400 text-xs">28 avril 2024</span>
+            </div>
+            <h2 class="text-xl font-bold text-slate-900 mb-3">Marché immobilier Auxois 2024 : tendances</h2>
+            <p class="text-slate-600 mb-4 leading-relaxed">
+              Analyse du marché immobilier en Auxois : évolution des prix, demandes, secteurs forts et faibles. L'année 2024 s'annonce dynamique...
+            </p>
+            <a href="/blog/marche-auxois-2024" class="text-amber-600 hover:text-amber-700 font-semibold inline-flex items-center gap-2">
+              Lire l'article
+              <span>→</span>
+            </a>
+          </div>
+        </article>
+
+        <article class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-slate-100">
+          <div class="h-48 bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center text-5xl">
+            🏡
+          </div>
+          <div class="p-6">
+            <div class="flex gap-2 mb-3">
+              <span class="bg-cyan-100 text-cyan-700 text-xs font-semibold px-3 py-1 rounded-full">Conseil</span>
+              <span class="text-slate-400 text-xs">20 avril 2024</span>
+            </div>
+            <h2 class="text-xl font-bold text-slate-900 mb-3">Les travaux qui augmentent la valeur de votre bien</h2>
+            <p class="text-slate-600 mb-4 leading-relaxed">
+              Tous les travaux ne se valent pas ! Certains offrent un excellent retour sur investissement. Voici les priorités à considérer...
+            </p>
+            <a href="/blog/travaux-valeur" class="text-amber-600 hover:text-amber-700 font-semibold inline-flex items-center gap-2">
+              Lire l'article
+              <span>→</span>
+            </a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter CTA -->
+  <section class="py-16 md:py-24 bg-slate-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold text-slate-900 mb-4">Recevez nos articles par email</h2>
+      <p class="text-slate-600 mb-8 max-w-2xl mx-auto">
+        Abonnez-vous à notre newsletter pour recevoir nos conseils en immobilier, nos analyses de marché et nos bons plans.
+      </p>
+      <form class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+        <input
+          type="email"
+          placeholder="Votre email"
+          required
+          class="flex-grow px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-amber-600"
+        />
+        <button type="submit" class="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg transition-colors whitespace-nowrap">
+          S'abonner
+        </button>
+      </form>
+    </div>
+  </section>
+</Layout>

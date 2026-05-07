@@ -1,0 +1,305 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SectionTitle from '../components/SectionTitle.astro';
+import Button from '../components/Button.astro';
+---
+
+<Layout
+  title="Contact"
+  description="Nous contacter - Mickael Gury et Marion Roulier, conseillers immobiliers IAD en Auxois et Morvan."
+  currentPage="/contact"
+>
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-br from-amber-600 to-amber-700 text-white py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-4xl md:text-5xl font-bold mb-6">Nous contacter</h1>
+      <p class="text-xl text-amber-100 max-w-3xl">
+        Vous avez une question ? Un projet immobilier ? Contactez Mickael et Marion, vos conseillers IAD en Auxois et Morvan.
+      </p>
+    </div>
+  </section>
+
+  <!-- Contact Info & Form -->
+  <section class="py-16 md:py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-3 gap-8 mb-16">
+        <!-- Info Cards -->
+        <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-8 border border-amber-200">
+          <div class="text-4xl mb-4">📍</div>
+          <h3 class="text-xl font-bold text-slate-900 mb-2">Localisation</h3>
+          <p class="text-slate-700">
+            Nous opérons sur l'ensemble de l'Auxois, du Morvan et de la Bourgogne du Nord. Rencontres possibles dans vos locaux.
+          </p>
+        </div>
+
+        <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-8 border border-amber-200">
+          <div class="text-4xl mb-4">📞</div>
+          <h3 class="text-xl font-bold text-slate-900 mb-2">Téléphone</h3>
+          <p class="text-slate-700 mb-2">Contactez-nous directement :</p>
+          <a href="tel:+330000000" class="text-amber-600 hover:text-amber-700 font-semibold">
+            +33 (0) 0 00 00 00
+          </a>
+          <p class="text-slate-600 text-sm mt-2">Lun-Ven : 9h-18h</p>
+        </div>
+
+        <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-8 border border-amber-200">
+          <div class="text-4xl mb-4">✉️</div>
+          <h3 class="text-xl font-bold text-slate-900 mb-2">Email</h3>
+          <p class="text-slate-700 mb-2">Écrivez-nous :</p>
+          <a href="mailto:contact@auxoismorvan.fr" class="text-amber-600 hover:text-amber-700 font-semibold break-all">
+            contact@auxoismorvan.fr
+          </a>
+          <p class="text-slate-600 text-sm mt-2">Réponse en moins de 24h</p>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div class="max-w-2xl mx-auto">
+        <SectionTitle
+          title="Envoyez-nous un message"
+          subtitle="Complétez le formulaire et nous vous répondrons au plus tôt"
+        />
+
+        <form action="#" class="bg-white rounded-2xl p-8 md:p-12 shadow-lg border border-slate-200 space-y-6">
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <label for="name" class="block text-sm font-semibold text-slate-900 mb-2">
+                Votre nom *
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                required
+                class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-100 transition-all"
+                placeholder="Jean Dupont"
+              />
+            </div>
+
+            <div>
+              <label for="email" class="block text-sm font-semibold text-slate-900 mb-2">
+                Votre email *
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-100 transition-all"
+                placeholder="jean@exemple.fr"
+              />
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <label for="phone" class="block text-sm font-semibold text-slate-900 mb-2">
+                Téléphone
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-100 transition-all"
+                placeholder="+33 6 00 00 00 00"
+              />
+            </div>
+
+            <div>
+              <label for="subject" class="block text-sm font-semibold text-slate-900 mb-2">
+                Sujet *
+              </label>
+              <select
+                id="subject"
+                name="subject"
+                required
+                class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-100 transition-all"
+              >
+                <option value="">Sélectionner...</option>
+                <option value="vendre">Je veux vendre</option>
+                <option value="acheter">Je veux acheter</option>
+                <option value="estimation">Demander une estimation</option>
+                <option value="fonds">Fonds de commerce</option>
+                <option value="conseil">Conseil immobilier</option>
+                <option value="autre">Autre</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="location" class="block text-sm font-semibold text-slate-900 mb-2">
+              {`Localisation du bien (si applicable)`}
+            </label>
+            <input
+              type="text"
+              id="location"
+              name="location"
+              class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-100 transition-all"
+              placeholder="Exemple : Autun, Beaune, Dijon..."
+            />
+          </div>
+
+          <div>
+            <label for="message" class="block text-sm font-semibold text-slate-900 mb-2">
+              Message *
+            </label>
+            <textarea
+              id="message"
+              name="message"
+              required
+              rows={6}
+              class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-100 transition-all resize-none"
+              placeholder="Décrivez votre projet, vos questions..."
+            ></textarea>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <input
+              type="checkbox"
+              id="privacy"
+              name="privacy"
+              required
+              class="w-5 h-5 rounded border-slate-300 text-amber-600 focus:ring-amber-500 mt-1"
+            />
+            <label for="privacy" class="text-sm text-slate-600">
+              J'accepte la politique de confidentialité et j'autorise Auxois Morvan Immobilier à me contacter par email ou téléphone concernant ma demande.
+            </label>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-4 rounded-lg transition-colors shadow-md hover:shadow-lg"
+          >
+            Envoyer mon message
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Section -->
+  <section class="py-16 md:py-24 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SectionTitle
+        title="Qui sommes-nous ?"
+        subtitle="Deux conseillers immobiliers IAD au service de votre projet"
+      />
+
+      <div class="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+        <div class="bg-white rounded-xl overflow-hidden shadow-md border border-slate-200">
+          <div class="h-64 bg-gradient-to-br from-amber-600 to-amber-700 flex items-center justify-center text-6xl">
+            👨‍💼
+          </div>
+          <div class="p-8">
+            <h3 class="text-2xl font-bold text-slate-900 mb-2">Mickael Gury</h3>
+            <p class="text-amber-600 font-semibold mb-4">Conseiller Immobilier IAD</p>
+            <p class="text-slate-600 mb-6">
+              Expert du marché local avec une connaissance pointue des zones de l'Auxois et du Morvan. Spécialisé dans la vente et l'accompagnement de projets complexes.
+            </p>
+            <div class="space-y-2 text-slate-700">
+              <p><strong>Expertise:</strong> Vente, estimation, conseil</p>
+              <p><strong>Secteur:</strong> Ensemble de l'Auxois-Morvan</p>
+              <p class="text-sm text-slate-600 mt-4">Disponible sur RDV en semaine et samedi</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl overflow-hidden shadow-md border border-slate-200">
+          <div class="h-64 bg-gradient-to-br from-amber-600 to-amber-700 flex items-center justify-center text-6xl">
+            👩‍💼
+          </div>
+          <div class="p-8">
+            <h3 class="text-2xl font-bold text-slate-900 mb-2">Marion Roulier</h3>
+            <p class="text-amber-600 font-semibold mb-4">Conseillère Immobilière IAD</p>
+            <p class="text-slate-600 mb-6">
+              Passionnée par l'immobilier local, Marion accompagne les clients dans leurs projets d'achat et de vente avec bienveillance et professionnalisme.
+            </p>
+            <div class="space-y-2 text-slate-700">
+              <p><strong>Expertise:</strong> Achat, fonds de commerce, conseil</p>
+              <p><strong>Secteur:</strong> Beaune, Dijon, Autun, Semur</p>
+              <p class="text-sm text-slate-600 mt-4">Disponible sur RDV en semaine et samedi</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="max-w-2xl mx-auto mt-12 bg-gradient-to-r from-amber-50 to-amber-100 rounded-xl p-8 text-center border border-amber-200">
+        <h3 class="text-2xl font-bold text-slate-900 mb-4">Groupe IAD France</h3>
+        <p class="text-slate-700 mb-4">
+          Nous sommes conseillers immobiliers affiliés au groupe IAD France, leader français des mandats immobiliers. Cette affiliation nous permet d'offrir un service de qualité supérieure avec accès à un réseau national de plus de 4000 conseillers.
+        </p>
+        <p class="text-slate-600 text-sm">
+          Professionnalisme, transparence et accompagnement personnalisé : nos valeurs
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="py-16 md:py-24 bg-white">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SectionTitle
+        title="Questions fréquentes"
+      />
+
+      <div class="space-y-6">
+        {[
+          {
+            q: "Combien coûte une estimation ?",
+            a: "L'estimation est entièrement gratuite et sans engagement. Nous vous fournissons un rapport détaillé en moins de 24 heures."
+          },
+          {
+            q: "Quelle est votre zone d'intervention ?",
+            a: "Nous couvrons l'ensemble de l'Auxois, du Morvan et de la Bourgogne du Nord : Autun, Beaune, Dijon, Semur-en-Auxois, Saulieu, Arnay-le-Duc, Pouilly-en-Auxois, et tous les villages alentours."
+          },
+          {
+            q: "Quel est notre processus de vente ?",
+            a: "Nous commençons par une estimation gratuite, définissons une stratégie de prix, nous nous chargeons des photos professionnelles, diffusons sur tous les portails, organisons les visites et vous accompagnons jusqu'à signature."
+          },
+          {
+            q: "Combien de temps pour vendre ?",
+            a: "Avec une bonne stratégie et un bien bien présenté, comptez en général 2 à 4 mois en Auxois-Morvan. Certains biens se vendent plus rapidement, d'autres demandent plus de temps."
+          },
+          {
+            q: "Pouvez-vous trouver des biens pour moi ?",
+            a: "Oui ! Nous effectuons une recherche active pour trouver les biens correspondant à votre projet, avant même leur publication sur les portails."
+          },
+          {
+            q: "Travaillez-vous aussi les fonds de commerce ?",
+            a: "Oui, nous accompagnons les commerçants et entrepreneurs dans la vente de leurs fonds de commerce, avec expertise spécialisée dans ce domaine."
+          }
+        ].map((item) => (
+          <details class="group bg-slate-50 rounded-xl p-6 cursor-pointer border border-slate-200 hover:border-amber-300 transition-colors">
+            <summary class="font-semibold text-slate-900 flex justify-between items-center">
+              {item.q}
+              <span class="text-amber-600 transition-transform group-open:rotate-180">
+                ▼
+              </span>
+            </summary>
+            <p class="mt-4 text-slate-600 leading-relaxed">
+              {item.a}
+            </p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="py-16 md:py-24 bg-slate-50">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold text-slate-900 mb-4">Travaillons ensemble</h2>
+      <p class="text-slate-600 mb-8">
+        Que vous souhaitiez vendre, acheter, estimer ou obtenir des conseils, nous sommes là pour vous accompagner.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <Button href="/estimation" variant="primary" size="lg">
+          Demander une estimation
+        </Button>
+        <Button href="tel:+330000000" variant="secondary" size="lg">
+          Nous appeler
+        </Button>
+      </div>
+    </div>
+  </section>
+</Layout>
