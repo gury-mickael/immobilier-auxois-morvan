@@ -1,245 +1,94 @@
-# Auxois Morvan Immobilier - Site V1
+# Immobilier Auxois Morvan
 
-Site web vitrine moderne pour Mickael Gury et Marion Roulier, conseillers immobiliers IAD en Auxois et Morvan.
+Site vitrine Astro pour Mickael Gury et Marion Roulier, avec contenu éditable dans le dépôt et administration Git via Sveltia CMS.
 
-**Technologie**: Astro 6 + Tailwind CSS 4
+## Stack
 
-## 🚀 Démarrage rapide
+- Astro 6
+- Tailwind CSS 4
+- Contenus Markdown et JSON dans src/content
+- Administration statique sur /admin via Sveltia CMS
 
-### Installation
+## Démarrage
+
 ```bash
 npm install
-```
-
-### Développement
-```bash
 npm run dev
 ```
-Le site sera accessible à `http://localhost:4322`
 
-### Build pour production
+Le site est alors disponible sur http://localhost:4321 et l'admin sur http://localhost:4321/admin.
+
+Build de production :
+
 ```bash
 npm run build
 ```
-Les fichiers statiques seront générés dans `./dist/`
 
-### Preview du build
-```bash
-npm run preview
-```
+## Structure utile
 
-## 📁 Structure du projet
+- src/content/pages : pages principales
+- src/content/local-pages : pages locales SEO
+- src/content/blog : articles
+- src/content/testimonials : avis clients
+- src/content/settings/site.json : paramètres globaux
+- public/uploads : médias utilisés par le site et par le CMS
+- public/admin : interface Sveltia CMS
 
-```
-src/
-├── components/          # Composants réutilisables
-│   ├── Button.astro
-│   ├── Header.astro
-│   ├── Footer.astro
-│   ├── SectionTitle.astro
-│   ├── ServiceCard.astro
-│   ├── CTASection.astro
-│   └── TestimonialCard.astro
-├── layouts/             # Layouts
-│   └── Layout.astro     # Layout principal avec Header/Footer
-├── pages/               # Pages du site
-│   ├── index.astro      # Accueil
-│   ├── vendre.astro     # Service Vendre
-│   ├── acheter.astro    # Service Acheter
-│   ├── estimation.astro # Service Estimation
-│   ├── fonds.astro      # Fonds de commerce
-│   ├── secteur.astro    # Secteur d'intervention
-│   ├── contact.astro    # Contact
-│   └── blog/            # Pages blog
-│       ├── index.astro
-│       ├── vendre-maison-auxois.astro
-│       ├── estimer-bien-immobilier.astro
-│       ├── acheter-morvan.astro
-│       └── vendre-fonds-commerce.astro
-└── styles/
-    └── global.css       # Styles Tailwind
+## Administration
 
-public/                 # Favicon et assets statiques
-```
+L'administration est servie sur /admin.
 
-## 📄 Pages disponibles
+Collections disponibles :
 
-| URL | Description |
-|-----|-------------|
-| `/` | Accueil avec hero, services, avis, blog |
-| `/vendre` | Accompagnement pour vendre |
-| `/acheter` | Accompagnement pour acheter |
-| `/estimation` | Formulaire d'estimation |
-| `/fonds` | Services fonds de commerce |
-| `/secteur` | Zones couvertes |
-| `/blog` | Listing articles |
-| `/blog/vendre-maison-auxois` | Article blog |
-| `/blog/estimer-bien-immobilier` | Article blog |
-| `/blog/acheter-morvan` | Article blog |
-| `/blog/vendre-fonds-commerce` | Article blog |
-| `/contact` | Page contact avec formulaire |
+- Pages principales
+- Pages locales SEO
+- Articles de blog
+- Avis clients
+- Paramètres globaux
 
-## 🎨 Design
+Les images envoyées depuis le CMS sont stockées dans public/uploads et référencées sur le site via /uploads/....
 
-- **Couleur primaire**: Amber (amber-600)
-- **Couleurs secondaires**: Slate, Blue, Green, Purple, Orange, Teal
-- **Typographie**: System font stack
-- **Breakpoints**: Responsive mobile-first
-- **Composants**: Cartes arrondies, beaucoup d'espace blanc, boutons visibles
+## Authentification GitHub
 
-## ⚙️ Configuration
+La configuration actuelle pointe sur le dépôt GitHub gury-mickael/immobilier-auxois-morvan avec la branche main.
 
-- **Framework**: Astro 6.2.2
-- **CSS**: Tailwind CSS 4.2.4
-- **Output**: Static pre-rendered HTML
-- **SEO**: Meta tags par page, H1 uniques
+Deux modes sont possibles :
 
-## 🔧 Customisation
+1. Mode simple pour un usage technique : connexion GitHub via token personnel si aucun pont OAuth n'est configuré.
+2. Mode confortable pour Marion et les éditeurs non techniques : ajouter un pont OAuth compatible Decap/Sveltia, puis compléter backend.base_url et backend.auth_endpoint dans public/admin/config.yml.
 
-### Ajouter une nouvelle page
+Pour un déploiement Vercel sans backend maison, le plus propre est d'utiliser un service tiers de pont OAuth compatible GitHub. Une fois ce service créé, il suffit de :
 
-1. Créer un fichier `.astro` dans `src/pages/`
-2. Importer `Layout` depuis `../layouts/Layout.astro`
-3. Importer les composants nécessaires
+1. Garder backend.name, repo et branch.
+2. Ajouter backend.base_url.
+3. Ajouter backend.auth_endpoint.
+4. Redéployer le site.
 
-Exemple :
-```astro
----
-import Layout from '../layouts/Layout.astro';
-import Button from '../components/Button.astro';
----
+Après cela, la connexion depuis /admin se fait via GitHub sans demander de token manuel.
 
-<Layout
-  title="Ma Page"
-  description="Description SEO"
-  currentPage="/ma-page"
->
-  <!-- Contenu ici -->
-</Layout>
-```
+## Modifier le contenu
 
-### Personnaliser les couleurs
+Depuis /admin, vous pouvez :
 
-Les couleurs sont utilisées via les classes Tailwind. 
-Modifiez le gradient primaire dans `src/pages/index.astro` ou les composants directement.
+1. Modifier les pages principales existantes.
+2. Créer ou dépublier une page locale SEO.
+3. Rédiger un article de blog avec image mise en avant.
+4. Ajouter un avis client.
+5. Mettre à jour les coordonnées, zones couvertes et CTA globaux.
 
-### Formulaires
+Chaque sauvegarde crée un commit Git dans le dépôt configuré.
 
-Les formulaires sont actuellement en front-end. Pour traiter les données:
-- Option 1: Ajouter une action Netlify Forms
-- Option 2: Intégrer Formspree, Basin, ou autre service
-- Option 3: Ajouter un backend Node/Express personnalisé
+## Déploiement
 
-## 📱 Responsive
+Le site reste entièrement statique. Un build Astro suffit.
 
-Le site est responsive sur :
-- Mobile (320px+)
-- Tablet (640px+)
-- Desktop (1024px+)
+Réglages attendus sur Vercel :
 
-Testez avec `npm run dev` et redimensionnez votre navigateur.
+- Build command : npm run build
+- Output directory : dist
 
-## 🚢 Déploiement
+## Notes
 
-### Netlify (recommandé)
-1. Push vers GitHub
-2. Connecter le repo à Netlify
-3. Build command: `npm run build`
-4. Publish directory: `dist/`
-
-### Vercel
-1. Import du projet
-2. Deploy automatique depuis Git
-
-### Autre hosting
-1. Run `npm run build` localement
-2. Upload le dossier `dist/` via FTP/SFTP
-
-## 🐛 Troubleshooting
-
-**Port 4321 déjà utilisé**
-```bash
-npm run dev -- --port 3000
-```
-
-**Cache du build problématique**
-```bash
-rm -rf dist node_modules
-npm install
-npm run build
-```
-
-## 📚 Ressources
-
-- [Documentation Astro](https://docs.astro.build)
-- [Documentation Tailwind CSS](https://tailwindcss.com/docs)
-- [Astro Best Practices](https://docs.astro.build/en/guides/best-practices/)
-
-## 📝 Notes
-
-- V1 sans backend (formulaires visuel seulement)
-- Pas de CMS configuré
-- Images placeholder avec emojis/gradients (à remplacer par vraies images)
-- Contenu blog en dur (peut être migré vers collections Astro)
-
-## Points forts de cette V1
-
-✅ **Architecture clean** - Composants modulaires et réutilisables  
-✅ **Design premium** - Cohérent, chaleureux et professionnel  
-✅ **Responsive** - Mobile, tablet, desktop optimisés  
-✅ **SEO** - Meta tags, titres uniques, structure sémantique  
-✅ **Performance** - Build léger, pas de JavaScript inutile  
-✅ **Maintenabilité** - Code simple, facile à étendre  
-✅ **Contenu riche** - 12 pages avec contenu de qualité  
-
----
-
-**Développé pour**: Mickael Gury & Marion Roulier, conseillers immobiliers IAD  
-**Date**: Mai 2024  
-**Version**: 1.0.0
-# Astro Starter Kit: Basics
-
-```sh
-npm create astro@latest -- --template basics
-```
-
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
-```
-
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- L'ancienne configuration Pages CMS a été retirée au profit de Sveltia.
+- Le schéma de contenu Astro reste la source de vérité applicative dans src/content.config.ts.
+- Si vous changez le nom du dépôt ou la branche principale, mettez aussi à jour public/admin/config.yml.

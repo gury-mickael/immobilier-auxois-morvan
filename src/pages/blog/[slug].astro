@@ -1,0 +1,63 @@
+---
+import { render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Hero from '../../components/Hero.astro';
+import CTASection from '../../components/CTASection.astro';
+import { formatLongDate, getPublishedBlogPosts, resolveAssetSrc } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const posts = await getPublishedBlogPosts();
+
+  return posts.map((post) => ({
+    params: { slug: post.data.slug },
+    props: { post }
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const coverImage = resolveAssetSrc(post.data.featuredImage);
+---
+
+<Layout title={post.data.title} description={post.data.metaDescription} currentPage="/blog" image={coverImage}>
+  <Hero
+    eyebrow={post.data.category}
+    title={post.data.title}
+    subtitle={post.data.excerpt}
+    image={coverImage}
+    imageAlt={post.data.featuredImageAlt}
+    stats={[
+      { value: formatLongDate(post.data.date), label: 'Publication' },
+      { value: post.data.category, label: 'Catégorie' },
+      { value: 'Auxois & Morvan', label: 'Ancrage local' },
+      { value: 'Conseil pratique', label: 'Approche éditoriale' }
+    ]}
+    actions={[
+      { label: 'Retour au blog', href: '/blog', variant: 'outline' },
+      { label: 'Nous contacter', href: '/contact', variant: 'primary' }
+    ]}
+  />
+
+  <section class="section pt-0">
+    <div class="shell">
+      <article class="surface-panel rounded-[2rem] p-8 md:p-12">
+        <div class="article-content max-w-4xl">
+          <Content />
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section pt-0">
+    <div class="shell">
+      <CTASection
+        title="Parler de votre projet immobilier"
+        description="Si cet article vous aide à mieux cadrer votre réflexion, nous pouvons prolonger l'échange autour de votre bien ou de votre secteur."
+        primaryButtonText="Nous contacter"
+        primaryButtonHref="/contact"
+        secondaryButtonText="Demander une estimation"
+        secondaryButtonHref="/estimation"
+      />
+    </div>
+  </section>
+</Layout>

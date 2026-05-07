@@ -1,11 +1,12 @@
 ---
 title: Vendre sa maison en Auxois
-metaDescription: Nos conseils pour vendre sa maison en Auxois : estimation, préparation, stratégie de prix et commercialisation locale.
+metaDescription: "Nos conseils pour vendre sa maison en Auxois : estimation, préparation, stratégie de prix et commercialisation locale."
 slug: vendre-sa-maison-en-auxois
 category: Vendre
 date: 2026-04-12
 excerpt: Préparer une vente en Auxois demande une estimation juste, une présentation soignée et une lecture réaliste des attentes acquéreurs.
-featuredImage: /uploads/blog-vendre-auxois.jpg
+featuredImage: /uploads/maison.jpg
+featuredImageAlt: Maison en pierre à vendre dans l'Auxois
 published: true
 ---
 Vendre une maison en Auxois ne se résume pas à publier une annonce. La qualité du positionnement dès les premiers jours joue souvent un rôle décisif sur la suite du dossier.

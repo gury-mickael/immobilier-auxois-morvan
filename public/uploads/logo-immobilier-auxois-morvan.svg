@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 436 120" role="img" aria-labelledby="title desc">
+  <title id="title">Immobilier Auxois Morvan</title>
+  <desc id="desc">Logo Immobilier Auxois Morvan avec tracé de maison et signature locale.</desc>
+  <path d="M12 57 61 10l49 47" fill="none" stroke="#111111" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
+  <path d="M31 57V101" fill="none" stroke="#111111" stroke-linecap="round" stroke-width="8"/>
+  <path d="M31 101H262" fill="none" stroke="#111111" stroke-linecap="round" stroke-width="8"/>
+  <text x="74" y="78" fill="#111111" font-family="Arial, sans-serif" font-size="58" font-weight="700">Immobilier</text>
+  <text x="268" y="101" fill="#3A4650" font-family="Arial, sans-serif" font-size="23" font-weight="700" letter-spacing="4">AUXOIS / MORVAN</text>
+</svg>

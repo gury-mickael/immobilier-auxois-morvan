@@ -1,7 +1,7 @@
 ---
 name: Sophie Martin
 location: Autun
-transactionType: Vente et achat
+propertyType: Vente et achat
 rating: 5
 published: true
 ---

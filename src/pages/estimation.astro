@@ -1,199 +1,111 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import SectionTitle from '../components/SectionTitle.astro';
-import ServiceCard from '../components/ServiceCard.astro';
-import Button from '../components/Button.astro';
-import CTASection from '../components/CTASection.astro';
+import MainPageTemplate from '../components/MainPageTemplate.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import LocalPageCard from '../components/LocalPageCard.astro';
+import { getPageContent, getPublishedLocalPages, getSiteSettings, resolveAssetSrc } from '../lib/content';
+
+const [page, localPages, siteSettings] = await Promise.all([
+  getPageContent('estimation'),
+  getPublishedLocalPages(),
+  getSiteSettings()
+]);
+
+const stats = [
+  { value: 'Avis de valeur', label: 'Argumenté et local' },
+  { value: 'Références', label: 'Marché et concurrence' },
+  { value: 'Spécificités', label: 'Analyse du bien' },
+  { value: 'Décision', label: 'Suite du projet' }
+];
 ---
 
-<Layout
-  title="Estimation de bien"
-  description="Obtenir une estimation gratuite de votre bien immobilier en Auxois et Morvan. Avis de valeur précis et fiable."
+<MainPageTemplate
+  page={page}
   currentPage="/estimation"
+  eyebrow="Avis de valeur"
+  introEyebrow="Méthode"
+  introTitle="Une estimation utile à la décision"
+  stats={stats}
 >
-  <!-- Hero Section -->
-  <section class="bg-gradient-to-br from-purple-600 to-purple-700 text-white py-16 md:py-24">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1 class="text-4xl md:text-5xl font-bold mb-6">Estimer votre bien</h1>
-      <p class="text-xl text-purple-100 max-w-3xl">
-        Connaître la valeur exacte de votre propriété sur le marché actuel. Estimation gratuite, précise et en toute confidentialité.
-      </p>
-    </div>
-  </section>
-
-  <!-- Pourquoi estimer -->
-  <section class="py-16 md:py-24 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <SectionTitle
-        title="Pourquoi faire estimer votre bien ?"
-      />
-
-      <div class="grid md:grid-cols-2 gap-12 mb-12">
-        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-8">
-          <h3 class="text-2xl font-bold text-slate-900 mb-4">Pour vendre aux meilleures conditions</h3>
-          <p class="text-slate-600 mb-4">
-            Une bonne estimation vous permet de fixer un prix attractif qui attire les acheteurs sérieux sans bradage. Ni trop haut, ni trop bas.
-          </p>
-          <ul class="space-y-2">
-            <li class="flex gap-2">
-              <span>✓</span>
-              <span class="text-slate-700">Vendre plus rapidement</span>
-            </li>
-            <li class="flex gap-2">
-              <span>✓</span>
-              <span class="text-slate-700">Maximiser le prix</span>
-            </li>
-            <li class="flex gap-2">
-              <span>✓</span>
-              <span class="text-slate-700">Préparer votre projet</span>
-            </li>
-          </ul>
+  <section class="section pt-0">
+    <div class="shell grid gap-8 lg:grid-cols-[0.88fr_1.12fr]">
+      <div class="grid gap-6">
+        <div class="surface-panel rounded-[2rem] p-8">
+          <SectionHeader eyebrow="Contact direct" title="Préparer votre demande d'estimation" subtitle="Quelques éléments simples suffisent pour engager un premier échange clair et utile sur votre bien." />
+          <div class="mt-6 grid gap-4 text-sm text-[color:var(--color-ink)]">
+            <a href={`tel:${siteSettings.phone.replace(/\s+/g, '')}`} class="surface-muted rounded-[1.35rem] px-5 py-4 font-semibold">
+              {siteSettings.phone}
+            </a>
+            <a href={`mailto:${siteSettings.email}`} class="surface-muted rounded-[1.35rem] px-5 py-4 font-semibold break-all">
+              {siteSettings.email}
+            </a>
+          </div>
         </div>
 
-        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-8">
-          <h3 class="text-2xl font-bold text-slate-900 mb-4">Pour considérer un achat ou un refinancement</h3>
-          <p class="text-slate-600 mb-4">
-            Connaître la valeur de votre bien vous aide à équilibrer votre budget, à négocier un crédit ou d'optimiser votre patrimoine.
-          </p>
-          <ul class="space-y-2">
-            <li class="flex gap-2">
-              <span>✓</span>
-              <span class="text-slate-700">Planifier un achat</span>
-            </li>
-            <li class="flex gap-2">
-              <span>✓</span>
-              <span class="text-slate-700">Évaluer votre patrimoine</span>
-            </li>
-            <li class="flex gap-2">
-              <span>✓</span>
-              <span class="text-slate-700">Refinancer utilement</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Notre méthode -->
-  <section class="py-16 md:py-24 bg-slate-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <SectionTitle
-        title="Notre méthode d'estimation"
-        subtitle="Précise, basée sur l'analyse du marché local"
-      />
-
-      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <ServiceCard
-          title="Analyse du marché"
-          description="Étude détaillée des prix des transactions récentes dans votre secteur."
-          icon="📊"
-        />
-        <ServiceCard
-          title="Visite sur site"
-          description="Inspection complète de votre bien : états du bâtiment, travaux réalisés, points forts."
-          icon="👀"
-        />
-        <ServiceCard
-          title="Étude comparative"
-          description="Comparaison avec des biens similaires vendus récemment en Auxois-Morvan."
-          icon="🔍"
-        />
-        <ServiceCard
-          title="Rapport détaillé"
-          description="Document précis avec justification de la valeur proposée et conseils pour valoriser."
-          icon="📄"
-        />
-      </div>
-    </div>
-  </section>
-
-  <!-- Facteurs qui influencent la valeur -->
-  <section class="py-16 md:py-24 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <SectionTitle
-        title="Les critères qui font la valeur"
-      />
-
-      <div class="grid md:grid-cols-2 gap-8">
-        <div>
-          <h3 class="text-xl font-bold text-slate-900 mb-4">Facteurs positifs</h3>
-          <ul class="space-y-3">
-            {['Localisation rare', 'Exposition ensoleillée', 'Calme et cadre verdoyant', 'Travaux récents', 'Garage ou parking', 'Jardin spacieux', 'Potentiel de rénov', 'Vue exceptionnelle'].map((factor) => (
-              <li class="flex gap-3 text-slate-700">
-                <span class="text-green-600 font-bold">+</span>
-                <span>{factor}</span>
-              </li>
+        <div class="surface-panel rounded-[2rem] p-8">
+          <SectionHeader eyebrow="Pages locales" title="Exemples d'estimations locales" subtitle="Des pages dédiées sont déjà prêtes pour répondre aux recherches locales les plus fréquentes." />
+          <div class="mt-6 grid gap-4">
+            {localPages.map((localPage) => (
+              <LocalPageCard
+                title={localPage.data.h1}
+                city={localPage.data.city}
+                pageType={localPage.data.pageType}
+                href={`/${localPage.data.slug}`}
+                excerpt={localPage.data.intro}
+                image={resolveAssetSrc(localPage.data.heroImage)}
+              />
             ))}
-          </ul>
-        </div>
-
-        <div>
-          <h3 class="text-xl font-bold text-slate-900 mb-4">Facteurs à améliorer</h3>
-          <ul class="space-y-3">
-            {['Emplacements bruyants', 'Isolation médiocre', 'Chauffage ancien', 'Travaux de rénovation', 'Humidité', 'Accès difficile', 'Toiture à refaire', 'Absence de parking'].map((factor) => (
-              <li class="flex gap-3 text-slate-700">
-                <span class="text-red-600 font-bold">-</span>
-                <span>{factor}</span>
-              </li>
-            ))}
-          </ul>
+          </div>
         </div>
       </div>
+
+      <form class="surface-panel rounded-[2rem] p-8 md:p-10" action="#" method="post">
+        <SectionHeader eyebrow="Formulaire" title="Demander une estimation" subtitle="Ce formulaire reste volontairement côté front dans cette version, en attendant une future gestion via CMS GitHub." />
+
+        <div class="mt-8 grid gap-5 md:grid-cols-2">
+          <label class="grid gap-2 text-sm font-semibold text-[color:var(--color-ink-strong)]">
+            Nom
+            <input class="rounded-2xl border border-[color:var(--color-border)] bg-white px-4 py-3 font-medium text-[color:var(--color-ink)] outline-none focus:border-[color:var(--color-accent)]" type="text" name="name" placeholder="Votre nom" required />
+          </label>
+          <label class="grid gap-2 text-sm font-semibold text-[color:var(--color-ink-strong)]">
+            Email
+            <input class="rounded-2xl border border-[color:var(--color-border)] bg-white px-4 py-3 font-medium text-[color:var(--color-ink)] outline-none focus:border-[color:var(--color-accent)]" type="email" name="email" placeholder="vous@exemple.fr" required />
+          </label>
+          <label class="grid gap-2 text-sm font-semibold text-[color:var(--color-ink-strong)]">
+            Téléphone
+            <input class="rounded-2xl border border-[color:var(--color-border)] bg-white px-4 py-3 font-medium text-[color:var(--color-ink)] outline-none focus:border-[color:var(--color-accent)]" type="tel" name="phone" placeholder="06 00 00 00 00" />
+          </label>
+          <label class="grid gap-2 text-sm font-semibold text-[color:var(--color-ink-strong)]">
+            Type de bien
+            <select class="rounded-2xl border border-[color:var(--color-border)] bg-white px-4 py-3 font-medium text-[color:var(--color-ink)] outline-none focus:border-[color:var(--color-accent)]" name="propertyType" required>
+              <option value="">Choisir un type</option>
+              <option value="maison">Maison</option>
+              <option value="appartement">Appartement</option>
+              <option value="terrain">Terrain</option>
+              <option value="fonds">Fonds de commerce</option>
+              <option value="autre">Autre</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="mt-5 grid gap-2 text-sm font-semibold text-[color:var(--color-ink-strong)]">
+          Commune du bien
+          <input class="rounded-2xl border border-[color:var(--color-border)] bg-white px-4 py-3 font-medium text-[color:var(--color-ink)] outline-none focus:border-[color:var(--color-accent)]" type="text" name="city" placeholder="Arnay-le-Duc, Autun, Beaune..." required />
+        </label>
+
+        <label class="mt-5 grid gap-2 text-sm font-semibold text-[color:var(--color-ink-strong)]">
+          Description du bien
+          <textarea class="min-h-44 rounded-[1.5rem] border border-[color:var(--color-border)] bg-white px-4 py-3 font-medium text-[color:var(--color-ink)] outline-none focus:border-[color:var(--color-accent)]" name="message" placeholder="Surface, état, nombre de pièces, dépendances, travaux, calendrier de vente..." required></textarea>
+        </label>
+
+        <label class="mt-5 flex items-start gap-3 text-sm leading-6 text-[color:var(--color-muted)]">
+          <input type="checkbox" name="privacy" required class="mt-1 h-4 w-4 rounded border-[color:var(--color-border)] text-[color:var(--color-accent)]" />
+          <span>J'accepte d'être recontacté au sujet de ma demande. Aucun backend ni stockage serveur n'est ajouté dans cette version du site.</span>
+        </label>
+
+        <button type="submit" class="mt-6 inline-flex rounded-full border border-[color:var(--color-ink-strong)] bg-[color:var(--color-ink-strong)] px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_28px_rgba(24,37,45,0.18)] hover:-translate-y-0.5 hover:bg-[#22343d]">
+          Envoyer ma demande
+        </button>
+      </form>
     </div>
   </section>
-
-  <!-- CTA Formulaire -->
-  <section class="py-16 md:py-24 bg-slate-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="bg-white rounded-2xl p-12 shadow-lg border border-slate-200">
-        <h2 class="text-3xl font-bold text-slate-900 mb-2">Demander une estimation</h2>
-        <p class="text-slate-600 mb-8">Gratuit, rapide, sans engagement. Nous répondons en moins de 24h.</p>
-
-        <form action="#" class="space-y-6">
-          <div class="grid md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-sm font-semibold text-slate-900 mb-2">Votre nom *</label>
-              <input type="text" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-purple-600" placeholder="Jean Dupont" />
-            </div>
-            <div>
-              <label class="block text-sm font-semibold text-slate-900 mb-2">Votre email *</label>
-              <input type="email" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-purple-600" placeholder="jean@exemple.fr" />
-            </div>
-          </div>
-
-          <div class="grid md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-sm font-semibold text-slate-900 mb-2">Téléphone</label>
-              <input type="tel" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-purple-600" placeholder="+33 6 00 00 00 00" />
-            </div>
-            <div>
-              <label class="block text-sm font-semibold text-slate-900 mb-2">Type de bien *</label>
-              <select required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-purple-600">
-                <option>Sélectionner...</option>
-                <option>Maison</option>
-                <option>Appartement</option>
-                <option>Terrain</option>
-                <option>Fonds de commerce</option>
-                <option>Autre</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-sm font-semibold text-slate-900 mb-2">Localisation du bien *</label>
-            <input type="text" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-purple-600" placeholder="Exemple : Autun, Beaune, Dijon..." />
-          </div>
-
-          <div>
-            <label class="block text-sm font-semibold text-slate-900 mb-2">Description / Notes *</label>
-            <textarea required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:border-purple-600 h-32" placeholder="Décrivez votre bien : surface, nombre de pièces, état, travaux..."></textarea>
-          </div>
-
-          <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg transition-colors">
-            Demander une estimation
-          </button>
-        </form>
-      </div>
-    </div>
-  </section>
-</Layout>
+</MainPageTemplate>

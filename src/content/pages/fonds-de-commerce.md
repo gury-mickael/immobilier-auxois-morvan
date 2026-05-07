@@ -1,11 +1,12 @@
 ---
 title: Fonds de commerce
-metaDescription: Accompagnement à la vente de fonds de commerce en Auxois, Morvan, Beaune, Dijon et environs : estimation, dossier acquéreur, diffusion et qualification des repreneurs.
+metaDescription: "Accompagnement à la vente de fonds de commerce en Auxois, Morvan, Beaune, Dijon et environs : estimation, dossier acquéreur, diffusion et qualification des repreneurs."
 slug: /fonds
 h1: Vendre un fonds de commerce avec une approche structurée et confidentielle
 heroTitle: Un accompagnement dédié aux commerçants et aux projets de transmission
 heroSubtitle: Nous vous aidons à préparer la cession, à construire un dossier clair et à qualifier les repreneurs pour conduire la vente dans de bonnes conditions.
-heroImage: /uploads/page-fonds.jpg
+heroImage: /uploads/our-services-3.jpg
+heroImageAlt: Façade de commerce prêt à être transmis
 intro: La transmission d'un fonds de commerce demande une lecture à la fois immobilière, économique et humaine. Notre rôle est d'apporter de la méthode et de la discrétion.
 sections:
   - eyebrow: Valorisation

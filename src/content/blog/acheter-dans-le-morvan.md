@@ -1,11 +1,12 @@
 ---
 title: Acheter dans le Morvan
-metaDescription: Acheter dans le Morvan : cadre de vie, types de biens, points de vigilance et conseils pour réussir son projet immobilier.
+metaDescription: "Acheter dans le Morvan : cadre de vie, types de biens, points de vigilance et conseils pour réussir son projet immobilier."
 slug: acheter-dans-le-morvan
 category: Acheter
 date: 2026-02-18
 excerpt: Le Morvan attire pour son cadre naturel et son authenticité, mais chaque secteur possède ses propres réalités de marché et d'usage.
-featuredImage: /uploads/blog-morvan.jpg
+featuredImage: /uploads/auxois.jpg
+featuredImageAlt: Panorama naturel du Morvan
 published: true
 ---
 Acheter dans le Morvan, c'est souvent rechercher un cadre de vie singulier. Selon le projet, il peut s'agir d'une résidence principale, d'une maison secondaire ou d'un bien à rénover avec un potentiel plus large.

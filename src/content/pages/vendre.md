@@ -1,11 +1,12 @@
 ---
 title: Vendre votre bien
-metaDescription: Vendre un bien en Auxois ou dans le Morvan avec Mickael Gury et Marion Roulier : estimation juste, stratégie de prix, valorisation, diffusion et négociation.
+metaDescription: "Vendre un bien en Auxois ou dans le Morvan avec Mickael Gury et Marion Roulier : estimation juste, stratégie de prix, valorisation, diffusion et négociation."
 slug: /vendre
 h1: Vendre votre bien avec une stratégie claire et un accompagnement rigoureux
 heroTitle: Vendre votre bien avec méthode, visibilité et exigence
 heroSubtitle: De l'avis de valeur à la signature, nous structurons chaque étape pour défendre votre prix, votre calendrier et la qualité du dossier acquéreur.
-heroImage: /uploads/page-vendre.jpg
+heroImage: /uploads/maison-Maconge-20.jpg
+heroImageAlt: Maison familiale en pierre en Auxois Morvan
 intro: Une vente réussie repose sur la justesse du positionnement, la qualité de présentation du bien et la capacité à piloter efficacement les échanges jusqu'à l'acte.
 sections:
   - eyebrow: Estimation

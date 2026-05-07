@@ -1,53 +1,51 @@
 ---
+import BrandLogo from './BrandLogo.astro';
 import Button from './Button.astro';
-import { getSiteSettings } from '../lib/content';
 
 interface Props {
   currentPage?: string;
 }
 
 const { currentPage = '' } = Astro.props;
-const siteSettings = await getSiteSettings();
 
 const navItems = [
   { label: 'Accueil', href: '/' },
-  { label: 'Vendre', href: '/vendre' },
-  { label: 'Acheter', href: '/acheter' },
-  { label: 'Estimation', href: '/estimation' },
+  { label: 'Histoire', href: '/#histoire' },
   { label: 'Secteur', href: '/secteur' },
-  { label: 'Fonds de commerce', href: '/fonds' },
+  { label: 'Prestations', href: '/#prestations' },
+  { label: 'Avis clients', href: '/#avis-clients' },
   { label: 'Blog', href: '/blog' },
-  { label: 'Contact', href: '/contact' }
+  { label: 'Contact', href: '/contact', mobileOnly: true }
 ];
 
-const isActive = (href: string) => (href === '/' ? currentPage === '/' : currentPage.startsWith(href));
+const isActive = (href: string) => {
+  if (href === '/') {
+    return currentPage === '/';
+  }
+
+  if (href.startsWith('/#')) {
+    return false;
+  }
+
+  return currentPage.startsWith(href);
+};
 ---
 
-<header class="sticky top-0 z-50 border-b border-[color:var(--color-border)] bg-[rgba(251,248,243,0.84)] backdrop-blur-xl">
+<header class="sticky top-0 z-50 border-b border-[color:var(--color-border)] bg-white/96 backdrop-blur-sm">
   <div class="shell">
-    <nav class="flex min-h-22 items-center justify-between gap-6 py-4">
-      <a href="/" class="flex min-w-0 items-center gap-4 text-left">
-        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[color:var(--color-border)] bg-white text-[0.82rem] font-extrabold tracking-[0.18em] text-[color:var(--color-ink-strong)] shadow-[0_12px_24px_rgba(24,37,45,0.08)]">
-          IAM
-        </span>
-        <span class="min-w-0">
-          <span class="block truncate text-[1rem] font-extrabold uppercase tracking-[0.16em] text-[color:var(--color-ink-strong)]">
-            {siteSettings.siteName}
-          </span>
-          <span class="block truncate text-xs text-[color:var(--color-muted)]">
-            {siteSettings.mickaelName} & {siteSettings.marionName} — Conseillers IAD
-          </span>
-        </span>
+    <nav class="flex min-h-24 items-center justify-between gap-6 py-5">
+      <a href="/" class="flex min-w-0 items-center text-left" aria-label="Accueil Immobilier Auxois Morvan">
+        <BrandLogo compact />
       </a>
 
-      <div class="hidden items-center gap-2 lg:flex">
-        {navItems.map((item) => (
+      <div class="hidden items-center gap-6 lg:flex">
+        {navItems.filter((item) => !item.mobileOnly).map((item) => (
           <a
             href={item.href}
-            class={`rounded-full px-4 py-2 text-sm font-semibold ${
+            class={`border-b-2 px-0 py-2 text-sm font-semibold ${
               isActive(item.href)
-                ? 'bg-white text-[color:var(--color-ink-strong)] shadow-[0_10px_24px_rgba(24,37,45,0.08)]'
-                : 'text-[color:var(--color-muted)] hover:bg-white/70 hover:text-[color:var(--color-ink-strong)]'
+                ? 'border-[color:var(--color-accent)] text-[color:var(--color-ink-strong)]'
+                : 'border-transparent text-[color:var(--color-muted)] hover:border-[color:var(--color-border-strong)] hover:text-[color:var(--color-ink-strong)]'
             }`}
           >
             {item.label}
@@ -56,14 +54,14 @@ const isActive = (href: string) => (href === '/' ? currentPage === '/' : current
       </div>
 
       <div class="hidden items-center gap-3 lg:flex">
-        <Button href={siteSettings.primaryCta.url} size="md">
-          {siteSettings.primaryCta.label}
+        <Button href="/contact" size="md">
+          Contactez-nous
         </Button>
       </div>
 
       <button
         id="mobile-menu-btn"
-        class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--color-border-strong)] bg-white text-[color:var(--color-ink-strong)] lg:hidden"
+        class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[color:var(--color-border-strong)] bg-white text-[color:var(--color-ink-strong)] lg:hidden"
         type="button"
         aria-expanded="false"
         aria-controls="mobile-menu"
@@ -76,23 +74,23 @@ const isActive = (href: string) => (href === '/' ? currentPage === '/' : current
     </nav>
   </div>
 
-  <div id="mobile-menu" class="hidden border-t border-[color:var(--color-border)] bg-[rgba(251,248,243,0.98)] lg:hidden">
+  <div id="mobile-menu" class="hidden border-t border-[color:var(--color-border)] bg-white lg:hidden">
     <div class="shell flex flex-col gap-2 py-4">
       {navItems.map((item) => (
         <a
           href={item.href}
-          class={`rounded-2xl px-4 py-3 text-sm font-semibold ${
+          class={`rounded-xl border px-4 py-3 text-sm font-semibold ${
             isActive(item.href)
-              ? 'bg-white text-[color:var(--color-ink-strong)] shadow-[0_10px_24px_rgba(24,37,45,0.06)]'
-              : 'text-[color:var(--color-ink)] hover:bg-white/75'
+              ? 'border-[color:var(--color-accent)] text-[color:var(--color-ink-strong)]'
+              : 'border-transparent text-[color:var(--color-ink)] hover:border-[color:var(--color-border)]'
           }`}
         >
           {item.label}
         </a>
       ))}
       <div class="pt-2">
-        <Button href={siteSettings.primaryCta.url} fullWidth size="md">
-          {siteSettings.primaryCta.label}
+        <Button href="/contact" fullWidth size="md">
+          Contactez-nous
         </Button>
       </div>
     </div>

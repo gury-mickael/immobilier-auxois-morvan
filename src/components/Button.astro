@@ -20,16 +20,16 @@ const {
 } = Astro.props;
 
 const baseStyles =
-  'inline-flex items-center justify-center gap-2 rounded-full border text-sm font-semibold tracking-[0.01em] transition duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-bg)]';
+  'inline-flex items-center justify-center gap-2 rounded-xl border text-sm font-semibold tracking-[0.01em] transition duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-bg)]';
 
 const variantStyles = {
   primary:
-    'border-[color:var(--color-accent)] bg-[color:var(--color-accent)] text-[color:var(--color-ink-strong)] shadow-[0_10px_24px_rgba(183,155,104,0.24)] hover:-translate-y-0.5 hover:bg-[color:var(--color-accent-strong)] hover:border-[color:var(--color-accent-strong)]',
+    'border-[color:var(--color-accent)] bg-[color:var(--color-accent)] text-white hover:bg-[color:var(--color-accent-strong)] hover:border-[color:var(--color-accent-strong)]',
   secondary:
-    'border-[color:var(--color-ink-strong)] bg-[color:var(--color-ink-strong)] text-white shadow-[0_12px_28px_rgba(24,37,45,0.18)] hover:-translate-y-0.5 hover:bg-[#22343d]',
+    'border-[color:var(--color-ink-strong)] bg-[color:var(--color-ink-strong)] text-white hover:bg-[#22343d]',
   outline:
-    'border-[color:var(--color-border-strong)] bg-white/75 text-[color:var(--color-ink-strong)] hover:-translate-y-0.5 hover:border-[color:var(--color-ink-strong)] hover:bg-white',
-  ghost: 'border-transparent bg-transparent text-[color:var(--color-ink-strong)] hover:bg-white/70'
+    'border-[color:var(--color-border-strong)] bg-white text-[color:var(--color-ink-strong)] hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-accent-strong)]',
+  ghost: 'border-transparent bg-transparent text-[color:var(--color-ink-strong)] hover:text-[color:var(--color-accent-strong)]'
 };
 
 const sizeStyles = {

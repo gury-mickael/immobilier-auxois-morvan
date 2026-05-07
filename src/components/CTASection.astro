@@ -6,6 +6,7 @@ interface Props {
   primaryButtonHref: string;
   secondaryButtonText?: string;
   secondaryButtonHref?: string;
+  backgroundImage?: string;
 }
 
 const {
@@ -14,21 +15,24 @@ const {
   primaryButtonText,
   primaryButtonHref,
   secondaryButtonText,
-  secondaryButtonHref
+  secondaryButtonHref,
+  backgroundImage = '/uploads/photo-IAD-fond.jpg'
 } = Astro.props;
 
 import Button from './Button.astro';
 ---
 
-<section class="surface-panel overflow-hidden rounded-[2rem] p-8 md:p-12">
-  <div class="grid gap-8 lg:grid-cols-[1.3fr_auto] lg:items-end">
+<section class="relative overflow-hidden rounded-[1.5rem] border border-[color:var(--color-border)] bg-[color:var(--color-ink-strong)] p-8 md:p-12">
+  <img src={backgroundImage} alt="Illustration du territoire" class="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
+  <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(20,32,40,0.86),rgba(20,32,40,0.68))]"></div>
+  <div class="relative grid gap-8 lg:grid-cols-[1.3fr_auto] lg:items-end">
     <div>
-      <p class="eyebrow">Projet immobilier</p>
-      <h2 class="mt-5 text-4xl leading-tight md:text-5xl">
+      <p class="text-xs font-bold uppercase tracking-[0.22em] text-white/72">Projet immobilier</p>
+      <h2 class="mt-5 text-4xl leading-tight text-white md:text-5xl">
         {title}
       </h2>
   {description && (
-        <p class="mt-4 max-w-2xl text-[1.02rem] leading-8 text-[color:var(--color-muted)]">
+        <p class="mt-4 max-w-2xl text-[1.02rem] leading-8 text-white/80">
           {description}
         </p>
   )}
@@ -38,7 +42,7 @@ import Button from './Button.astro';
         {primaryButtonText}
       </Button>
       {secondaryButtonText && secondaryButtonHref && (
-        <Button href={secondaryButtonHref} variant="outline" size="lg">
+        <Button href={secondaryButtonHref} variant="outline" size="lg" class="border-white/20 bg-white text-[color:var(--color-ink-strong)] hover:border-white hover:text-[color:var(--color-accent-strong)]">
           {secondaryButtonText}
         </Button>
       )}

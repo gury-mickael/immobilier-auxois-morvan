@@ -1,4 +1,4 @@
-import { getCollection, getEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 import siteSettings from '../content/settings/site.json';
 
 export type MainPageId =
@@ -10,12 +10,24 @@ export type MainPageId =
   | 'fonds-de-commerce'
   | 'contact';
 
+const pageSlugById: Record<MainPageId, string> = {
+  accueil: '/',
+  vendre: '/vendre',
+  acheter: '/acheter',
+  estimation: '/estimation',
+  secteur: '/secteur',
+  'fonds-de-commerce': '/fonds',
+  contact: '/contact'
+};
+
 export async function getSiteSettings() {
   return siteSettings;
 }
 
 export async function getPageContent(id: MainPageId) {
-  const entry = await getEntry('pages', id);
+  const targetSlug = pageSlugById[id];
+  const entries = await getCollection('pages');
+  const entry = entries.find((item) => item.data.slug === targetSlug);
 
   if (!entry) {
     throw new Error(`Le contenu de la page ${id} est introuvable.`);
@@ -55,4 +67,12 @@ export function formatLongDate(date: Date) {
 
 export function getPageIntro(entry: Awaited<ReturnType<typeof getPageContent>>) {
   return entry.data.intro;
+}
+
+export function resolveAssetSrc(asset?: string | { src: string }) {
+  if (!asset) {
+    return undefined;
+  }
+
+  return typeof asset === 'string' ? asset : asset.src;
 }

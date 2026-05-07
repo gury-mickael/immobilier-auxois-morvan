@@ -1,0 +1,409 @@
+$schema: https://unpkg.com/@sveltia/cms/schema/sveltia-cms.json
+
+backend:
+  name: github
+  repo: gury-mickael/immobilier-auxois-morvan
+  branch: main
+  # Pour un login GitHub sans token personnel, ajoutez ensuite un pont OAuth compatible :
+  # base_url: https://votre-pont-oauth.exemple.com
+  # auth_endpoint: auth
+
+app_title: Immobilier Auxois Morvan
+site_url: https://immobilier-auxois-morvan.fr
+media_folder: public/uploads
+public_folder: /uploads
+
+editor:
+  preview: false
+
+collections:
+  - name: pages
+    label: Pages principales
+    label_singular: Page principale
+    folder: src/content/pages
+    create: false
+    delete: false
+    extension: md
+    format: frontmatter
+    slug: "{{fields.slug}}"
+    identifier_field: title
+    editor:
+      preview: false
+    fields:
+      - label: Titre SEO
+        name: title
+        widget: string
+      - label: Meta description
+        name: metaDescription
+        widget: text
+      - label: Slug
+        name: slug
+        widget: string
+        hint: Utiliser / pour l'accueil et des chemins du type /contact pour les autres pages.
+      - label: H1
+        name: h1
+        widget: string
+      - label: Titre hero
+        name: heroTitle
+        widget: string
+      - label: Sous-titre hero
+        name: heroSubtitle
+        widget: text
+      - label: Image hero
+        name: heroImage
+        widget: image
+        required: false
+      - label: Texte alternatif image hero
+        name: heroImageAlt
+        widget: string
+        required: false
+      - label: Introduction
+        name: intro
+        widget: text
+      - label: Sections
+        name: sections
+        widget: list
+        collapsed: true
+        summary: "{{fields.title}}"
+        fields:
+          - label: Surtitre
+            name: eyebrow
+            widget: string
+            required: false
+          - label: Titre
+            name: title
+            widget: string
+          - label: Texte
+            name: text
+            widget: text
+          - label: Image
+            name: image
+            widget: image
+            required: false
+          - label: Texte alternatif image
+            name: imageAlt
+            widget: string
+            required: false
+          - label: Libellé du bouton
+            name: buttonLabel
+            widget: string
+            required: false
+          - label: URL du bouton
+            name: buttonUrl
+            widget: string
+            required: false
+          - label: Liste à puces
+            name: items
+            widget: list
+            required: false
+            field:
+              label: Élément
+              name: item
+              widget: string
+          - label: Chiffres clés
+            name: stats
+            widget: list
+            required: false
+            collapsed: true
+            summary: "{{fields.label}}"
+            fields:
+              - label: Libellé
+                name: label
+                widget: string
+              - label: Valeur
+                name: value
+                widget: string
+      - label: Titre du bloc CTA
+        name: ctaTitle
+        widget: string
+      - label: Texte du bloc CTA
+        name: ctaText
+        widget: text
+      - label: Libellé du bouton CTA
+        name: ctaButtonLabel
+        widget: string
+      - label: URL du bouton CTA
+        name: ctaButtonUrl
+        widget: string
+      - label: Publié
+        name: published
+        widget: boolean
+        default: true
+
+  - name: local-pages
+    label: Pages locales SEO
+    label_singular: Page locale
+    folder: src/content/local-pages
+    create: true
+    delete: true
+    extension: md
+    format: frontmatter
+    slug: "{{fields.slug}}"
+    identifier_field: title
+    editor:
+      preview: false
+    fields:
+      - label: Titre SEO
+        name: title
+        widget: string
+      - label: Meta description
+        name: metaDescription
+        widget: text
+      - label: Slug
+        name: slug
+        widget: string
+      - label: Ville
+        name: city
+        widget: string
+      - label: Type de page
+        name: pageType
+        widget: string
+      - label: H1
+        name: h1
+        widget: string
+      - label: Titre hero
+        name: heroTitle
+        widget: string
+      - label: Sous-titre hero
+        name: heroSubtitle
+        widget: text
+      - label: Image hero
+        name: heroImage
+        widget: image
+        required: false
+      - label: Texte alternatif image hero
+        name: heroImageAlt
+        widget: string
+        required: false
+      - label: Introduction
+        name: intro
+        widget: text
+      - label: Sections
+        name: sections
+        widget: list
+        collapsed: true
+        summary: "{{fields.title}}"
+        fields:
+          - label: Surtitre
+            name: eyebrow
+            widget: string
+            required: false
+          - label: Titre
+            name: title
+            widget: string
+          - label: Texte
+            name: text
+            widget: text
+          - label: Image
+            name: image
+            widget: image
+            required: false
+          - label: Texte alternatif image
+            name: imageAlt
+            widget: string
+            required: false
+          - label: Libellé du bouton
+            name: buttonLabel
+            widget: string
+            required: false
+          - label: URL du bouton
+            name: buttonUrl
+            widget: string
+            required: false
+          - label: Liste à puces
+            name: items
+            widget: list
+            required: false
+            field:
+              label: Élément
+              name: item
+              widget: string
+          - label: Chiffres clés
+            name: stats
+            widget: list
+            required: false
+            collapsed: true
+            summary: "{{fields.label}}"
+            fields:
+              - label: Libellé
+                name: label
+                widget: string
+              - label: Valeur
+                name: value
+                widget: string
+      - label: Atouts locaux
+        name: localAdvantages
+        widget: list
+        field:
+          label: Atout
+          name: advantage
+          widget: string
+      - label: Villes proches
+        name: nearbyCities
+        widget: list
+        field:
+          label: Ville
+          name: city
+          widget: string
+      - label: Titre du bloc CTA
+        name: ctaTitle
+        widget: string
+      - label: Texte du bloc CTA
+        name: ctaText
+        widget: text
+      - label: Libellé du bouton CTA
+        name: ctaButtonLabel
+        widget: string
+      - label: URL du bouton CTA
+        name: ctaButtonUrl
+        widget: string
+      - label: Publié
+        name: published
+        widget: boolean
+        default: true
+
+  - name: blog
+    label: Articles de blog
+    label_singular: Article
+    folder: src/content/blog
+    create: true
+    delete: true
+    extension: md
+    format: frontmatter
+    slug: "{{fields.slug}}"
+    identifier_field: title
+    fields:
+      - label: Titre SEO
+        name: title
+        widget: string
+      - label: Meta description
+        name: metaDescription
+        widget: text
+      - label: Slug
+        name: slug
+        widget: string
+      - label: Catégorie
+        name: category
+        widget: string
+      - label: Date de publication
+        name: date
+        widget: datetime
+        date_format: DD/MM/YYYY
+        time_format: false
+        format: YYYY-MM-DD
+      - label: Extrait
+        name: excerpt
+        widget: text
+      - label: Image mise en avant
+        name: featuredImage
+        widget: image
+        required: false
+      - label: Texte alternatif image mise en avant
+        name: featuredImageAlt
+        widget: string
+        required: false
+      - label: Publié
+        name: published
+        widget: boolean
+        default: true
+      - label: Contenu
+        name: body
+        widget: markdown
+
+  - name: testimonials
+    label: Avis clients
+    label_singular: Avis client
+    folder: src/content/testimonials
+    create: true
+    delete: true
+    extension: md
+    format: frontmatter
+    slug: "{{slug}}"
+    identifier_field: name
+    fields:
+      - label: Nom
+        name: name
+        widget: string
+      - label: Localisation
+        name: location
+        widget: string
+      - label: Type de bien ou projet
+        name: propertyType
+        widget: string
+      - label: Note
+        name: rating
+        widget: number
+        min: 1
+        max: 5
+        step: 1
+        value_type: int
+        default: 5
+      - label: Publié
+        name: published
+        widget: boolean
+        default: true
+      - label: Témoignage
+        name: body
+        widget: markdown
+
+  - name: settings
+    label: Paramètres globaux
+    label_singular: Paramètre global
+    delete: false
+    editor:
+      preview: false
+    files:
+      - name: site
+        label: Site
+        file: src/content/settings/site.json
+        format: json
+        fields:
+          - label: Nom du site
+            name: siteName
+            widget: string
+          - label: Baseline
+            name: baseline
+            widget: text
+          - label: Nom Mickael
+            name: mickaelName
+            widget: string
+          - label: Nom Marion
+            name: marionName
+            widget: string
+          - label: Téléphone
+            name: phone
+            widget: string
+          - label: Email
+            name: email
+            widget: string
+          - label: Ville principale
+            name: mainCity
+            widget: string
+          - label: Zones couvertes
+            name: coveredAreas
+            widget: list
+            field:
+              label: Zone
+              name: area
+              widget: string
+          - label: URL Facebook
+            name: facebookUrl
+            widget: string
+            required: false
+          - label: URL Instagram
+            name: instagramUrl
+            widget: string
+            required: false
+          - label: URL IAD
+            name: iadUrl
+            widget: string
+            required: false
+          - label: Texte de pied de page
+            name: footerText
+            widget: text
+          - label: Libellé du CTA principal
+            name: mainCtaLabel
+            widget: string
+          - label: URL du CTA principal
+            name: mainCtaUrl
+            widget: string

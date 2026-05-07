@@ -5,7 +5,8 @@ slug: /contact
 h1: Nous contacter pour parler de votre projet immobilier
 heroTitle: Un premier échange simple, direct et utile
 heroSubtitle: Que vous souhaitiez vendre, acheter, faire estimer un bien ou préparer une cession de fonds de commerce, nous sommes disponibles pour vous répondre.
-heroImage: /uploads/page-contact.jpg
+heroImage: /uploads/photo-IAD-fond.jpg
+heroImageAlt: Maison en pierre représentative du secteur Auxois Morvan
 intro: Nous privilégions les échanges clairs et concrets pour comprendre votre projet, répondre à vos questions et vous proposer la meilleure suite.
 sections:
   - eyebrow: Présentation

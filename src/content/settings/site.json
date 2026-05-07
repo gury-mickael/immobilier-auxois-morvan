@@ -1,10 +1,11 @@
 {
   "siteName": "Immobilier Auxois Morvan",
+  "baseline": "Mickael Gury et Marion Roulier accompagnent les projets immobiliers en Auxois et dans le Morvan avec une approche sérieuse, locale et profondément humaine.",
   "mickaelName": "Mickael Gury",
   "marionName": "Marion Roulier",
   "phone": "+33 (0)6 00 00 00 00",
   "email": "contact@immobilier-auxois-morvan.fr",
-  "primaryCity": "Arnay-le-Duc",
+  "mainCity": "Arnay-le-Duc",
   "coveredAreas": [
     "Arnay-le-Duc",
     "Pouilly-en-Auxois",
@@ -17,23 +18,10 @@
     "Auxois",
     "Morvan"
   ],
-  "socialLinks": {
-    "linkedin": "https://www.linkedin.com/company/immobilier-auxois-morvan",
-    "facebook": "https://www.facebook.com/immobilier-auxois-morvan",
-    "instagram": "https://www.instagram.com/immobilier.auxois.morvan"
-  },
-  "shortPresentation": "Mickael Gury et Marion Roulier accompagnent les projets immobiliers en Auxois et dans le Morvan avec une approche sérieuse, locale et profondément humaine.",
-  "primaryCta": {
-    "label": "Demander une estimation",
-    "url": "/estimation"
-  },
-  "footer": {
-    "legalName": "Immobilier Auxois Morvan - Mickael Gury & Marion Roulier",
-    "legalNotice": "Conseillers immobiliers IAD en Auxois et Morvan.",
-    "privacyLabel": "Politique de confidentialité",
-    "privacyUrl": "/contact",
-    "termsLabel": "Mentions légales",
-    "termsUrl": "/contact",
-    "copyright": "© 2026 Immobilier Auxois Morvan. Tous droits réservés."
-  }
+  "facebookUrl": "https://www.facebook.com/immobilier-auxois-morvan",
+  "instagramUrl": "https://www.instagram.com/immobilier.auxois.morvan",
+  "iadUrl": "https://www.iadfrance.fr",
+  "footerText": "Immobilier Auxois Morvan accompagne les projets immobiliers en Auxois et Morvan avec une approche locale, claire et humaine.",
+  "mainCtaLabel": "Contactez-nous",
+  "mainCtaUrl": "/contact"
 }

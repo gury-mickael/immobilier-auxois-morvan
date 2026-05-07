@@ -5,7 +5,8 @@ slug: /estimation
 h1: Une estimation immobilière sérieuse, argumentée et utile à la décision
 heroTitle: Estimer votre bien avec une lecture réaliste du marché local
 heroSubtitle: Nous vous remettons un avis de valeur construit à partir des références du secteur, des caractéristiques du bien et de l'objectif de votre projet.
-heroImage: /uploads/page-estimation.jpg
+heroImage: /uploads/estimer.jpg
+heroImageAlt: Conseiller immobilier préparant une estimation de bien
 intro: Une estimation fiable ne se limite pas à une fourchette. Elle permet de fixer une stratégie, d'anticiper les délais et de sécuriser les prochaines étapes de votre projet.
 sections:
   - eyebrow: Marché

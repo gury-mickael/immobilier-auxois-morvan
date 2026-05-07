@@ -1,108 +1,22 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import SectionTitle from '../components/SectionTitle.astro';
-import ServiceCard from '../components/ServiceCard.astro';
-import Button from '../components/Button.astro';
-import CTASection from '../components/CTASection.astro';
+import MainPageTemplate from '../components/MainPageTemplate.astro';
+import { getPageContent } from '../lib/content';
+
+const page = await getPageContent('vendre');
+
+const stats = [
+  { value: 'Prix juste', label: 'Positionnement de départ' },
+  { value: 'Diffusion ciblée', label: 'Visibilité commerciale' },
+  { value: 'Négociation', label: 'Pilotage des offres' },
+  { value: 'Signature', label: 'Suivi jusqu\'au bout' }
+];
 ---
 
-<Layout
-  title="Vendre votre bien"
-  description="Service de vente immobilière en Auxois et Morvan. Estimation, marketing, vente aux meilleures conditions."
+<MainPageTemplate
+  page={page}
   currentPage="/vendre"
->
-  <!-- Hero Section -->
-  <section class="bg-gradient-to-br from-blue-600 to-blue-700 text-white py-16 md:py-24">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1 class="text-4xl md:text-5xl font-bold mb-6">Vendre votre bien</h1>
-      <p class="text-xl text-blue-100 max-w-3xl">
-        Nous vous accompagnons de l'estimation à la signature. Avec notre stratégie de prix et notre marketing professionnel, votre bien se vend rapidement et au meilleur prix.
-      </p>
-    </div>
-  </section>
-
-  <!-- Notre processus -->
-  <section class="py-16 md:py-24 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <SectionTitle
-        title="Notre processus de vente"
-        subtitle="6 étapes pour vendre votre bien aux meilleures conditions"
-      />
-
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-8 border-l-4 border-blue-600">
-          <div class="text-3xl font-bold text-blue-600 mb-2">01</div>
-          <h3 class="text-xl font-bold text-slate-900 mb-3">Estimation gratuite</h3>
-          <p class="text-slate-600">Nous évaluons votre bien en tenant compte du marché local, de l'état du bien et des critères qui font sa valeur.</p>
-        </div>
-
-        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-8 border-l-4 border-green-600">
-          <div class="text-3xl font-bold text-green-600 mb-2">02</div>
-          <h3 class="text-xl font-bold text-slate-900 mb-3">Stratégie de prix</h3>
-          <p class="text-slate-600">Fixons ensemble un prix compétitif et attractif pour attirer les bons acheteurs et conclure rapidement.</p>
-        </div>
-
-        <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-8 border-l-4 border-amber-600">
-          <div class="text-3xl font-bold text-amber-600 mb-2">03</div>
-          <h3 class="text-xl font-bold text-slate-900 mb-3">Photos professionnelles</h3>
-          <p class="text-slate-600">Des photos de qualité professionnelle mettent en avant votre bien et augmentent les demandes de visite.</p>
-        </div>
-
-        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-8 border-l-4 border-purple-600">
-          <div class="text-3xl font-bold text-purple-600 mb-2">04</div>
-          <h3 class="text-xl font-bold text-slate-900 mb-3">Diffusion large</h3>
-          <p class="text-slate-600">Votre annonce circule sur tous les grands portails immobiliers et auprès de notre réseau IAD national.</p>
-        </div>
-
-        <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-8 border-l-4 border-red-600">
-          <div class="text-3xl font-bold text-red-600 mb-2">05</div>
-          <h3 class="text-xl font-bold text-slate-900 mb-3">Visites et négociations</h3>
-          <p class="text-slate-600">Nous organisons les visites, filtrons les candidats sérieux et menons les négociations pour vous.</p>
-        </div>
-
-        <div class="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl p-8 border-l-4 border-cyan-600">
-          <div class="text-3xl font-bold text-cyan-600 mb-2">06</div>
-          <h3 class="text-xl font-bold text-slate-900 mb-3">Conclusion du dossier</h3>
-          <p class="text-slate-600">Nous vous accompagnons jusqu'à la signature et assurons la bonne fin du dossier immobilier.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Services additionnels -->
-  <section class="py-16 md:py-24 bg-slate-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <SectionTitle
-        title="Services additionnels"
-        subtitle="Pour optimiser votre vente"
-      />
-
-      <div class="grid md:grid-cols-2 gap-8">
-        <ServiceCard
-          title="Conseil en travaux"
-          description="Optimisez votre bien avant la vente avec nos recommandations d'amélioration. Un petit investissement pour une meilleure valeur de revente."
-          icon="🔨"
-        />
-        <ServiceCard
-          title="Financing consulting"
-          description="Nous aidons vos acheteurs à sécuriser leur financement, ce qui accélère le processus et diminue les risques d'abandon."
-          icon="💳"
-        />
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section class="py-16 md:py-24 bg-white">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <CTASection
-        title="Prêt à vendre votre bien ?"
-        description="Contactez Mickael ou Marion pour une estimation gratuite et sans engagement. Nous vous proposerons la meilleure stratégie de vente."
-        primaryButtonText="Demander une estimation"
-        primaryButtonHref="/estimation"
-        secondaryButtonText="Nous contacter"
-        secondaryButtonHref="/contact"
-      />
-    </div>
-  </section>
-</Layout>
+  eyebrow="Vente immobilière"
+  introEyebrow="Stratégie"
+  introTitle="Vendre avec une méthode claire et défendue"
+  stats={stats}
+/>

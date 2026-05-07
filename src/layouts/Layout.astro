@@ -15,7 +15,7 @@ const siteSettings = await getSiteSettings();
 
 const {
   title,
-  description = siteSettings.shortPresentation,
+  description = siteSettings.baseline,
   currentPage = Astro.url.pathname,
   image
 } = Astro.props;

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Admin | Immobilier Auxois Morvan</title>
+    <link rel="cms-config-url" type="application/yaml" href="/admin/config.yml" />
+    <style>
+      html,
+      body,
+      #nc-root {
+        min-height: 100%;
+      }
+
+      body {
+        margin: 0;
+        background: #f4efe8;
+      }
+
+      noscript {
+        display: block;
+        padding: 2rem;
+        font: 16px/1.5 system-ui, sans-serif;
+        color: #1f2937;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="nc-root"></div>
+    <noscript>JavaScript est requis pour utiliser l'administration.</noscript>
+    <script type="module">
+      window.CMS_MANUAL_INIT = true;
+
+      const { init } = await import('https://unpkg.com/@sveltia/cms@0.159.2/dist/sveltia-cms.mjs');
+
+      await init();
+    </script>
+  </body>
+</html>

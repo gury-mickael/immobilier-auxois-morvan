@@ -1,11 +1,12 @@
 ---
 title: Vendre un fonds de commerce
-metaDescription: Les étapes pour vendre un fonds de commerce : estimation, préparation du dossier, diffusion et sélection des repreneurs.
+metaDescription: "Les étapes pour vendre un fonds de commerce : estimation, préparation du dossier, diffusion et sélection des repreneurs."
 slug: vendre-un-fonds-de-commerce
 category: Fonds de commerce
 date: 2026-01-30
 excerpt: Une cession de fonds de commerce se prépare avec méthode pour présenter l'activité de façon claire et qualifier efficacement les repreneurs.
-featuredImage: /uploads/blog-fonds.jpg
+featuredImage: /uploads/our-services-2.jpg
+featuredImageAlt: Commerce de proximité prêt à être cédé
 published: true
 ---
 La vente d'un fonds de commerce ne s'improvise pas. Le cédant doit pouvoir présenter une activité lisible, un cadre d'exploitation clair et des repères sérieux pour les candidats à la reprise.

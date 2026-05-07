@@ -1,7 +1,7 @@
 ---
 name: Jean-Marc Durand
 location: Semur-en-Auxois
-transactionType: Vente de maison
+propertyType: Vente de maison
 rating: 5
 published: true
 ---

@@ -5,7 +5,8 @@ slug: /secteur
 h1: Un accompagnement immobilier ancré dans l'Auxois, le Morvan et leurs villes de proximité
 heroTitle: Notre secteur d'intervention
 heroSubtitle: Nous accompagnons des projets immobiliers dans les villages, petites villes et pôles d'activité de l'Auxois, du Morvan et des environs.
-heroImage: /uploads/page-secteur.jpg
+heroImage: /uploads/auxois.jpg
+heroImageAlt: Paysages vallonnés entre Auxois et Morvan
 intro: La valeur d'un conseil immobilier local tient à la connaissance fine des rythmes de marché, des profils d'acquéreurs et des spécificités de chaque secteur.
 sections:
   - eyebrow: Villes clés
@@ -21,7 +22,7 @@ sections:
       - Vitteaux
       - Semur-en-Auxois
   - eyebrow: Territoire
-    title: Auxois et Morvan : deux territoires aux réalités complémentaires
+    title: "Auxois et Morvan : deux territoires aux réalités complémentaires"
     text: Nous adaptons notre lecture du marché selon les attentes des vendeurs et acquéreurs, la typologie des biens et les dynamiques propres à chaque bassin de vie.
     items:
       - Résidences principales

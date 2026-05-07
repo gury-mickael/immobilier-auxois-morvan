@@ -5,7 +5,8 @@ slug: /
 h1: Votre projet immobilier en Auxois et Morvan, accompagné avec sérieux et proximité
 heroTitle: Votre projet immobilier en Auxois et Morvan, accompagné avec sérieux et proximité
 heroSubtitle: Mickael Gury et Marion Roulier vous accompagnent pour vendre, acheter ou estimer votre bien autour d'Arnay-le-Duc, Pouilly-en-Auxois, Autun, Beaune, Saulieu et Dijon.
-heroImage: /uploads/hero-auxois-morvan.jpg
+heroImage: /uploads/auxois.jpg
+heroImageAlt: Vue aérienne des paysages de l'Auxois Morvan
 intro: Une présence de terrain, un accompagnement attentif et des conseils clairs pour avancer avec méthode à chaque étape de votre projet immobilier.
 sections:
   - eyebrow: Réassurance

@@ -1,7 +1,7 @@
 ---
 name: Catherine Leblanc
 location: Beaune
-transactionType: Achat de maison
+propertyType: Achat de maison
 rating: 5
 published: true
 ---

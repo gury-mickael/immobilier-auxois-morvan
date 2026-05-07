@@ -1,0 +1,17 @@
+---
+interface Props {
+  compact?: boolean;
+  class?: string;
+}
+
+const { compact = false, class: customClass = '' } = Astro.props;
+const widthClass = compact ? 'w-[172px] md:w-[190px]' : 'w-[200px] md:w-[236px]';
+---
+
+<img
+  src="/uploads/cropped-logo.png"
+  alt="Immobilier Auxois Morvan"
+  class={`${widthClass} h-auto ${customClass}`}
+  loading="eager"
+  decoding="async"
+/>

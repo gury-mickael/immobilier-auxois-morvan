@@ -12,7 +12,7 @@ const { quote, author, title, rating = 5, location } = Astro.props;
 const stars = Array.from({ length: 5 }, (_, i) => i < rating);
 ---
 
-<article class="flex h-full flex-col rounded-[1.75rem] border border-[color:var(--color-border)] bg-white/88 p-8 shadow-[0_18px_36px_rgba(24,37,45,0.06)]">
+<article class="flex h-full flex-col rounded-[1.25rem] border border-[color:var(--color-border)] bg-white p-8">
   <div class="flex gap-2">
     {stars.map((filled) => (
       <span class={`h-2.5 w-2.5 rounded-full ${filled ? 'bg-[color:var(--color-accent)]' : 'bg-[rgba(24,37,45,0.12)]'}`}></span>

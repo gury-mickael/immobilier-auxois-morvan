@@ -8,7 +8,7 @@ interface Props {
 const { title, text, items = [] } = Astro.props;
 ---
 
-<article class="surface-muted h-full rounded-[1.75rem] p-7 md:p-8">
+<article class="surface-muted h-full rounded-[1.25rem] p-7 md:p-8">
   <h3 class="text-[1.9rem] leading-tight">{title}</h3>
   <p class="mt-4 text-[0.98rem] leading-7 text-[color:var(--color-muted)]">{text}</p>
   {items.length > 0 && (

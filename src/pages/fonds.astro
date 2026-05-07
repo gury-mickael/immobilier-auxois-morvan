@@ -1,120 +1,22 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import SectionTitle from '../components/SectionTitle.astro';
-import ServiceCard from '../components/ServiceCard.astro';
-import Button from '../components/Button.astro';
-import CTASection from '../components/CTASection.astro';
+import MainPageTemplate from '../components/MainPageTemplate.astro';
+import { getPageContent } from '../lib/content';
+
+const page = await getPageContent('fonds-de-commerce');
+
+const stats = [
+  { value: 'Valorisation', label: 'Activité et environnement' },
+  { value: 'Dossier clair', label: 'Supports acquéreurs' },
+  { value: 'Diffusion ciblée', label: 'Repreneurs qualifiés' },
+  { value: 'Confidentialité', label: 'Accompagnement du cédant' }
+];
 ---
 
-<Layout
-  title="Fonds de commerce"
-  description="Vente et achat de fonds de commerce en Auxois et Morvan. Accompagnement spécialisé pour commerçants et entrepreneurs."
+<MainPageTemplate
+  page={page}
   currentPage="/fonds"
->
-  <!-- Hero Section -->
-  <section class="bg-gradient-to-br from-orange-600 to-orange-700 text-white py-16 md:py-24">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h1 class="text-4xl md:text-5xl font-bold mb-6">Fonds de commerce</h1>
-      <p class="text-xl text-orange-100 max-w-3xl">
-        Spécialistes dans l'accompagnement de la transmission et de l'acquisition de fonds de commerce. Pour restaurateurs, commerçants et entrepreneurs.
-      </p>
-    </div>
-  </section>
-
-  <!-- Nos services -->
-  <section class="py-16 md:py-24 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <SectionTitle
-        title="Nos services spécialisés"
-        subtitle="Un accompagnement complet pour les commerçants"
-      />
-
-      <div class="grid md:grid-cols-2 gap-8 mb-12">
-        <ServiceCard
-          title="Vendre votre fonds"
-          description="Nous valorisons votre activité, rédigeons un dossier commercial attractif et trouvons le bon repreneur."
-          icon="📈"
-          features={['Évaluation précise', 'Dossier commercial', 'Prospection acheteurs', 'Accompagnement complet']}
-        />
-        <ServiceCard
-          title="Acquérir un fonds"
-          description="Nous identifions les meilleures opportunités, analysons la rentabilité et sécurisons votre investissement."
-          icon="🎯"
-          features={['Sourcing d\'opportunités', 'Analyse financière', 'Audit du fonds', 'Financement']}
-        />
-        <ServiceCard
-          title="Estimation de fonds"
-          description="Connaître la valeur réelle de votre activité. Évaluation basée sur le chiffre, les perspectives et les comparables."
-          icon="💰"
-          features={['Méthode reconnue', 'Rapport détaillé', 'Confidentialité', 'Conseil gratuit']}
-        />
-        <ServiceCard
-          title="Immobilier commercial"
-          description="Nous nous chargeons aussi de la vente ou location des locaux commerciaux associés à votre activité."
-          icon="🏬"
-          features={['Locaux commerciaux', 'Baux commerciaux', 'Évolution de local', 'Conseil juridique']}
-        />
-      </div>
-    </div>
-  </section>
-
-  <!-- Processus de vente -->
-  <section class="py-16 md:py-24 bg-slate-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <SectionTitle
-        title="Processus de vente d'un fonds"
-        subtitle="Étapes clés pour transmettre votre activité"
-      />
-
-      <div class="space-y-6">
-        {[
-          { num: '01', title: 'Diagnostic initial', desc: 'Bilan complet : activité, clientèle, filière, rentabilité, forces et faiblesses.' },
-          { num: '02', title: 'Évaluation et tarification', desc: 'Fixation d\'un prix compétitif basé sur les chiffres, les actifs et le potentiel.' },
-          { num: '03', title: 'Dossier commercial', desc: 'Création d\'un dossier professionnel : présentation, données financières, opportunités.' },
-          { num: '04', title: 'Prospection d\'acheteurs', desc: 'Diffusion auprès de candidats qualifiés via notre réseau et partenaires.' },
-          { num: '05', title: 'Accompagnement des visites', desc: 'Présentation du fonds, réponse aux questions, filtrage des candidats sérieux.' },
-          { num: '06', title: 'Finalisation de la vente', desc: 'Négociation, mise en place du financement, signature chez le notaire.' },
-        ].map((item) => (
-          <div class="bg-white rounded-xl p-8 shadow-md border-l-4 border-orange-600 flex gap-6">
-            <div class="text-4xl font-bold text-orange-600 flex-shrink-0">{item.num}</div>
-            <div class="flex-grow">
-              <h3 class="text-xl font-bold text-slate-900 mb-2">{item.title}</h3>
-              <p class="text-slate-600">{item.desc}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- Secteurs d'activité -->
-  <section class="py-16 md:py-24 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <SectionTitle
-        title="Les secteurs que nous accompagnons"
-      />
-
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-12">
-        {['Restauration', 'Hôtellerie', 'Boulangerie', 'Commerce général', 'Coiffure', 'Beauté', 'Services', 'Autre'].map((sector) => (
-          <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 text-center">
-            <p class="font-semibold text-slate-900">{sector}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section class="py-16 md:py-24 bg-slate-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <CTASection
-        title="Vous envisagez de vendre ou d'acquérir ?"
-        description="Parlez-nous de votre projet. Nous vous proposerons un accompagnement adapté et discret."
-        primaryButtonText="Demander un diagnostic"
-        primaryButtonHref="/contact"
-        secondaryButtonText="Nous appeler"
-        secondaryButtonHref="tel:+330000000"
-      />
-    </div>
-  </section>
-</Layout>
+  eyebrow="Transmission de commerce"
+  introEyebrow="Commerce"
+  introTitle="Une cession préparée avec méthode, discrétion et qualité de suivi"
+  stats={stats}
+/>

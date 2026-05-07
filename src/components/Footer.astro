@@ -1,46 +1,55 @@
 ---
+import BrandLogo from './BrandLogo.astro';
 import { getSiteSettings } from '../lib/content';
 
 const siteSettings = await getSiteSettings();
 const mainAreas = siteSettings.coveredAreas.slice(0, 6);
+const serviceLinks = [
+  { label: 'Vendre', href: '/vendre' },
+  { label: 'Acheter', href: '/acheter' },
+  { label: 'Estimation', href: '/estimation' },
+  { label: 'Fonds de commerce', href: '/fonds' }
+];
 ---
 
-<footer class="mt-12 border-t border-[rgba(255,255,255,0.1)] bg-[color:var(--color-ink-strong)] text-[rgba(255,255,255,0.78)]">
+<footer class="mt-20 border-t border-[color:var(--color-border)] bg-white text-[color:var(--color-ink)]">
   <div class="shell py-16">
-    <div class="grid gap-12 lg:grid-cols-[1.4fr_repeat(3,minmax(0,1fr))]">
+    <div class="grid gap-12 xl:grid-cols-[1.2fr_0.85fr_0.85fr_0.9fr_1fr]">
       <div class="max-w-md">
-        <p class="eyebrow text-[rgba(255,255,255,0.56)] before:bg-[linear-gradient(90deg,var(--color-accent),transparent)]">
-          Immobilier local
+        <BrandLogo compact class="max-w-none" />
+        <p class="mt-6 text-sm leading-7 text-[color:var(--color-muted)]">
+          {siteSettings.footerText}
         </p>
-        <h2 class="mt-6 text-3xl text-white">{siteSettings.siteName}</h2>
-        <p class="mt-4 text-sm leading-7 text-[rgba(255,255,255,0.7)]">
-          {siteSettings.shortPresentation}
-        </p>
-        <div class="mt-6 flex flex-wrap gap-2">
-          {(['linkedin', 'facebook', 'instagram'] as const).map((network) => (
-            <a
-              href={siteSettings.socialLinks[network]}
-              class="rounded-full border border-[rgba(255,255,255,0.14)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[rgba(255,255,255,0.72)] hover:border-[color:var(--color-accent)] hover:text-white"
-            >
-              {network}
-            </a>
-          ))}
+        <div class="mt-6 flex flex-wrap gap-4 text-sm font-semibold text-[color:var(--color-muted)]">
+          {siteSettings.facebookUrl && <a href={siteSettings.facebookUrl} class="hover:text-[color:var(--color-accent-strong)]">Facebook</a>}
+          {siteSettings.instagramUrl && <a href={siteSettings.instagramUrl} class="hover:text-[color:var(--color-accent-strong)]">Instagram</a>}
+          {siteSettings.iadUrl && <a href={siteSettings.iadUrl} class="hover:text-[color:var(--color-accent-strong)]">IAD</a>}
         </div>
       </div>
 
       <div>
-        <h3 class="text-lg font-semibold text-white">Services</h3>
+        <h3 class="text-base font-extrabold text-[color:var(--color-ink-strong)]">Navigation</h3>
         <ul class="mt-5 space-y-3 text-sm">
-          <li><a href="/vendre" class="hover:text-white">Vendre</a></li>
-          <li><a href="/acheter" class="hover:text-white">Acheter</a></li>
-          <li><a href="/estimation" class="hover:text-white">Estimation</a></li>
-          <li><a href="/fonds" class="hover:text-white">Fonds de commerce</a></li>
-          <li><a href="/blog" class="hover:text-white">Blog</a></li>
+          <li><a href="/" class="hover:text-[color:var(--color-accent-strong)]">Accueil</a></li>
+          <li><a href="/#histoire" class="hover:text-[color:var(--color-accent-strong)]">Histoire</a></li>
+          <li><a href="/secteur" class="hover:text-[color:var(--color-accent-strong)]">Secteur</a></li>
+          <li><a href="/#avis-clients" class="hover:text-[color:var(--color-accent-strong)]">Avis clients</a></li>
+          <li><a href="/blog" class="hover:text-[color:var(--color-accent-strong)]">Blog</a></li>
+          <li><a href="/contact" class="hover:text-[color:var(--color-accent-strong)]">Contact</a></li>
         </ul>
       </div>
 
       <div>
-        <h3 class="text-lg font-semibold text-white">Secteur</h3>
+        <h3 class="text-base font-extrabold text-[color:var(--color-ink-strong)]">Prestations</h3>
+        <ul class="mt-5 space-y-3 text-sm">
+          {serviceLinks.map((item) => (
+            <li><a href={item.href} class="hover:text-[color:var(--color-accent-strong)]">{item.label}</a></li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-base font-extrabold text-[color:var(--color-ink-strong)]">Secteur</h3>
         <ul class="mt-5 space-y-3 text-sm">
           {mainAreas.map((area) => (
             <li>{area}</li>
@@ -49,33 +58,42 @@ const mainAreas = siteSettings.coveredAreas.slice(0, 6);
       </div>
 
       <div>
-        <h3 class="text-lg font-semibold text-white">Contact</h3>
+        <h3 class="text-base font-extrabold text-[color:var(--color-ink-strong)]">Conseillers</h3>
+        <ul class="mt-5 space-y-3 text-sm">
+          <li class="font-semibold text-[color:var(--color-ink-strong)]">{siteSettings.marionName}</li>
+          <li class="font-semibold text-[color:var(--color-ink-strong)]">{siteSettings.mickaelName}</li>
+          <li>{siteSettings.mainCity}</li>
+          <li><a href="/contact" class="hover:text-[color:var(--color-accent-strong)]">Voir la page contact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-base font-extrabold text-[color:var(--color-ink-strong)]">Contact</h3>
         <ul class="mt-5 space-y-3 text-sm">
           <li>
-            <a href={`tel:${siteSettings.phone.replace(/\s+/g, '')}`} class="hover:text-white">
+            <a href={`tel:${siteSettings.phone.replace(/\s+/g, '')}`} class="hover:text-[color:var(--color-accent-strong)]">
               {siteSettings.phone}
             </a>
           </li>
           <li>
-            <a href={`mailto:${siteSettings.email}`} class="break-all hover:text-white">
+            <a href={`mailto:${siteSettings.email}`} class="break-all hover:text-[color:var(--color-accent-strong)]">
               {siteSettings.email}
             </a>
           </li>
-          <li>{siteSettings.primaryCity}</li>
           <li>
-            <a href="/contact" class="inline-flex rounded-full border border-[rgba(255,255,255,0.18)] px-4 py-2 font-semibold text-white hover:border-[color:var(--color-accent)]">
-              Demander un rendez-vous
+            <a href="/contact" class="inline-flex rounded-xl border border-[color:var(--color-border-strong)] px-4 py-2 font-semibold text-[color:var(--color-ink-strong)] hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-accent-strong)]">
+              Nous écrire
             </a>
           </li>
         </ul>
       </div>
     </div>
 
-    <div class="mt-14 flex flex-col gap-4 border-t border-[rgba(255,255,255,0.1)] pt-6 text-sm text-[rgba(255,255,255,0.56)] md:flex-row md:items-center md:justify-between">
-      <p>{siteSettings.footer.copyright}</p>
+    <div class="mt-14 flex flex-col gap-4 border-t border-[color:var(--color-border)] pt-6 text-sm text-[color:var(--color-muted)] md:flex-row md:items-center md:justify-between">
+      <p>{siteSettings.footerText}</p>
       <div class="flex flex-wrap gap-4">
-        <a href={siteSettings.footer.termsUrl} class="hover:text-white">{siteSettings.footer.termsLabel}</a>
-        <a href={siteSettings.footer.privacyUrl} class="hover:text-white">{siteSettings.footer.privacyLabel}</a>
+        <a href="/contact" class="hover:text-[color:var(--color-accent-strong)]">Mentions légales</a>
+        <a href="/contact" class="hover:text-[color:var(--color-accent-strong)]">Politique de confidentialité</a>
       </div>
     </div>
   </div>

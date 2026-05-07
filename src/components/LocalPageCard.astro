@@ -5,18 +5,22 @@ interface Props {
   pageType: string;
   href: string;
   excerpt: string;
+  image?: string;
 }
 
-const { title, city, pageType, href, excerpt } = Astro.props;
+const { title, city, pageType, href, excerpt, image } = Astro.props;
 ---
 
-<article class="surface-muted h-full rounded-[1.75rem] p-7">
-  <p class="text-xs font-bold uppercase tracking-[0.22em] text-[color:var(--color-muted)]">{pageType.replaceAll('-', ' ')}</p>
-  <h3 class="mt-4 text-[1.8rem] leading-tight">{title}</h3>
-  <p class="mt-2 text-sm font-semibold text-[color:var(--color-accent-strong)]">{city}</p>
-  <p class="mt-4 text-sm leading-7 text-[color:var(--color-muted)]">{excerpt}</p>
-  <a href={href} class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[color:var(--color-ink-strong)]">
-    Voir la page locale
-    <span>→</span>
-  </a>
+<article class="surface-muted h-full overflow-hidden rounded-[1.15rem]">
+  {image && <img src={image} alt={title} class="h-48 w-full object-cover" loading="lazy" decoding="async" />}
+  <div class="p-7">
+    <p class="text-xs font-bold uppercase tracking-[0.22em] text-[color:var(--color-muted)]">{pageType.replaceAll('-', ' ')}</p>
+    <h3 class="mt-4 text-[1.8rem] leading-tight">{title}</h3>
+    <p class="mt-2 text-sm font-semibold text-[color:var(--color-accent)]">{city}</p>
+    <p class="mt-4 text-sm leading-7 text-[color:var(--color-muted)]">{excerpt}</p>
+    <a href={href} class="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[color:var(--color-ink-strong)]">
+      Voir la page locale
+      <span>→</span>
+    </a>
+  </div>
 </article>

@@ -19,26 +19,23 @@ interface Props {
   actions?: Action[];
   stats?: Stat[];
   image?: string;
+  imageAlt?: string;
 }
 
-const { eyebrow, title, subtitle, actions = [], stats = [], image } = Astro.props;
-
-const panelStyle = image
-  ? `background-image: linear-gradient(180deg, rgba(24,37,45,0.12), rgba(24,37,45,0.5)), url('${image}'); background-size: cover; background-position: center;`
-  : undefined;
+const { eyebrow, title, subtitle, actions = [], stats = [], image, imageAlt = 'Illustration de la page' } = Astro.props;
 ---
 
 <section class="section section-lg">
   <div class="shell">
-    <div class="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-      <div class="surface-panel rounded-[2.25rem] p-8 md:p-12">
+    <div class="grid gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:items-start">
+      <div class="max-w-3xl">
         {eyebrow && <p class="eyebrow">{eyebrow}</p>}
-        <h1 class="balanced-text mt-6 text-5xl leading-none md:text-7xl">{title}</h1>
-        <p class="mt-6 max-w-3xl text-[1.06rem] leading-8 text-[color:var(--color-muted)] md:text-[1.12rem]">
+        <h1 class="balanced-text mt-6 text-4xl leading-[0.95] md:text-6xl xl:text-[4.45rem]">{title}</h1>
+        <p class="mt-6 max-w-2xl text-[1rem] leading-8 text-[color:var(--color-muted)] md:text-[1.08rem]">
           {subtitle}
         </p>
         {actions.length > 0 && (
-          <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             {actions.map((action, index) => (
               <Button href={action.href} variant={action.variant ?? (index === 0 ? 'primary' : 'outline')} size="lg">
                 {action.label}
@@ -49,25 +46,30 @@ const panelStyle = image
       </div>
 
       <div class="grid gap-5">
-        <div class="relative overflow-hidden rounded-[2.25rem] border border-[color:var(--color-border)] bg-[linear-gradient(135deg,rgba(183,155,104,0.18),rgba(24,37,45,0.88))] p-8 text-white shadow-[0_30px_70px_rgba(24,37,45,0.18)]" style={panelStyle}>
-          <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_35%)]"></div>
-          <div class="relative grid gap-5">
-            <p class="text-xs font-bold uppercase tracking-[0.24em] text-white/70">Couverture locale</p>
-            <div class="grid gap-4 sm:grid-cols-2">
-              {(stats.length > 0
-                ? stats
-                : [
-                    { value: 'Auxois', label: 'Territoire suivi' },
-                    { value: 'Morvan', label: 'Projet de vie' },
-                    { value: 'IAD', label: 'Réseau national' },
-                    { value: 'Sur mesure', label: 'Accompagnement' }
-                  ]).map((stat) => (
-                <div class="rounded-[1.5rem] border border-white/14 bg-white/8 p-4 backdrop-blur-sm">
-                  <p class="text-2xl font-semibold">{stat.value}</p>
-                  <p class="mt-1 text-sm text-white/70">{stat.label}</p>
-                </div>
-              ))}
+        <div class="overflow-hidden rounded-[1.75rem] border border-[color:var(--color-border)] bg-[color:var(--color-bg-soft)]">
+          {image ? (
+            <img src={image} alt={imageAlt} class="h-[360px] w-full object-cover" loading="eager" decoding="async" />
+          ) : (
+            <div class="flex h-[360px] items-center justify-center px-8 text-center text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--color-muted)]">
+              Auxois · Morvan · Immobilier local
             </div>
+          )}
+        </div>
+
+        <div class="grid gap-px rounded-[1.25rem] border border-[color:var(--color-border)] bg-[color:var(--color-border)] sm:grid-cols-2">
+          {(stats.length > 0
+            ? stats
+            : [
+                { value: 'Auxois', label: 'Territoire suivi' },
+                { value: 'Morvan', label: 'Projet de vie' },
+                { value: 'IAD', label: 'Réseau national' },
+                { value: 'Sur mesure', label: 'Accompagnement' }
+              ]).map((stat) => (
+            <div class="bg-white px-5 py-5">
+              <p class="text-[1.45rem] font-extrabold text-[color:var(--color-ink-strong)]">{stat.value}</p>
+              <p class="mt-1 text-sm text-[color:var(--color-muted)]">{stat.label}</p>
+            </div>
+          ))}
           </div>
         </div>
         <slot name="aside" />

@@ -1,11 +1,12 @@
 ---
 title: Acheter un bien
-metaDescription: Acheter un bien en Auxois ou dans le Morvan avec un conseiller immobilier local : connaissance du secteur, sélection de biens, accompagnement de visite et conseils de marché.
+metaDescription: "Acheter un bien en Auxois ou dans le Morvan avec un conseiller immobilier local : connaissance du secteur, sélection de biens, accompagnement de visite et conseils de marché."
 slug: /acheter
 h1: Acheter un bien avec une lecture précise du marché local
 heroTitle: Acheter dans l'Auxois ou le Morvan avec des conseils utiles sur le terrain
 heroSubtitle: Nous vous aidons à affiner votre recherche, à comprendre les spécificités du secteur et à avancer sereinement dans votre projet d'acquisition.
-heroImage: /uploads/page-acheter.jpg
+heroImage: /uploads/maison.jpg
+heroImageAlt: Maison de caractère disponible à l'achat en Auxois Morvan
 intro: Un achat immobilier demande autant de méthode que d'intuition. Notre rôle est de vous apporter un regard local, pragmatique et indépendant à chaque étape.
 sections:
   - eyebrow: Écoute

@@ -1,12 +1,14 @@
 ---
 title: Vendre sa maison à Autun
-metaDescription: Vendre sa maison à Autun avec l'appui d'un conseiller immobilier local : estimation, stratégie de prix, valorisation, diffusion et négociation.
+metaDescription: "Vendre sa maison à Autun avec l'appui d'un conseiller immobilier local : estimation, stratégie de prix, valorisation, diffusion et négociation."
 slug: vendre-maison-autun
 city: Autun
 pageType: vendre-maison
 h1: Vendre sa maison à Autun
 heroTitle: Préparer la vente de votre maison à Autun avec un accompagnement structuré
 heroSubtitle: Nous vous aidons à estimer, positionner et présenter votre bien pour toucher les bons acquéreurs à Autun et dans son bassin de vie.
+heroImage: /uploads/autun.jpg
+heroImageAlt: Vue de la ville d'Autun
 intro: À Autun, la lecture du marché dépend fortement du quartier, du type de maison, de l'état du bien et du projet des acquéreurs. Une vente efficace commence par cette analyse.
 sections:
   - eyebrow: Prix
@@ -34,7 +36,6 @@ nearbyCities:
   - Saulieu
   - Beaune
   - Arnay-le-Duc
-featuredImage: /uploads/local-autun.jpg
 ctaTitle: Préparer la vente de votre maison à Autun
 ctaText: Nous pouvons vous aider à cadrer le prix, organiser la commercialisation et piloter la vente jusqu'à la signature.
 ctaButtonLabel: Demander une estimation

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Auxois Morvan</title>
+  <desc id="desc">Visuel placeholder premium pour la page d'accueil.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f4efe7" />
+      <stop offset="100%" stop-color="#ddd1bb" />
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)" />
+  <rect x="90" y="90" width="1420" height="720" rx="34" fill="#fbf8f3" stroke="#cbbda3" />
+  <path d="M160 655C360 540 544 430 708 430C871 430 1038 537 1450 640" fill="none" stroke="#b79b68" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+  <path d="M180 700C430 580 610 522 800 522C987 522 1180 600 1420 706" fill="none" stroke="#18252d" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+  <circle cx="520" cy="410" r="12" fill="#18252d" />
+  <circle cx="780" cy="360" r="12" fill="#18252d" />
+  <circle cx="1020" cy="460" r="12" fill="#18252d" />
+  <g fill="#18252d">
+    <text x="160" y="240" font-family="Georgia, serif" font-size="74">Immobilier Auxois Morvan</text>
+    <text x="160" y="305" font-family="Arial, sans-serif" font-size="28" fill="#5d6a72">Accompagnement local pour vendre, acheter ou estimer un bien</text>
+  </g>
+  <g fill="#18252d" font-family="Arial, sans-serif" font-size="22">
+    <text x="486" y="387">Arnay-le-Duc</text>
+    <text x="746" y="337">Pouilly-en-Auxois</text>
+    <text x="986" y="437">Autun</text>
+  </g>
+</svg>

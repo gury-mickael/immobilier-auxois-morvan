@@ -1,243 +1,247 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import SectionTitle from '../components/SectionTitle.astro';
+import Hero from '../components/Hero.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import FeatureCard from '../components/FeatureCard.astro';
 import ServiceCard from '../components/ServiceCard.astro';
-import Button from '../components/Button.astro';
+import AreaCard from '../components/AreaCard.astro';
+import LocalPageCard from '../components/LocalPageCard.astro';
 import TestimonialCard from '../components/TestimonialCard.astro';
+import BlogCard from '../components/BlogCard.astro';
 import CTASection from '../components/CTASection.astro';
+import {
+  formatLongDate,
+  getPageContent,
+  getPublishedBlogPosts,
+  getPublishedLocalPages,
+  getPublishedTestimonials,
+  getSiteSettings,
+  resolveAssetSrc
+} from '../lib/content';
+
+const [page, blogPosts, localPages, testimonials, siteSettings] = await Promise.all([
+  getPageContent('accueil'),
+  getPublishedBlogPosts(),
+  getPublishedLocalPages(),
+  getPublishedTestimonials(),
+  getSiteSettings()
+]);
+
+const heroImage = resolveAssetSrc(page.data.heroImage);
+const reassurance = page.data.sections[0];
+const whyUs = page.data.sections[1];
+const iadSupport = page.data.sections[2];
+const featuredPosts = blogPosts.slice(0, 3);
+
+const heroActions = [
+  { label: 'Faire estimer mon bien', href: '/estimation', variant: 'primary' as const },
+  { label: 'Nous contacter', href: '/contact', variant: 'outline' as const }
+];
+
+const heroStats = [
+  { value: siteSettings.mainCity, label: 'Ville repère' },
+  { value: 'Auxois & Morvan', label: 'Secteur couvert' },
+  { value: 'IAD France', label: 'Réseau national' },
+  { value: 'Suivi humain', label: 'Méthode de travail' }
+];
+
+const services = [
+  {
+    title: 'Vendre',
+    description: 'Positionner votre bien au bon prix, le valoriser et piloter la vente jusqu\'à la signature.',
+    href: '/vendre',
+    features: ['Estimation juste', 'Diffusion ciblée', 'Négociation pilotée']
+  },
+  {
+    title: 'Acheter',
+    description: 'Comparer les secteurs, affiner la recherche et avancer avec des repères concrets sur le terrain.',
+    href: '/acheter',
+    features: ['Lecture du marché local', 'Accompagnement des visites', 'Aide à la décision']
+  },
+  {
+    title: 'Estimation',
+    description: 'Obtenir un avis de valeur argumenté pour préparer une mise en vente ou arbitrer un projet.',
+    href: '/estimation',
+    features: ['Analyse locale', 'Spécificités du bien', 'Conseil utile à la décision']
+  },
+  {
+    title: 'Fonds de commerce',
+    description: 'Structurer une transmission, présenter le dossier et qualifier les repreneurs avec discrétion.',
+    href: '/fonds',
+    features: ['Valorisation', 'Dossier acquéreur', 'Accompagnement jusqu\'à la vente']
+  }
+];
+
+const areaDescriptions: Record<string, string> = {
+  'Arnay-le-Duc': 'Un marché de proximité où la lecture du cadre de vie et des villages environnants fait la différence.',
+  'Pouilly-en-Auxois': 'Un secteur charnière entre mobilité, vie locale et recherche résidentielle dans l\'Auxois.',
+  Autun: 'Un bassin de vie structuré, avec des quartiers et profils acquéreurs à bien distinguer.',
+  Saulieu: 'Une ville d\'équilibre entre centralité locale, patrimoine et environnement naturel recherché.',
+  Beaune: 'Un marché attractif où l\'emplacement, la qualité du bien et le projet acquéreur pèsent fortement.',
+  Dijon: 'Une zone plus large où l\'accompagnement local aide à mieux arbitrer les opportunités et les secteurs.'
+};
+
+const areaImages: Record<string, string> = {
+  'Arnay-le-Duc': '/uploads/arnay.jpg',
+  'Pouilly-en-Auxois': '/uploads/pouilly.jpg',
+  Autun: '/uploads/autun.jpg',
+  Saulieu: '/uploads/saulieu.jpg',
+  Beaune: '/uploads/beaune.jpg',
+  Dijon: '/uploads/dijon.jpg'
+};
 ---
 
-<Layout
-  title="Accueil"
-  description="Conseillers immobiliers IAD en Auxois et Morvan - Vendre, acheter, estimer. Mickael Gury et Marion Roulier"
-  currentPage="/"
->
-  <!-- Hero Section -->
-  <section class="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-20 md:py-32 overflow-hidden">
-    <div class="absolute inset-0 opacity-20">
-      <div class="absolute top-10 right-10 w-72 h-72 bg-amber-600 rounded-full mix-blend-multiply filter blur-3xl"></div>
-      <div class="absolute bottom-10 left-10 w-72 h-72 bg-amber-500 rounded-full mix-blend-multiply filter blur-3xl animation-pulse"></div>
-    </div>
+<Layout title={page.data.title} description={page.data.metaDescription} currentPage="/" image={heroImage}>
+  <Hero eyebrow="Conseillers immobiliers locaux" title={page.data.heroTitle} subtitle={page.data.heroSubtitle} actions={heroActions} stats={heroStats} image={heroImage} imageAlt={page.data.heroImageAlt} />
 
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid md:grid-cols-2 gap-12 items-center">
-        <div>
-          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-            Votre partenaire immobilier en <span class="text-amber-400">Auxois et Morvan</span>
-          </h1>
-          <p class="text-xl text-slate-300 mb-8 leading-relaxed">
-            Découvrez nos services d'accompagnement immobilier avec Mickael Gury et Marion Roulier, conseillers IAD. Nous vous guidons à chaque étape : vendre, acheter, estimer ou se développer.
+  <section id="histoire" class="section pt-0">
+    <div class="shell">
+      <div class="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
+        <div class="surface-panel rounded-[1.5rem] p-8 md:p-10">
+          <div>
+            <p class="eyebrow">Immobilier en Auxois et Morvan</p>
+            <h2 class="mt-5 text-4xl leading-tight md:text-5xl">{reassurance.title}</h2>
+            <p class="mt-5 max-w-3xl text-[1.02rem] leading-8 text-[color:var(--color-muted)]">{reassurance.text}</p>
+            <ul class="mt-6 grid gap-3">
+              {reassurance.items?.map((item) => (
+                <li class="flex items-start gap-3 text-sm leading-7 text-[color:var(--color-ink)]">
+                  <span class="mt-3 h-1.5 w-8 rounded-full bg-[color:var(--color-accent)]"></span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+        </div>
+
+        <div class="surface-muted rounded-[1.5rem] p-8 md:p-10">
+          <p class="eyebrow">Qui sommes-nous ?</p>
+          <h2 class="mt-5 text-4xl leading-tight md:text-5xl">{siteSettings.mickaelName} & {siteSettings.marionName}</h2>
+          <p class="mt-5 text-[1.02rem] leading-8 text-[color:var(--color-muted)]">
+            {siteSettings.baseline}
           </p>
-          <div class="flex flex-col sm:flex-row gap-4">
-            <Button href="/estimation" variant="primary" size="lg">
-              Faire estimer mon bien
-            </Button>
-            <Button href="/contact" variant="outline" size="lg" class="text-white border-white hover:bg-white hover:bg-opacity-10">
-              Nous contacter
-            </Button>
-          </div>
-        </div>
-        <div class="hidden md:block">
-          <div class="relative h-96 bg-gradient-to-br from-amber-600 to-amber-700 rounded-2xl shadow-2xl flex items-center justify-center">
-            <div class="text-center">
-              <div class="text-7xl mb-4">🏘️</div>
-              <p class="text-xl font-semibold text-white">Auxois Morvan</p>
-              <p class="text-amber-100">Groupe IAD France</p>
-            </div>
+          <div class="mt-8 grid gap-px rounded-[1rem] border border-[color:var(--color-border)] bg-[color:var(--color-border)] sm:grid-cols-2">
+            {siteSettings.coveredAreas.slice(0, 4).map((item) => (
+              <div class="bg-white px-5 py-4 text-sm font-semibold text-[color:var(--color-ink-strong)]">
+                {item}
+              </div>
+            ))}
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Pourquoi nous confier section -->
-  <section class="py-16 md:py-24 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <SectionTitle
-        title="Pourquoi nous confier votre projet ?"
-        subtitle="Une approche humaine et professionnelle au cœur de l'Auxois et du Morvan"
-      />
-
-      <div class="grid md:grid-cols-3 gap-8">
-        <ServiceCard
-          title="Expertise locale"
-          description="Nous connaissons intimement chaque région, village et quartier. Une expertise terrain qui bénéficie à vos projets."
-          icon="📍"
-        />
-        <ServiceCard
-          title="Accompagnement total"
-          description="De la première visite à la signature, nous vous guidons. Estimation, marketing, négociation, conseil."
-          icon="🤝"
-        />
-        <ServiceCard
-          title="Réseau IAD"
-          description="Accès à un réseau national de plus de 4000 conseillers, pour trouver l'acheteur ou le bien idéal."
-          icon="🌐"
-        />
-      </div>
+  <section id="prestations" class="section pt-0">
+    <div class="shell grid gap-6 lg:grid-cols-2">
+      <FeatureCard title={whyUs.title} text={whyUs.text} items={whyUs.items} />
+      <FeatureCard title="Une méthode posée, lisible et défendue sur le terrain" text={page.data.intro} items={reassurance.items} />
     </div>
   </section>
 
-  <!-- Services section -->
-  <section class="py-16 md:py-24 bg-slate-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <SectionTitle
-        title="Nos services"
-        subtitle="Une offre complète pour tous vos projets immobiliers"
-      />
-
-      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <ServiceCard
-          href="/vendre"
-          title="Vendre"
-          description="Vendre votre bien aux meilleures conditions avec notre stratégie de prix et marketing professionnels."
-          icon="💰"
-          features={['Estimation gratuite', 'Marketing expert', 'Négociation']}
-        />
-        <ServiceCard
-          href="/acheter"
-          title="Acheter"
-          description="Trouvez votre bien rêvé avec l'appui de notre connaissance du marché local."
-          icon="🔑"
-          features={['Recherche ciblée', 'Conseils terrain', 'Financement']}
-        />
-        <ServiceCard
-          href="/estimation"
-          title="Estimation"
-          description="Connaître la valeur exacte de votre bien sur le marché actuel, rapidement et gratuitement."
-          icon="📊"
-          features={['Analyse précise', 'Rapport détaillé', 'Conseil']}
-        />
-        <ServiceCard
-          href="/fonds"
-          title="Fonds de commerce"
-          description="Spécialistes dans l'accompagnement des commerçants et entrepreneurs de la région."
-          icon="🏪"
-          features={['Estimation fonds', 'Dossier acheteur', 'Diffusion']}
-        />
-      </div>
-    </div>
-  </section>
-
-  <!-- Secteur section -->
-  <section class="py-16 md:py-24 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <SectionTitle
-        title="Nous couvrons votre région"
-        subtitle="Présents sur l'ensemble de l'Auxois, du Morvan et les grandes villes alentours"
-      />
-
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {['Autun', 'Arnay-le-Duc', 'Beaune', 'Dijon', 'Pouilly-en-Auxois', 'Saulieu', 'Semur-en-Auxois', 'Vitteaux', 'Auxois', 'Morvan'].map((city) => (
-          <div class="bg-slate-50 rounded-xl p-6 text-center hover:shadow-lg hover:bg-amber-50 transition-all duration-300 cursor-pointer">
-            <p class="font-semibold text-slate-900">{city}</p>
-          </div>
+  <section id="avis-clients" class="section pt-0">
+    <div class="shell">
+      <SectionHeader eyebrow="Services" title="Nos services" subtitle="Une présence utile pour vendre, acheter, estimer un bien ou préparer une transmission de commerce." />
+      <div class="mt-10 grid gap-6 lg:grid-cols-4">
+        {services.map((service) => (
+          <ServiceCard {...service} />
         ))}
       </div>
+    </div>
+  </section>
 
-      <div class="mt-12 text-center">
-        <Button href="/secteur" variant="outline" size="lg">
-          Découvrir toutes les zones
-        </Button>
+  <section class="section pt-0">
+    <div class="shell grid gap-10">
+      <div>
+        <SectionHeader eyebrow="Secteur local" title="Notre secteur local" subtitle="Des repères concrets sur les villes et bassins de vie où nous accompagnons régulièrement des projets immobiliers." />
+        <div class="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {siteSettings.coveredAreas.slice(0, 6).map((area) => (
+            <AreaCard title={area} description={areaDescriptions[area] ?? 'Un secteur suivi avec attention pour ses dynamiques de marché, ses profils acquéreurs et ses projets de vie.'} image={areaImages[area]} />
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <SectionHeader eyebrow="SEO local" title="Quelques pages locales déjà prêtes" subtitle="Le site peut accueillir facilement de nouvelles pages ciblées par ville ou intention de recherche." />
+        <div class="mt-10 grid gap-6 lg:grid-cols-3">
+          {localPages.map((localPage) => (
+            <LocalPageCard
+              title={localPage.data.h1}
+              city={localPage.data.city}
+              pageType={localPage.data.pageType}
+              href={`/${localPage.data.slug}`}
+              excerpt={localPage.data.intro}
+              image={resolveAssetSrc(localPage.data.featuredImage)}
+            />
+          ))}
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Testimonials section -->
-  <section class="py-16 md:py-24 bg-slate-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <SectionTitle
-        title="Ce que nos clients disent"
-        subtitle="Des expériences positives et des projets réussis"
-      />
-
-      <div class="grid md:grid-cols-3 gap-8">
-        <TestimonialCard
-          quote="Mickael a su trouver la maison de mes rêves en quelques mois. Son expertise locale et sa bienveillance font la différence."
-          author="Catherine Leblanc"
-          title="Acheteur, Beaune"
-          rating={5}
-        />
-        <TestimonialCard
-          quote="L'estimation était précise et nous avons vendu rapidement. Marion nous a accompagnés du début à la fin avec professionnalisme."
-          author="Jean-Marc Durand"
-          title="Vendeur, Semur-en-Auxois"
-          rating={5}
-        />
-        <TestimonialCard
-          quote="Vraiment satisfaits du service. Conseillers à l'écoute, réactifs et honnêtes. Nous les recommandons sans hésiter."
-          author="Sophie Martin"
-          title="Vendeur-Acheteur, Autun"
-          rating={5}
-        />
+  <section class="section pt-0">
+    <div class="shell">
+      <div class="surface-panel rounded-[1.5rem] p-8 md:p-10">
+        <div class="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+          <SectionHeader eyebrow={iadSupport.eyebrow} title={iadSupport.title} subtitle={iadSupport.text} />
+          <div class="grid gap-4 sm:grid-cols-2">
+            {(iadSupport.stats ?? []).map((stat) => (
+              <div class="rounded-[1rem] border border-[color:var(--color-border)] bg-white px-5 py-5">
+                <p class="text-2xl font-semibold text-[color:var(--color-ink-strong)]">{stat.value}</p>
+                <p class="mt-1 text-sm text-[color:var(--color-muted)]">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Blog preview -->
-  <section class="py-16 md:py-24 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <SectionTitle
-        title="Lire nos derniers articles"
-        subtitle="Conseils, actualités et guides immobiliers"
-      />
-
-      <div class="grid md:grid-cols-3 gap-8">
-        <article class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-slate-100">
-          <div class="h-48 bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-5xl">
-            🏠
-          </div>
-          <div class="p-6">
-            <div class="text-sm text-amber-600 font-semibold mb-2">Vendre</div>
-            <h3 class="text-xl font-bold text-slate-900 mb-3">Vendre sa maison en Auxois : guide pratique</h3>
-            <p class="text-slate-600 mb-4">Tous les conseils pour mettre en avant votre bien et obtenir le meilleur prix sur le marché local.</p>
-            <a href="/blog/vendre-maison-auxois" class="text-amber-600 hover:text-amber-700 font-semibold">Lire l'article →</a>
-          </div>
-        </article>
-
-        <article class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-slate-100">
-          <div class="h-48 bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-5xl">
-            📊
-          </div>
-          <div class="p-6">
-            <div class="text-sm text-amber-600 font-semibold mb-2">Estimation</div>
-            <h3 class="text-xl font-bold text-slate-900 mb-3">Bien estimer son bien immobilier</h3>
-            <p class="text-slate-600 mb-4">Les critères importants pour obtenir une estimation précise et fiable de votre maison ou appartement.</p>
-            <a href="/blog/estimer-bien-immobilier" class="text-amber-600 hover:text-amber-700 font-semibold">Lire l'article →</a>
-          </div>
-        </article>
-
-        <article class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-slate-100">
-          <div class="h-48 bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-5xl">
-            🔑
-          </div>
-          <div class="p-6">
-            <div class="text-sm text-amber-600 font-semibold mb-2">Acheter</div>
-            <h3 class="text-xl font-bold text-slate-900 mb-3">Acheter dans le Morvan : conseils d'expert</h3>
-            <p class="text-slate-600 mb-4">Guide complet pour bien choisir votre région, évaluer les pièges et sécuriser votre investissement.</p>
-            <a href="/blog/acheter-morvan" class="text-amber-600 hover:text-amber-700 font-semibold">Lire l'article →</a>
-          </div>
-        </article>
-      </div>
-
-      <div class="mt-12 text-center">
-        <Button href="/blog" variant="secondary" size="lg">
-          Voir tous les articles
-        </Button>
+  <section class="section pt-0">
+    <div class="shell">
+      <SectionHeader eyebrow="Avis clients" title="Des retours fondés sur la qualité du suivi" subtitle="Des échanges clairs, une présence régulière et une vraie lecture du terrain pour accompagner le projet jusqu\'au bout." />
+      <div class="mt-10 grid gap-6 lg:grid-cols-3">
+        {testimonials.map((testimonial) => (
+          <TestimonialCard
+            quote={testimonial.quote}
+            author={testimonial.data.name}
+            title={testimonial.data.propertyType}
+            location={testimonial.data.location}
+            rating={testimonial.data.rating}
+          />
+        ))}
       </div>
     </div>
   </section>
 
-  <!-- Final CTA -->
-  <section class="py-16 md:py-24 bg-slate-50">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+  <section class="section pt-0">
+    <div class="shell">
+      <SectionHeader eyebrow="Blog" title="Derniers articles" subtitle="Des contenus utiles pour comprendre le marché local, préparer une vente et cadrer un projet immobilier." />
+      <div class="mt-10 grid gap-6 lg:grid-cols-3">
+        {featuredPosts.map((post) => (
+          <BlogCard
+            title={post.data.title}
+            excerpt={post.data.excerpt}
+            href={`/blog/${post.data.slug}`}
+            category={post.data.category}
+            date={formatLongDate(post.data.date)}
+            image={resolveAssetSrc(post.data.featuredImage)}
+            imageAlt={post.data.featuredImageAlt}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section pt-0">
+    <div class="shell">
       <CTASection
-        title="Prêt à concrétiser votre projet immobilier ?"
-        description="Contactez Mickael et Marion pour une première évaluation sans engagement. Nous répondons à toutes vos questions en moins de 24h."
-        primaryButtonText="Demander une estimation"
-        primaryButtonHref="/estimation"
-        secondaryButtonText="Nous appeler"
-        secondaryButtonHref="tel:+330000000"
+        title={page.data.ctaTitle}
+        description={page.data.ctaText}
+        primaryButtonText={page.data.ctaButtonLabel}
+        primaryButtonHref={page.data.ctaButtonUrl}
+        secondaryButtonText="Nous contacter"
+        secondaryButtonHref="/contact"
       />
     </div>
   </section>
