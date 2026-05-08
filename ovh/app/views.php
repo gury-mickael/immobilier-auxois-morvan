@@ -1124,18 +1124,36 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
               <span class="estimate-trust-score"><strong>4,9/5</strong> <span class="estimate-trust-divider">—</span> 41 avis Immodvisor</span>
             </a>
 
+            <div class="estimate-kpi-grid">
+              <div class="estimate-kpi-card">
+                <span class="estimate-kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+                <strong class="estimate-kpi-value">24h</strong>
+                <span class="estimate-kpi-label">Délai de réponse</span>
+              </div>
+              <div class="estimate-kpi-card">
+                <span class="estimate-kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5-7-11a7 7 0 0 1 14 0c0 6-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+                <strong class="estimate-kpi-value">100%</strong>
+                <span class="estimate-kpi-label">Local &amp; humain</span>
+              </div>
+              <div class="estimate-kpi-card">
+                <span class="estimate-kpi-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-1.4 11.2a2 2 0 0 1-2 1.8H7.4a2 2 0 0 1-2-1.8L4 7Z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg></span>
+                <strong class="estimate-kpi-value">0€</strong>
+                <span class="estimate-kpi-label">Sans engagement</span>
+              </div>
+            </div>
+
             <ul class="estimate-trust-features">
               <li>
                 <span class="estimate-trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>
-                <span>Données<br>sécurisées</span>
+                <span>Données sécurisées</span>
               </li>
               <li>
                 <span class="estimate-trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.4 2.5 2.4 4.5-5"/></svg></span>
-                <span>Estimation<br>gratuite</span>
+                <span>Estimation gratuite</span>
               </li>
               <li>
                 <span class="estimate-trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11c0-3 2.7-5 7-5s7 2 7 5v3c0 1.1-.9 2-2 2h-1.5"/><path d="M5 11v3a3 3 0 0 0 3 3h2v-6H8a3 3 0 0 0-3 3Z"/><path d="M14 17v2a2 2 0 0 0 4 0"/><circle cx="16.5" cy="11" r="0.6" fill="currentColor"/></svg></span>
-                <span>100%<br>gratuit</span>
+                <span>100% gratuit</span>
               </li>
             </ul>
           </div>
