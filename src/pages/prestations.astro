@@ -1,0 +1,121 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import CTASection from '../components/CTASection.astro';
+
+const services = [
+  {
+    title: 'Vendre',
+    description: 'Positionner votre bien au bon prix, le valoriser et piloter la vente jusqu\'à la signature.',
+    href: '/vendre',
+    features: ['Estimation juste', 'Diffusion ciblée', 'Négociation pilotée']
+  },
+  {
+    title: 'Acheter',
+    description: 'Comparer les secteurs, affiner la recherche et avancer avec des repères concrets sur le terrain.',
+    href: '/acheter',
+    features: ['Lecture du marché local', 'Accompagnement des visites', 'Aide à la décision']
+  },
+  {
+    title: 'Estimation',
+    description: 'Obtenir un avis de valeur argumenté pour préparer une mise en vente ou arbitrer un projet.',
+    href: '/estimation',
+    features: ['Analyse locale', 'Spécificités du bien', 'Conseil utile à la décision']
+  },
+  {
+    title: 'Fonds de commerce',
+    description: 'Structurer une transmission, présenter le dossier et qualifier les repreneurs avec discrétion.',
+    href: '/fonds',
+    features: ['Valorisation', 'Dossier acquéreur', 'Accompagnement jusqu\'à la vente']
+  }
+];
+
+const projectSteps = [
+  { title: 'Échange sur votre projet', text: 'Un premier rendez-vous pour comprendre votre situation, vos contraintes et vos objectifs.' },
+  { title: 'Estimation du bien', text: 'Une analyse argumentée appuyée sur le marché local et les particularités du bien.' },
+  { title: 'Stratégie de mise en vente', text: 'Un plan d\'action clair pour positionner le bien et cibler les bons acquéreurs.' },
+  { title: 'Diffusion, visites et suivi', text: 'Une présence constante : visuels, discours, qualification, retours réguliers.' },
+  { title: 'Négociation et signature', text: 'Un cadre serein jusqu\'à la signature de l\'acte authentique.' }
+];
+
+const trustReasons = [
+  { title: 'Estimation argumentée', text: 'Un avis de valeur lisible, ancré dans le marché local et défendu avec méthode.' },
+  { title: 'Stratégie de vente', text: 'Un plan d\'action clair pour positionner le bien et tenir le cap.' },
+  { title: 'Mise en valeur', text: 'Visuels, discours, présentation : chaque détail joue dès les premières visites.' },
+  { title: 'Suivi humain', text: 'Un accompagnement régulier, structuré, jusqu\'à l\'acte authentique.' }
+];
+---
+
+<Layout title="Nos prestations" description="Vendre, acheter, faire estimer un bien immobilier ou transmettre un fonds de commerce en Auxois-Morvan." currentPage="/prestations">
+
+  <section class="section">
+    <div class="shell">
+      <div class="max-w-3xl">
+        <p class="eyebrow">Prestations</p>
+        <h1 class="mt-6 display-1 balanced-text">Un accompagnement clair pour chaque projet immobilier.</h1>
+        <p class="mt-6 text-[1.02rem] leading-[1.8] text-[color:var(--color-muted)]">
+          Vendeur, acheteur, propriétaire qui souhaite estimer son bien ou commerçant en transmission : nos prestations s'adaptent à votre projet, sans surcharger les démarches inutilement.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section pt-0">
+    <div class="shell">
+      <div class="grid gap-6 md:grid-cols-2">
+        {services.map((service, i) => (
+          <ServiceCard {...service} index={i + 1} kicker="Prestation" />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section pt-0">
+    <div class="shell">
+      <SectionHeader eyebrow="Méthode" title="Pourquoi nous confier votre projet ?" subtitle="Une approche sobre, locale et structurée — pour défendre votre intérêt sans flottement." />
+      <div class="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        {trustReasons.map((reason, i) => (
+          <article class={`rounded-[1.5rem] p-7 lift ${i % 2 === 0 ? 'surface-soft' : 'surface-warm'}`}>
+            <p class="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-accent)]">0{i + 1}</p>
+            <h3 class="mt-4 font-[family-name:var(--font-display)] text-[1.5rem] leading-tight text-[color:var(--color-ink-strong)]">{reason.title}</h3>
+            <p class="mt-3 text-[0.92rem] leading-7 text-[color:var(--color-muted)]">{reason.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section pt-0">
+    <div class="shell">
+      <div class="surface-dark relative overflow-hidden rounded-[2rem] p-8 md:p-14">
+        <div class="max-w-2xl">
+          <p class="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-white/60">Parcours type</p>
+          <h2 class="mt-5 display-2 text-white">Étape par étape, votre projet immobilier.</h2>
+        </div>
+        <ol class="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          {projectSteps.map((step, i) => (
+            <li class="rounded-[1.25rem] bg-white/5 p-6">
+              <span class="font-[family-name:var(--font-display)] text-3xl text-[color:var(--color-warm)]">0{i + 1}</span>
+              <h3 class="mt-3 text-base font-semibold leading-6 text-white">{step.title}</h3>
+              <p class="mt-2 text-sm leading-6 text-white/65">{step.text}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="section pt-0">
+    <div class="shell">
+      <CTASection
+        title="On structure votre projet ensemble ?"
+        description="<p>Un premier échange suffit souvent à clarifier les choses et à identifier la meilleure prestation pour votre situation.</p>"
+        primaryButtonText="Prendre contact"
+        primaryButtonHref="/contact"
+        secondaryButtonText="Estimer mon bien"
+        secondaryButtonHref="/estimation"
+      />
+    </div>
+  </section>
+</Layout>

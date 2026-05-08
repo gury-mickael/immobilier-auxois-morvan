@@ -43,6 +43,15 @@ function toHtmlParagraphs(value) {
     .join('');
 }
 
+function stripMarkdown(value) {
+  return String(value ?? '')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/`(.*?)`/g, '$1')
+    .trim();
+}
+
 function toExcerpt(value, maxLength = 180) {
   const text = String(value ?? '').replace(/[#>*_`\-]+/g, ' ').replace(/\s+/g, ' ').trim();
   if (text.length <= maxLength) {
@@ -90,15 +99,19 @@ async function writeSnapshot(destinationDir) {
     blogPosts: blogPosts
       .filter(({ data }) => data.published)
       .sort((left, right) => new Date(right.data.date).getTime() - new Date(left.data.date).getTime())
-      .slice(0, 3)
-      .map(({ data }) => ({
+      .map(({ data, content }) => ({
         title: data.title,
+        slug: data.slug,
+        metaTitle: data.title,
+        metaDescription: data.metaDescription,
         excerpt: data.excerpt,
         href: `/blog/${data.slug}`,
         category: data.category,
         date: data.date,
         image: data.featuredImage ?? '',
         imageAlt: data.featuredImageAlt ?? '',
+        bodyHtml: toHtmlParagraphs(stripMarkdown(content)),
+        isIndexable: true,
       })),
     testimonials: testimonials
       .filter(({ data }) => data.published)

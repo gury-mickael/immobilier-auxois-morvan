@@ -1,100 +1,97 @@
 ---
-import BrandLogo from './BrandLogo.astro';
 import { getSiteSettings } from '../lib/content';
+import BrandLogo from './BrandLogo.astro';
 
 const siteSettings = await getSiteSettings();
-const mainAreas = siteSettings.coveredAreas.slice(0, 6);
-const serviceLinks = [
-  { label: 'Vendre', href: '/vendre' },
-  { label: 'Acheter', href: '/acheter' },
-  { label: 'Estimation', href: '/estimation' },
-  { label: 'Fonds de commerce', href: '/fonds' }
+const year = new Date().getFullYear();
+
+const navColumns = [
+  {
+    title: 'Le cabinet',
+    links: [
+      { label: 'Notre histoire', href: '/histoire' },
+      { label: 'Avis clients', href: '/avis' },
+      { label: 'Contact', href: '/contact' }
+    ]
+  },
+  {
+    title: 'Prestations',
+    links: [
+      { label: 'Vendre un bien', href: '/vendre' },
+      { label: 'Acheter', href: '/acheter' },
+      { label: 'Estimation', href: '/estimation' },
+      { label: 'Fonds de commerce', href: '/fonds' }
+    ]
+  },
+  {
+    title: 'Ressources',
+    links: [
+      { label: 'Notre secteur', href: '/secteur' },
+      { label: 'Toutes nos prestations', href: '/prestations' },
+      { label: 'Blog & conseils', href: '/blog' }
+    ]
+  }
 ];
 ---
 
-<footer class="mt-20 border-t border-[color:var(--color-border)] bg-white text-[color:var(--color-ink)]">
-  <div class="shell py-16">
-    <div class="grid gap-12 xl:grid-cols-[1.2fr_0.85fr_0.85fr_0.9fr_1fr]">
-      <div class="max-w-md">
-        <BrandLogo compact class="max-w-none" />
-        <p class="mt-6 text-sm leading-7 text-[color:var(--color-muted)]">
+<footer class="section-lg surface-dark mt-16 rounded-t-[2.5rem]">
+  <div class="shell">
+    <div class="grid gap-12 lg:grid-cols-[1.2fr_2fr]">
+      <div>
+        <div class="bg-white inline-flex rounded-2xl p-3">
+          <BrandLogo compact />
+        </div>
+        <p class="mt-6 max-w-md text-[0.98rem] leading-7 text-white/70">
           {siteSettings.footerText}
         </p>
-        <div class="mt-6 flex flex-wrap gap-4 text-sm font-semibold text-[color:var(--color-muted)]">
-          {siteSettings.facebookUrl && <a href={siteSettings.facebookUrl} class="hover:text-[color:var(--color-accent-strong)]">Facebook</a>}
-          {siteSettings.instagramUrl && <a href={siteSettings.instagramUrl} class="hover:text-[color:var(--color-accent-strong)]">Instagram</a>}
-          {siteSettings.iadUrl && <a href={siteSettings.iadUrl} class="hover:text-[color:var(--color-accent-strong)]">IAD</a>}
+        <div class="mt-7 flex flex-wrap gap-3">
+          {siteSettings.facebookUrl && (
+            <a href={siteSettings.facebookUrl} target="_blank" rel="noopener" class="chip chip-dark bg-white/10 text-white hover:bg-white/20">Facebook</a>
+          )}
+          {siteSettings.instagramUrl && (
+            <a href={siteSettings.instagramUrl} target="_blank" rel="noopener" class="chip chip-dark bg-white/10 text-white hover:bg-white/20">Instagram</a>
+          )}
+          {siteSettings.iadUrl && (
+            <a href={siteSettings.iadUrl} target="_blank" rel="noopener" class="chip chip-dark bg-white/10 text-white hover:bg-white/20">Réseau IAD</a>
+          )}
         </div>
       </div>
 
-      <div>
-        <h3 class="text-base font-extrabold text-[color:var(--color-ink-strong)]">Navigation</h3>
-        <ul class="mt-5 space-y-3 text-sm">
-          <li><a href="/" class="hover:text-[color:var(--color-accent-strong)]">Accueil</a></li>
-          <li><a href="/#histoire" class="hover:text-[color:var(--color-accent-strong)]">Histoire</a></li>
-          <li><a href="/secteur" class="hover:text-[color:var(--color-accent-strong)]">Secteur</a></li>
-          <li><a href="/#avis-clients" class="hover:text-[color:var(--color-accent-strong)]">Avis clients</a></li>
-          <li><a href="/blog" class="hover:text-[color:var(--color-accent-strong)]">Blog</a></li>
-          <li><a href="/contact" class="hover:text-[color:var(--color-accent-strong)]">Contact</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h3 class="text-base font-extrabold text-[color:var(--color-ink-strong)]">Prestations</h3>
-        <ul class="mt-5 space-y-3 text-sm">
-          {serviceLinks.map((item) => (
-            <li><a href={item.href} class="hover:text-[color:var(--color-accent-strong)]">{item.label}</a></li>
-          ))}
-        </ul>
-      </div>
-
-      <div>
-        <h3 class="text-base font-extrabold text-[color:var(--color-ink-strong)]">Secteur</h3>
-        <ul class="mt-5 space-y-3 text-sm">
-          {mainAreas.map((area) => (
-            <li>{area}</li>
-          ))}
-        </ul>
-      </div>
-
-      <div>
-        <h3 class="text-base font-extrabold text-[color:var(--color-ink-strong)]">Conseillers</h3>
-        <ul class="mt-5 space-y-3 text-sm">
-          <li class="font-semibold text-[color:var(--color-ink-strong)]">{siteSettings.marionName}</li>
-          <li class="font-semibold text-[color:var(--color-ink-strong)]">{siteSettings.mickaelName}</li>
-          <li>{siteSettings.mainCity}</li>
-          <li><a href="/contact" class="hover:text-[color:var(--color-accent-strong)]">Voir la page contact</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h3 class="text-base font-extrabold text-[color:var(--color-ink-strong)]">Contact</h3>
-        <ul class="mt-5 space-y-3 text-sm">
-          <li>
-            <a href={`tel:${siteSettings.phone.replace(/\s+/g, '')}`} class="hover:text-[color:var(--color-accent-strong)]">
-              {siteSettings.phone}
-            </a>
-          </li>
-          <li>
-            <a href={`mailto:${siteSettings.email}`} class="break-all hover:text-[color:var(--color-accent-strong)]">
-              {siteSettings.email}
-            </a>
-          </li>
-          <li>
-            <a href="/contact" class="inline-flex rounded-xl border border-[color:var(--color-border-strong)] px-4 py-2 font-semibold text-[color:var(--color-ink-strong)] hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-accent-strong)]">
-              Nous écrire
-            </a>
-          </li>
-        </ul>
+      <div class="grid gap-10 sm:grid-cols-3">
+        {navColumns.map((col) => (
+          <div>
+            <p class="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-white/50">{col.title}</p>
+            <ul class="mt-5 grid gap-3">
+              {col.links.map((link) => (
+                <li>
+                  <a href={link.href} class="text-[0.95rem] text-white/85 hover:text-white">{link.label}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
     </div>
 
-    <div class="mt-14 flex flex-col gap-4 border-t border-[color:var(--color-border)] pt-6 text-sm text-[color:var(--color-muted)] md:flex-row md:items-center md:justify-between">
-      <p>{siteSettings.footerText}</p>
-      <div class="flex flex-wrap gap-4">
-        <a href="/contact" class="hover:text-[color:var(--color-accent-strong)]">Mentions légales</a>
-        <a href="/contact" class="hover:text-[color:var(--color-accent-strong)]">Politique de confidentialité</a>
+    <div class="mt-14 grid gap-6 rounded-[1.5rem] bg-white/5 p-6 md:grid-cols-3 md:p-8">
+      <div>
+        <p class="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-white/50">Téléphone</p>
+        <a href={`tel:${siteSettings.phone.replace(/\./g, '')}`} class="mt-3 block font-[family-name:var(--font-display)] text-2xl text-white">{siteSettings.phone}</a>
       </div>
+      <div>
+        <p class="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-white/50">Email</p>
+        <a href={`mailto:${siteSettings.email}`} class="mt-3 block break-all font-[family-name:var(--font-display)] text-2xl text-white">{siteSettings.email}</a>
+      </div>
+      <div>
+        <p class="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-white/50">Secteur</p>
+        <p class="mt-3 font-[family-name:var(--font-display)] text-2xl text-white">{siteSettings.mainCity}</p>
+        <p class="mt-1 text-sm text-white/60">Auxois · Morvan · Côte-d'Or</p>
+      </div>
+    </div>
+
+    <div class="mt-10 flex flex-col gap-3 text-sm text-white/55 md:flex-row md:items-center md:justify-between">
+      <p>© {year} {siteSettings.siteName}. Tous droits réservés.</p>
+      <p>Conseillers immobiliers indépendants — Réseau IAD France</p>
     </div>
   </div>
 </footer>

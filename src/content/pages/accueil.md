@@ -1,40 +1,40 @@
 ---
-title: Accueil
-metaDescription: Conseillers immobiliers IAD en Auxois et Morvan. Mickael Gury et Marion Roulier vous accompagnent pour vendre, acheter ou estimer votre bien avec sérieux et proximité.
+title: Vendre, acheter ou estimer un bien en Auxois-Morvan
+metaDescription: "Mickael Gury et Marion Roulier vous accompagnent localement pour vendre, acheter ou estimer un bien en Auxois-Morvan, avec le réseau IAD, de l'estimation à la signature."
 slug: /
-h1: Votre projet immobilier en Auxois et Morvan, accompagné avec sérieux et proximité
-heroTitle: Votre projet immobilier en Auxois et Morvan, accompagné avec sérieux et proximité
-heroSubtitle: Mickael Gury et Marion Roulier vous accompagnent pour vendre, acheter ou estimer votre bien autour d'Arnay-le-Duc, Pouilly-en-Auxois, Autun, Beaune, Saulieu et Dijon.
+h1: Vendre, acheter ou estimer un bien en Auxois-Morvan
+heroTitle: Vendre, acheter ou estimer un bien en Auxois-Morvan
+heroSubtitle: "Mickael Gury & Marion Roulier vous accompagnent localement avec le réseau IAD, de l'estimation à la signature."
 heroImage: /uploads/auxois.jpg
 heroImageAlt: Vue aérienne des paysages de l'Auxois Morvan
-intro: Une présence de terrain, un accompagnement attentif et des conseils clairs pour avancer avec méthode à chaque étape de votre projet immobilier.
+intro: "Une présence de terrain, un accompagnement attentif et des conseils clairs pour avancer avec méthode à chaque étape de votre projet immobilier."
 sections:
   - eyebrow: Réassurance
-    title: Un accompagnement cadré, clair et humain
-    text: Nous travaillons avec des propriétaires, acquéreurs et commerçants qui veulent des repères fiables, une lecture honnête du marché local et un interlocuteur engagé jusqu'à la signature.
+    title: Deux conseillers locaux pour vous accompagner
+    text: "Basés localement, nous accompagnons vendeurs, acheteurs et porteurs de projets dans l'Auxois, le Morvan et les secteurs voisins. Notre objectif : vous apporter un suivi clair, humain et régulier, avec l'appui du réseau IAD."
     items:
-      - Conseils précis sur le marché local
-      - Disponibilité et suivi régulier
-      - Coordination jusqu'à l'acte authentique
+      - Présence de terrain et lecture honnête du marché local
+      - Suivi clair, humain et régulier
+      - Coordination jusqu'à la signature
   - eyebrow: Méthode
     title: Pourquoi nous confier votre projet
-    text: Notre approche repose sur l'estimation juste, la qualité de présentation des biens, une diffusion ciblée et une vraie capacité d'écoute pour défendre votre intérêt.
+    text: "Notre approche repose sur l'estimation juste, la qualité de présentation des biens, une diffusion ciblée et une vraie capacité d'écoute pour défendre votre intérêt."
     items:
       - Analyse fine des secteurs et des micro-marchés
       - Stratégie de mise en vente ou de recherche adaptée
       - Accompagnement humain, sérieux et transparent
   - eyebrow: Réseau
-    title: L'appui du réseau IAD
-    text: Nous combinons proximité locale et puissance de diffusion nationale pour donner plus de portée à votre projet, tout en gardant un interlocuteur unique.
+    title: La proximité locale, avec la puissance du réseau IAD
+    text: "Vous bénéficiez d'un accompagnement de proximité, tout en profitant de la visibilité et des outils du réseau IAD."
     stats:
-      - label: Réseau
-        value: IAD France
-      - label: Terrain couvert
-        value: Auxois, Morvan et villes voisines
+      - label: Diffusion
+        value: Large et ciblée
       - label: Suivi
-        value: Personnalisé à chaque étape
-ctaTitle: Parler de votre projet avec un conseiller local
-ctaText: Nous pouvons vous aider à estimer un bien, préparer une mise en vente, rechercher un achat ou cadrer un projet de cession de fonds de commerce.
+        value: Humain et régulier
+      - label: Signature
+        value: Accompagnement jusqu'au bout
+ctaTitle: Vous avez un projet immobilier ?
+ctaText: "Parlons simplement de votre bien, de votre secteur et de la meilleure stratégie à adopter."
 ctaButtonLabel: Demander une estimation
 ctaButtonUrl: /estimation
 ---

@@ -9,6 +9,7 @@ interface Props {
   description?: string;
   currentPage?: string;
   image?: string;
+  structuredData?: Record<string, unknown> | Array<Record<string, unknown>>;
 }
 
 const siteSettings = await getSiteSettings();
@@ -17,7 +18,8 @@ const {
   title,
   description = siteSettings.baseline,
   currentPage = Astro.url.pathname,
-  image
+  image,
+  structuredData
 } = Astro.props;
 
 const documentTitle = title === siteSettings.siteName ? title : `${title} | ${siteSettings.siteName}`;
@@ -27,6 +29,7 @@ const socialImage = image
     ? new URL(image, Astro.site).toString()
     : image
   : undefined;
+const structuredDataBlocks = (Array.isArray(structuredData) ? structuredData : structuredData ? [structuredData] : []).filter(Boolean);
 ---
 
 <!doctype html>
@@ -51,6 +54,7 @@ const socialImage = image
     <meta name="twitter:title" content={documentTitle} />
     <meta name="twitter:description" content={description} />
     {socialImage && <meta name="twitter:image" content={socialImage} />}
+    {structuredDataBlocks.map((block) => <script type="application/ld+json" set:html={JSON.stringify(block)} />)}
     <title>{documentTitle}</title>
   </head>
   <body class="min-h-screen bg-[color:var(--color-bg)] text-[color:var(--color-ink)] antialiased">

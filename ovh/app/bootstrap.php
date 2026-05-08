@@ -105,6 +105,42 @@ function cms_h(?string $value): string
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
+function strftime_safe(?int $timestamp = null): string
+{
+    $months = [
+        1 => 'janvier', 2 => 'février', 3 => 'mars', 4 => 'avril',
+        5 => 'mai', 6 => 'juin', 7 => 'juillet', 8 => 'août',
+        9 => 'septembre', 10 => 'octobre', 11 => 'novembre', 12 => 'décembre',
+    ];
+    $ts = $timestamp ?? time();
+    return (int) date('j', $ts) . ' ' . $months[(int) date('n', $ts)] . ' ' . date('Y', $ts);
+}
+
+function cms_relative_time(int $timestamp): string
+{
+    $diff = time() - $timestamp;
+    if ($diff < 60) {
+        return 'à l\'instant';
+    }
+    if ($diff < 3600) {
+        $m = (int) ($diff / 60);
+        return 'il y a ' . $m . ' min';
+    }
+    if ($diff < 86400) {
+        $h = (int) ($diff / 3600);
+        return 'il y a ' . $h . ' h';
+    }
+    if ($diff < 604800) {
+        $d = (int) ($diff / 86400);
+        return 'il y a ' . $d . ' j';
+    }
+    if ($diff < 2592000) {
+        $w = (int) ($diff / 604800);
+        return 'il y a ' . $w . ' sem.';
+    }
+    return date('d/m/Y', $timestamp);
+}
+
 function cms_base_url(): string
 {
     $appUrl = cms_config()['app_url'] ?? '';
@@ -618,6 +654,255 @@ function cms_delete_local_page(int $id): void
     $statement->execute([$id, 'local']);
 }
 
+function cms_blog_slugify(string $value): string
+{
+    $value = trim($value);
+    if ($value === '') {
+        return '';
+    }
+
+    $value = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $value) ?: $value;
+    $value = strtolower($value);
+    $value = preg_replace('/[^a-z0-9]+/', '-', $value) ?: $value;
+    return trim($value, '-');
+}
+
+function cms_blank_blog_post(array $seed = []): array
+{
+    return array_merge([
+        'id' => null,
+        'title' => '',
+        'slug' => '',
+        'excerpt' => '',
+        'category' => 'Actualite',
+        'featured_image' => '',
+        'featured_image_alt' => '',
+        'content_html' => '<p></p>',
+        'meta_title' => '',
+        'meta_description' => '',
+        'is_indexable' => 1,
+        'status' => 'draft',
+        'published_at' => null,
+        'created_at' => null,
+        'updated_at' => null,
+        'source' => 'database',
+    ], $seed);
+}
+
+function cms_snapshot_blog_posts(): array
+{
+    $posts = cms_snapshot()['blogPosts'] ?? [];
+    $result = [];
+
+    foreach ($posts as $post) {
+        if (!is_array($post)) {
+            continue;
+        }
+
+        $slug = trim((string) ($post['slug'] ?? ''));
+        $href = trim((string) ($post['href'] ?? ''));
+
+        if ($slug === '' && preg_match('#^/blog/(.+)$#', $href, $matches) === 1) {
+            $slug = trim((string) ($matches[1] ?? ''), '/');
+        }
+
+        if ($slug === '') {
+            continue;
+        }
+
+        $result[] = cms_blank_blog_post([
+            'title' => trim((string) ($post['title'] ?? '')),
+            'slug' => $slug,
+            'excerpt' => trim((string) ($post['excerpt'] ?? '')),
+            'category' => trim((string) ($post['category'] ?? 'Actualite')),
+            'featured_image' => trim((string) ($post['image'] ?? '')),
+            'featured_image_alt' => trim((string) ($post['imageAlt'] ?? '')),
+            'content_html' => trim((string) ($post['bodyHtml'] ?? '<p></p>')),
+            'meta_title' => trim((string) ($post['metaTitle'] ?? $post['title'] ?? '')),
+            'meta_description' => trim((string) ($post['metaDescription'] ?? $post['excerpt'] ?? '')),
+            'is_indexable' => !empty($post['isIndexable']) ? 1 : 0,
+            'status' => 'file',
+            'published_at' => trim((string) ($post['date'] ?? '')) ?: null,
+            'created_at' => trim((string) ($post['date'] ?? '')) ?: null,
+            'source' => 'file',
+        ]);
+    }
+
+    return $result;
+}
+
+function cms_blog_posts(): array
+{
+    $bySlug = [];
+
+    foreach (cms_snapshot_blog_posts() as $post) {
+        $bySlug[(string) $post['slug']] = $post;
+    }
+
+    $statement = cms_db()->query(
+        'SELECT id, title, slug, excerpt, category, featured_image, featured_image_alt, content_html,
+                meta_title, meta_description, is_indexable, status, published_at, created_at, updated_at
+           FROM cms_blog_posts
+          ORDER BY COALESCE(published_at, updated_at, created_at) DESC, title ASC'
+    );
+
+    foreach ($statement->fetchAll() as $row) {
+        $bySlug[(string) $row['slug']] = cms_blank_blog_post(array_merge($row, ['source' => 'database']));
+    }
+
+    $posts = array_values($bySlug);
+    usort($posts, static function (array $left, array $right): int {
+        $leftDate = strtotime((string) ($left['published_at'] ?? $left['updated_at'] ?? $left['created_at'] ?? '')) ?: 0;
+        $rightDate = strtotime((string) ($right['published_at'] ?? $right['updated_at'] ?? $right['created_at'] ?? '')) ?: 0;
+
+        if ($leftDate === $rightDate) {
+            return strcasecmp((string) ($left['title'] ?? ''), (string) ($right['title'] ?? ''));
+        }
+
+        return $rightDate <=> $leftDate;
+    });
+
+    return $posts;
+}
+
+function cms_blog_post(?string $slug): ?array
+{
+    if ($slug === null || trim($slug) === '') {
+        return cms_blank_blog_post();
+    }
+
+    $normalizedSlug = cms_blog_slugify($slug);
+
+    $statement = cms_db()->prepare(
+        'SELECT id, title, slug, excerpt, category, featured_image, featured_image_alt, content_html,
+                meta_title, meta_description, is_indexable, status, published_at, created_at, updated_at
+           FROM cms_blog_posts
+          WHERE slug = ?
+          LIMIT 1'
+    );
+    $statement->execute([$normalizedSlug]);
+    $row = $statement->fetch();
+
+    if ($row) {
+        return cms_blank_blog_post(array_merge($row, ['source' => 'database']));
+    }
+
+    foreach (cms_snapshot_blog_posts() as $post) {
+        if ((string) $post['slug'] === $normalizedSlug) {
+            return $post;
+        }
+    }
+
+    return null;
+}
+
+function cms_blog_payload_from_request(?string $fallbackSlug = null): array
+{
+    $submittedSlug = trim((string) ($_POST['slug'] ?? ''));
+    $slugSource = $submittedSlug !== '' ? $submittedSlug : ($fallbackSlug ?: (string) ($_POST['title'] ?? ''));
+
+    return [
+        'title' => trim((string) ($_POST['title'] ?? '')),
+        'slug' => cms_blog_slugify($slugSource),
+        'excerpt' => trim((string) ($_POST['excerpt'] ?? '')),
+        'category' => trim((string) ($_POST['category'] ?? '')),
+        'featured_image' => trim((string) ($_POST['featured_image'] ?? '')),
+        'featured_image_alt' => trim((string) ($_POST['featured_image_alt'] ?? '')),
+        'content_html' => trim((string) ($_POST['content_html'] ?? '')),
+        'meta_title' => trim((string) ($_POST['meta_title'] ?? '')),
+        'meta_description' => trim((string) ($_POST['meta_description'] ?? '')),
+        'is_indexable' => isset($_POST['is_indexable']) ? 1 : 0,
+        'status' => (($_POST['status'] ?? 'draft') === 'published') ? 'published' : 'draft',
+    ];
+}
+
+function cms_validate_blog_payload(array $payload): array
+{
+    $errors = [];
+
+    foreach (['title', 'slug', 'excerpt', 'category', 'content_html', 'meta_title', 'meta_description'] as $field) {
+        if (trim((string) ($payload[$field] ?? '')) === '') {
+            $errors[] = 'Tous les champs essentiels de l\'article doivent être remplis.';
+            break;
+        }
+    }
+
+    return $errors;
+}
+
+function cms_save_blog_post(array $payload, ?int $id = null): int
+{
+    $pdo = cms_db();
+
+    if ($id === null) {
+        $statement = $pdo->prepare(
+            'INSERT INTO cms_blog_posts (
+                title, slug, excerpt, category, featured_image, featured_image_alt, content_html,
+                meta_title, meta_description, is_indexable, status, published_at
+             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CASE WHEN ? = "published" THEN NOW() ELSE NULL END)'
+        );
+        $statement->execute([
+            $payload['title'],
+            $payload['slug'],
+            $payload['excerpt'],
+            $payload['category'],
+            $payload['featured_image'] ?: null,
+            $payload['featured_image_alt'] ?: null,
+            $payload['content_html'],
+            $payload['meta_title'],
+            $payload['meta_description'],
+            $payload['is_indexable'],
+            $payload['status'],
+            $payload['status'],
+        ]);
+
+        return (int) $pdo->lastInsertId();
+    }
+
+    $statement = $pdo->prepare(
+        'UPDATE cms_blog_posts SET
+            title = ?, slug = ?, excerpt = ?, category = ?, featured_image = ?, featured_image_alt = ?,
+            content_html = ?, meta_title = ?, meta_description = ?, is_indexable = ?, status = ?,
+            published_at = CASE WHEN ? = "published" THEN COALESCE(published_at, NOW()) ELSE NULL END
+         WHERE id = ?'
+    );
+    $statement->execute([
+        $payload['title'],
+        $payload['slug'],
+        $payload['excerpt'],
+        $payload['category'],
+        $payload['featured_image'] ?: null,
+        $payload['featured_image_alt'] ?: null,
+        $payload['content_html'],
+        $payload['meta_title'],
+        $payload['meta_description'],
+        $payload['is_indexable'],
+        $payload['status'],
+        $payload['status'],
+        $id,
+    ]);
+
+    return $id;
+}
+
+function cms_public_blog_posts(): array
+{
+    return array_values(array_filter(cms_blog_posts(), static function (array $post): bool {
+        return in_array((string) ($post['status'] ?? 'draft'), ['published', 'file'], true);
+    }));
+}
+
+function cms_public_blog_post(string $slug): ?array
+{
+    $post = cms_blog_post($slug);
+
+    if (!$post) {
+        return null;
+    }
+
+    return in_array((string) ($post['status'] ?? 'draft'), ['published', 'file'], true) ? $post : null;
+}
+
 function cms_media_items(): array
 {
     $statement = cms_db()->query('SELECT * FROM cms_media ORDER BY created_at DESC, id DESC');
@@ -691,6 +976,85 @@ function cms_upload_directory(): string
     return $directory;
 }
 
+function cms_can_optimize_uploaded_image(string $mimeType): bool
+{
+    if (!function_exists('imagecreatetruecolor') || !function_exists('imagecopyresampled')) {
+        return false;
+    }
+
+    return match ($mimeType) {
+        'image/jpeg' => function_exists('imagecreatefromjpeg') && function_exists('imagejpeg'),
+        'image/png' => function_exists('imagecreatefrompng') && function_exists('imagepng'),
+        'image/webp' => function_exists('imagecreatefromwebp') && function_exists('imagewebp'),
+        default => false,
+    };
+}
+
+function cms_write_optimized_upload(string $tmpName, string $destination, string $mimeType): bool
+{
+    if (!cms_can_optimize_uploaded_image($mimeType)) {
+        return false;
+    }
+
+    $imageInfo = @getimagesize($tmpName);
+    if (!is_array($imageInfo) || empty($imageInfo[0]) || empty($imageInfo[1])) {
+        return false;
+    }
+
+    [$sourceWidth, $sourceHeight] = $imageInfo;
+    $maxWidth = 2200;
+    $maxHeight = 2200;
+    $ratio = min($maxWidth / $sourceWidth, $maxHeight / $sourceHeight, 1);
+    $targetWidth = max(1, (int) round($sourceWidth * $ratio));
+    $targetHeight = max(1, (int) round($sourceHeight * $ratio));
+
+    $source = match ($mimeType) {
+        'image/jpeg' => @imagecreatefromjpeg($tmpName),
+        'image/png' => @imagecreatefrompng($tmpName),
+        'image/webp' => @imagecreatefromwebp($tmpName),
+        default => false,
+    };
+
+    if (!$source) {
+        return false;
+    }
+
+    $target = imagecreatetruecolor($targetWidth, $targetHeight);
+    if (!$target) {
+        imagedestroy($source);
+        return false;
+    }
+
+    if (in_array($mimeType, ['image/png', 'image/webp'], true)) {
+        imagealphablending($target, false);
+        imagesavealpha($target, true);
+        $transparent = imagecolorallocatealpha($target, 0, 0, 0, 127);
+        imagefilledrectangle($target, 0, 0, $targetWidth, $targetHeight, $transparent);
+    } else {
+        $background = imagecolorallocate($target, 255, 255, 255);
+        imagefilledrectangle($target, 0, 0, $targetWidth, $targetHeight, $background);
+    }
+
+    $resampled = imagecopyresampled($target, $source, 0, 0, 0, 0, $targetWidth, $targetHeight, $sourceWidth, $sourceHeight);
+    if (!$resampled) {
+        imagedestroy($source);
+        imagedestroy($target);
+        return false;
+    }
+
+    $written = match ($mimeType) {
+        'image/jpeg' => imagejpeg($target, $destination, 82),
+        'image/png' => imagepng($target, $destination, 6),
+        'image/webp' => imagewebp($target, $destination, 82),
+        default => false,
+    };
+
+    imagedestroy($source);
+    imagedestroy($target);
+
+    return $written;
+}
+
 function cms_store_uploaded_media(array $file, string $title = '', string $altText = ''): string
 {
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
@@ -715,12 +1079,15 @@ function cms_store_uploaded_media(array $file, string $title = '', string $altTe
     $fileName = ($safeBaseName !== '' ? $safeBaseName : 'media') . '-' . bin2hex(random_bytes(4)) . '.' . $extension;
     $destination = cms_upload_directory() . '/' . $fileName;
 
-    if (!move_uploaded_file($tmpName, $destination)) {
+    $stored = cms_write_optimized_upload($tmpName, $destination, $mimeType);
+
+    if (!$stored && !move_uploaded_file($tmpName, $destination)) {
         throw new RuntimeException('Impossible d’enregistrer l’image sur le serveur.');
     }
 
     $config = cms_config();
     $publicUrl = $config['upload_public_base'] . '/' . $fileName;
+    $storedSize = is_file($destination) ? (int) filesize($destination) : (int) ($file['size'] ?? 0);
     $statement = cms_db()->prepare(
         'INSERT INTO cms_media (original_name, file_name, public_url, mime_type, size_bytes, alt_text, title)
          VALUES (?, ?, ?, ?, ?, ?, ?)'
@@ -730,7 +1097,7 @@ function cms_store_uploaded_media(array $file, string $title = '', string $altTe
         $fileName,
         $publicUrl,
         $mimeType,
-        (int) ($file['size'] ?? 0),
+        $storedSize,
         $altText !== '' ? $altText : null,
         $title !== '' ? $title : null,
     ]);
@@ -806,6 +1173,332 @@ function cms_handle_contact_request(array $settings): array
     }
 
     return [];
+}
+
+function cms_ensure_estimation_requests_table(): void
+{
+    static $done = false;
+
+    if ($done) {
+        return;
+    }
+
+    cms_db()->exec(
+        "CREATE TABLE IF NOT EXISTS cms_estimation_requests (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            property_type VARCHAR(100) NOT NULL,
+            room_count VARCHAR(100) NOT NULL,
+            property_condition VARCHAR(100) NOT NULL,
+            living_surface VARCHAR(100) NOT NULL,
+            land_surface VARCHAR(100) NOT NULL,
+            commune VARCHAR(150) NOT NULL,
+            postal_code VARCHAR(20) DEFAULT NULL,
+            address_details TEXT NOT NULL,
+            goal VARCHAR(150) NOT NULL,
+            project_timeline VARCHAR(100) NOT NULL,
+            first_name VARCHAR(150) NOT NULL,
+            last_name VARCHAR(150) NOT NULL,
+            email VARCHAR(190) NOT NULL,
+            phone VARCHAR(50) NOT NULL,
+            contact_consent TINYINT(1) NOT NULL DEFAULT 0,
+            outside_area TINYINT(1) NOT NULL DEFAULT 0,
+            status VARCHAR(50) NOT NULL DEFAULT 'new',
+            internal_notes LONGTEXT DEFAULT NULL,
+            source VARCHAR(150) NOT NULL DEFAULT 'formulaire estimation en ligne',
+            utm_source VARCHAR(190) DEFAULT NULL,
+            utm_campaign VARCHAR(190) DEFAULT NULL,
+            utm_content VARCHAR(190) DEFAULT NULL,
+            utm_medium VARCHAR(190) DEFAULT NULL,
+            origin_page VARCHAR(255) DEFAULT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY idx_cms_estimation_requests_status (status),
+            KEY idx_cms_estimation_requests_commune (commune),
+            KEY idx_cms_estimation_requests_created_at (created_at),
+            KEY idx_cms_estimation_requests_utm_campaign (utm_campaign)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+    );
+
+    $done = true;
+}
+
+function cms_estimation_statuses(): array
+{
+    return [
+        'new' => 'Nouveau',
+        'contacted' => 'Contacté',
+        'appointment-booked' => 'Rendez-vous pris',
+        'valuation-completed' => 'Estimation réalisée',
+        'mandate-signed' => 'Mandat signé',
+        'lost' => 'Perdu',
+    ];
+}
+
+function cms_estimation_request_payload_from_request(): array
+{
+    return [
+        'property_type' => trim((string) ($_POST['property_type'] ?? '')),
+        'room_count' => trim((string) ($_POST['room_count'] ?? '')),
+        'property_condition' => trim((string) ($_POST['property_condition'] ?? '')),
+        'living_surface' => trim((string) ($_POST['living_surface'] ?? '')),
+        'land_surface' => trim((string) ($_POST['land_surface'] ?? '')),
+        'commune' => trim((string) ($_POST['commune'] ?? '')),
+        'postal_code' => trim((string) ($_POST['postal_code'] ?? '')),
+        'address_details' => trim((string) ($_POST['address_details'] ?? '')),
+        'goal' => trim((string) ($_POST['goal'] ?? '')),
+        'project_timeline' => trim((string) ($_POST['project_timeline'] ?? '')),
+        'first_name' => trim((string) ($_POST['first_name'] ?? '')),
+        'last_name' => trim((string) ($_POST['last_name'] ?? '')),
+        'email' => trim((string) ($_POST['email'] ?? '')),
+        'phone' => trim((string) ($_POST['phone'] ?? '')),
+        'contact_consent' => (string) ($_POST['contact_consent'] ?? '') === '1' ? 1 : 0,
+        'outside_area' => (string) ($_POST['outside_area'] ?? '') === '1' ? 1 : 0,
+        'status' => 'new',
+        'internal_notes' => '',
+        'source' => trim((string) ($_POST['source'] ?? 'formulaire estimation en ligne')),
+        'utm_source' => trim((string) ($_POST['utm_source'] ?? '')),
+        'utm_campaign' => trim((string) ($_POST['utm_campaign'] ?? '')),
+        'utm_content' => trim((string) ($_POST['utm_content'] ?? '')),
+        'utm_medium' => trim((string) ($_POST['utm_medium'] ?? '')),
+        'origin_page' => trim((string) ($_POST['origin_page'] ?? cms_url('/estimation-en-ligne'))),
+    ];
+}
+
+function cms_validate_estimation_request_payload(array $payload): array
+{
+    $errors = [];
+
+    foreach (['property_type', 'room_count', 'property_condition', 'living_surface', 'land_surface', 'commune', 'address_details', 'goal', 'project_timeline', 'first_name', 'last_name', 'email', 'phone'] as $field) {
+        if (trim((string) ($payload[$field] ?? '')) === '') {
+            $errors[] = 'Merci de compléter toutes les étapes avant d’envoyer votre demande.';
+            break;
+        }
+    }
+
+    if ($payload['email'] === '' || !filter_var((string) $payload['email'], FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Indiquez une adresse email valide.';
+    }
+
+    $phoneDigits = preg_replace('/\D+/', '', (string) ($payload['phone'] ?? ''));
+    if ($phoneDigits === null || strlen($phoneDigits) < 9) {
+        $errors[] = 'Indiquez un numéro de téléphone valide.';
+    }
+
+    if ((int) ($payload['contact_consent'] ?? 0) !== 1) {
+        $errors[] = 'Vous devez accepter d’être recontacté au sujet de votre demande d’estimation.';
+    }
+
+    return array_values(array_unique($errors));
+}
+
+function cms_save_estimation_request(array $payload): int
+{
+    cms_ensure_estimation_requests_table();
+
+    $statement = cms_db()->prepare(
+        'INSERT INTO cms_estimation_requests (
+            property_type, room_count, property_condition, living_surface, land_surface,
+            commune, postal_code, address_details, goal, project_timeline,
+            first_name, last_name, email, phone, contact_consent, outside_area,
+            status, internal_notes, source, utm_source, utm_campaign, utm_content, utm_medium, origin_page
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    );
+    $statement->execute([
+        $payload['property_type'],
+        $payload['room_count'],
+        $payload['property_condition'],
+        $payload['living_surface'],
+        $payload['land_surface'],
+        $payload['commune'],
+        $payload['postal_code'] !== '' ? $payload['postal_code'] : null,
+        $payload['address_details'],
+        $payload['goal'],
+        $payload['project_timeline'],
+        $payload['first_name'],
+        $payload['last_name'],
+        strtolower($payload['email']),
+        $payload['phone'],
+        $payload['contact_consent'],
+        $payload['outside_area'],
+        'new',
+        null,
+        $payload['source'] !== '' ? $payload['source'] : 'formulaire estimation en ligne',
+        $payload['utm_source'] !== '' ? $payload['utm_source'] : null,
+        $payload['utm_campaign'] !== '' ? $payload['utm_campaign'] : null,
+        $payload['utm_content'] !== '' ? $payload['utm_content'] : null,
+        $payload['utm_medium'] !== '' ? $payload['utm_medium'] : null,
+        $payload['origin_page'] !== '' ? $payload['origin_page'] : null,
+    ]);
+
+    return (int) cms_db()->lastInsertId();
+}
+
+function cms_estimation_request(int $id): ?array
+{
+    cms_ensure_estimation_requests_table();
+
+    $statement = cms_db()->prepare('SELECT * FROM cms_estimation_requests WHERE id = ? LIMIT 1');
+    $statement->execute([$id]);
+    $row = $statement->fetch();
+
+    return $row ?: null;
+}
+
+function cms_estimation_requests(array $filters = []): array
+{
+    cms_ensure_estimation_requests_table();
+
+    $where = [];
+    $params = [];
+
+    $search = trim((string) ($filters['search'] ?? ''));
+    if ($search !== '') {
+        $needle = '%' . $search . '%';
+        $where[] = '(first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR phone LIKE ? OR commune LIKE ?)';
+        array_push($params, $needle, $needle, $needle, $needle, $needle);
+    }
+
+    $status = trim((string) ($filters['status'] ?? ''));
+    if ($status !== '' && isset(cms_estimation_statuses()[$status])) {
+        $where[] = 'status = ?';
+        $params[] = $status;
+    }
+
+    $commune = trim((string) ($filters['commune'] ?? ''));
+    if ($commune !== '') {
+        $where[] = 'commune LIKE ?';
+        $params[] = '%' . $commune . '%';
+    }
+
+    $utmCampaign = trim((string) ($filters['utm_campaign'] ?? ''));
+    if ($utmCampaign !== '') {
+        $where[] = 'utm_campaign LIKE ?';
+        $params[] = '%' . $utmCampaign . '%';
+    }
+
+    $sql = 'SELECT * FROM cms_estimation_requests';
+    if ($where !== []) {
+        $sql .= ' WHERE ' . implode(' AND ', $where);
+    }
+    $sql .= ' ORDER BY created_at DESC, id DESC LIMIT 300';
+
+    $statement = cms_db()->prepare($sql);
+    $statement->execute($params);
+    return $statement->fetchAll();
+}
+
+function cms_recent_estimation_requests(int $limit = 5): array
+{
+    cms_ensure_estimation_requests_table();
+
+    $statement = cms_db()->prepare('SELECT * FROM cms_estimation_requests WHERE status = ? ORDER BY created_at DESC, id DESC LIMIT ?');
+    $statement->bindValue(1, 'new');
+    $statement->bindValue(2, $limit, PDO::PARAM_INT);
+    $statement->execute();
+    return $statement->fetchAll();
+}
+
+function cms_estimation_requests_count(?string $status = null): int
+{
+    cms_ensure_estimation_requests_table();
+
+    if ($status !== null && isset(cms_estimation_statuses()[$status])) {
+        $statement = cms_db()->prepare('SELECT COUNT(*) FROM cms_estimation_requests WHERE status = ?');
+        $statement->execute([$status]);
+        return (int) $statement->fetchColumn();
+    }
+
+    return (int) cms_db()->query('SELECT COUNT(*) FROM cms_estimation_requests')->fetchColumn();
+}
+
+function cms_update_estimation_request(int $id, array $payload): void
+{
+    cms_ensure_estimation_requests_table();
+
+    $status = trim((string) ($payload['status'] ?? 'new'));
+    if (!isset(cms_estimation_statuses()[$status])) {
+        $status = 'new';
+    }
+
+    $statement = cms_db()->prepare('UPDATE cms_estimation_requests SET status = ?, internal_notes = ? WHERE id = ?');
+    $statement->execute([
+        $status,
+        trim((string) ($payload['internal_notes'] ?? '')) ?: null,
+        $id,
+    ]);
+}
+
+function cms_delete_estimation_request(int $id): void
+{
+    cms_ensure_estimation_requests_table();
+    $statement = cms_db()->prepare('DELETE FROM cms_estimation_requests WHERE id = ? LIMIT 1');
+    $statement->execute([$id]);
+}
+
+function cms_mail_headers(?string $replyTo = null): string
+{
+    $headers = ['Content-Type: text/plain; charset=UTF-8'];
+
+    if ($replyTo !== null && $replyTo !== '' && filter_var($replyTo, FILTER_VALIDATE_EMAIL)) {
+        $headers[] = 'Reply-To: ' . $replyTo;
+    }
+
+    return implode("\r\n", $headers);
+}
+
+function cms_send_estimation_notifications(array $request, array $settings): void
+{
+    $adminEmail = trim((string) ($settings['email'] ?? ''));
+    $fullName = trim($request['first_name'] . ' ' . $request['last_name']);
+    $commune = (string) ($request['commune'] ?? '');
+
+    if ($adminEmail !== '' && filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) {
+        $adminBody = "Nouvelle demande d'estimation en ligne\n\n"
+            . "Nom : {$fullName}\n"
+            . "Email : {$request['email']}\n"
+            . "Téléphone : {$request['phone']}\n"
+            . "Commune : {$commune}\n"
+            . "Type de bien : {$request['property_type']}\n"
+            . "Objectif : {$request['goal']}\n"
+            . "Délai : {$request['project_timeline']}\n"
+            . "Campagne : " . (($request['utm_campaign'] ?? '') !== '' ? $request['utm_campaign'] : 'n/a') . "\n"
+            . "Source : " . (($request['utm_source'] ?? '') !== '' ? $request['utm_source'] : 'n/a') . "\n";
+        @mail($adminEmail, 'Nouvelle demande d’estimation en ligne', $adminBody, cms_mail_headers((string) $request['email']));
+    }
+
+    if (filter_var((string) ($request['email'] ?? ''), FILTER_VALIDATE_EMAIL)) {
+        $prospectBody = "Bonjour {$request['first_name']},\n\n"
+            . "Merci pour votre demande d’estimation concernant votre bien situé à {$commune}.\n\n"
+            . "J’ai bien reçu les informations transmises. Je vais les analyser et je vous recontacterai sous 24h pour vous donner un premier avis de valeur.\n\n"
+            . "À très bientôt,\n\n"
+            . trim((string) ($settings['mickael_name'] ?? 'Mickael Gury')) . "\n"
+            . "Conseiller immobilier IAD";
+        @mail((string) $request['email'], 'Votre demande d’estimation a bien été reçue', $prospectBody, cms_mail_headers($adminEmail));
+    }
+}
+
+function cms_handle_estimation_request(array $settings): array
+{
+    $trap = trim((string) ($_POST['website'] ?? ''));
+    if ($trap !== '') {
+        return ['errors' => [], 'payload' => [], 'id' => null, 'ignored' => true];
+    }
+
+    $payload = cms_estimation_request_payload_from_request();
+    $errors = cms_validate_estimation_request_payload($payload);
+
+    if ($errors !== []) {
+        return ['errors' => $errors, 'payload' => $payload, 'id' => null, 'ignored' => false];
+    }
+
+    $requestId = cms_save_estimation_request($payload);
+    $request = cms_estimation_request($requestId);
+    if ($request) {
+        cms_send_estimation_notifications($request, $settings);
+    }
+
+    return ['errors' => [], 'payload' => $payload, 'id' => $requestId, 'ignored' => false];
 }
 
 function cms_admin_users(): array

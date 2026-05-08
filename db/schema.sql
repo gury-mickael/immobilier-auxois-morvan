@@ -109,3 +109,38 @@ CREATE TABLE IF NOT EXISTS cms_contact_requests (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS cms_estimation_requests (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  property_type VARCHAR(100) NOT NULL,
+  room_count VARCHAR(100) NOT NULL,
+  property_condition VARCHAR(100) NOT NULL,
+  living_surface VARCHAR(100) NOT NULL,
+  land_surface VARCHAR(100) NOT NULL,
+  commune VARCHAR(150) NOT NULL,
+  postal_code VARCHAR(20) DEFAULT NULL,
+  address_details TEXT NOT NULL,
+  goal VARCHAR(150) NOT NULL,
+  project_timeline VARCHAR(100) NOT NULL,
+  first_name VARCHAR(150) NOT NULL,
+  last_name VARCHAR(150) NOT NULL,
+  email VARCHAR(190) NOT NULL,
+  phone VARCHAR(50) NOT NULL,
+  contact_consent TINYINT(1) NOT NULL DEFAULT 0,
+  outside_area TINYINT(1) NOT NULL DEFAULT 0,
+  status VARCHAR(50) NOT NULL DEFAULT 'new',
+  internal_notes LONGTEXT DEFAULT NULL,
+  source VARCHAR(150) NOT NULL DEFAULT 'formulaire estimation en ligne',
+  utm_source VARCHAR(190) DEFAULT NULL,
+  utm_campaign VARCHAR(190) DEFAULT NULL,
+  utm_content VARCHAR(190) DEFAULT NULL,
+  utm_medium VARCHAR(190) DEFAULT NULL,
+  origin_page VARCHAR(255) DEFAULT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_cms_estimation_requests_status (status),
+  KEY idx_cms_estimation_requests_commune (commune),
+  KEY idx_cms_estimation_requests_created_at (created_at),
+  KEY idx_cms_estimation_requests_utm_campaign (utm_campaign)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

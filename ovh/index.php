@@ -12,8 +12,64 @@ try {
         $requestPath = substr($requestPath, strlen($base)) ?: '/';
     }
 
-    $page = cms_public_page_by_path($requestPath);
     $settings = cms_settings();
+
+    if ($requestPath === '/blog' || $requestPath === '/blog/') {
+        cms_render_blog_index_page($settings);
+        exit;
+    }
+
+    if ($requestPath === '/estimation-en-ligne/confirmation' || $requestPath === '/estimation-immobiliere-auxois-morvan/confirmation') {
+      cms_render_estimation_confirmation_page($settings);
+      exit;
+    }
+
+    if ($requestPath === '/estimation-en-ligne' || $requestPath === '/estimation-en-ligne/' || $requestPath === '/estimation-immobiliere-auxois-morvan' || $requestPath === '/estimation-immobiliere-auxois-morvan/') {
+      $formState = ['errors' => [], 'payload' => []];
+
+      if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        cms_require_csrf();
+        $formState = cms_handle_estimation_request($settings);
+
+        if (($formState['errors'] ?? []) === []) {
+          cms_redirect('/estimation-en-ligne/confirmation');
+        }
+      }
+
+      cms_render_estimation_tunnel_page($settings, (array) ($formState['payload'] ?? []), (array) ($formState['errors'] ?? []));
+      exit;
+    }
+
+    if (preg_match('#^/blog/([^/]+)/?$#', $requestPath, $matches) === 1) {
+        $post = cms_public_blog_post((string) ($matches[1] ?? ''));
+
+        if (!$post) {
+            http_response_code(404);
+            ?><!doctype html>
+            <html lang="fr">
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>Article introuvable</title>
+                <link rel="stylesheet" href="<?= cms_h(cms_url('/assets/site.css')) ?>">
+              </head>
+              <body>
+                <main class="shell not-found">
+                  <p class="eyebrow">404</p>
+                  <h1>Article introuvable</h1>
+                  <p>Le contenu demandé n’existe pas encore ou n’est pas publié.</p>
+                  <a class="button primary" href="<?= cms_h(cms_url('/blog')) ?>">Retour au blog</a>
+                </main>
+              </body>
+            </html><?php
+            exit;
+        }
+
+        cms_render_blog_post_page($post, $settings);
+        exit;
+    }
+
+    $page = cms_public_page_by_path($requestPath);
 
     if (!$page) {
         http_response_code(404);

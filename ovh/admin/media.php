@@ -15,8 +15,9 @@ function cms_render_media_card(array $item): void
     $title = (string) ($item['title'] ?: $item['original_name']);
     $altText = trim((string) ($item['alt_text'] ?? ''));
     $isAvailable = cms_media_is_available($item);
+    $searchBlob = strtolower(trim($title . ' ' . $altText . ' ' . $previewUrl));
     ?>
-    <article class="media-card<?= $isAvailable ? '' : ' is-missing' ?>">
+    <article class="media-card<?= $isAvailable ? '' : ' is-missing' ?>" data-media-search="<?= cms_h($searchBlob) ?>">
       <div class="media-preview<?= $isAvailable ? '' : ' is-missing' ?>">
         <?php if ($isAvailable): ?>
           <img src="<?= cms_h($displayUrl) ?>" alt="<?= cms_h($altText !== '' ? $altText : $title) ?>" loading="lazy" decoding="async">
@@ -94,32 +95,79 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $mediaItems = cms_media_items();
 
 cms_render_admin_start('Images', '/admin/media');
+
+$missingCount = 0;
+foreach ($mediaItems as $m) { if (!cms_media_is_available($m)) { $missingCount++; } }
+$availableCount = count($mediaItems) - $missingCount;
 ?>
 <?php if ($errors): ?>
   <div class="flash flash-error"><?= cms_h(implode(' ', $errors)) ?></div>
 <?php endif; ?>
-<section class="panel media-panel">
-  <div class="panel-head compact media-panel-head">
+
+<section class="dashboard-hero">
+  <div class="dashboard-hero-inner">
     <div>
       <p class="eyebrow">Médiathèque</p>
-      <h1>Images</h1>
-      <p class="lead media-lead">Téléversez vos visuels sans quitter la page, avec progression en direct et ajout immédiat dans la bibliothèque.</p>
+      <h1>Vos visuels en un seul endroit</h1>
+      <p>Téléversez, organisez et copiez les liens de vos images. Glissez-déposez vos fichiers JPG, PNG ou WebP en direct.</p>
     </div>
-    <div class="media-stats-card">
-      <strong><?= count($mediaItems) ?></strong>
-      <span>Médias enregistrés</span>
+    <div class="dashboard-hero-actions">
+      <a class="secondary-button" href="#upload-dropzone">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Téléverser
+      </a>
     </div>
   </div>
+</section>
 
+<section class="kpi-grid">
+  <article class="kpi-card">
+    <div class="kpi-card-head">
+      <span class="kpi-card-label">Médias enregistrés</span>
+      <span class="kpi-card-icon is-emerald">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </span>
+    </div>
+    <div class="kpi-card-value"><?= count($mediaItems) ?></div>
+    <div class="kpi-card-foot"><span class="kpi-trend is-neutral">Bibliothèque complète</span></div>
+  </article>
+  <article class="kpi-card">
+    <div class="kpi-card-head">
+      <span class="kpi-card-label">Disponibles</span>
+      <span class="kpi-card-icon is-blue">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </span>
+    </div>
+    <div class="kpi-card-value"><?= $availableCount ?></div>
+    <div class="kpi-card-foot"><span class="kpi-trend is-up">Servis sur le site</span></div>
+  </article>
+  <article class="kpi-card">
+    <div class="kpi-card-head">
+      <span class="kpi-card-label">À corriger</span>
+      <span class="kpi-card-icon is-rose">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </span>
+    </div>
+    <div class="kpi-card-value"><?= $missingCount ?></div>
+    <div class="kpi-card-foot"><span class="kpi-trend <?= $missingCount > 0 ? 'is-down' : 'is-neutral' ?>">Fichiers manquants</span></div>
+  </article>
+</section>
+
+<section class="upload-pro-card" id="upload-dropzone-section">
   <div id="media-feedback" class="flash" hidden></div>
 
   <form id="media-upload-form" method="post" enctype="multipart/form-data" class="media-upload-layout">
     <input type="hidden" name="_csrf" value="<?= cms_h(cms_csrf_token()) ?>">
 
-    <label class="upload-dropzone" id="upload-dropzone" for="media-file-input">
-      <span class="upload-dropzone-icon">+</span>
+    <label class="upload-dropzone-pro" id="upload-dropzone" for="media-file-input">
+      <span class="upload-dropzone-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </span>
       <strong>Glissez votre image ici</strong>
-      <span>ou cliquez pour choisir un fichier JPG, PNG ou WebP</span>
+      <span>ou cliquez pour parcourir vos fichiers</span>
+      <div class="upload-formats">
+        <span>JPG</span><span>PNG</span><span>WEBP</span>
+      </div>
       <span id="upload-file-name" class="upload-file-name">Aucun fichier sélectionné</span>
       <input id="media-file-input" type="file" name="image" accept="image/jpeg,image/png,image/webp" required>
     </label>
@@ -136,7 +184,7 @@ cms_render_admin_start('Images', '/admin/media');
 
       <div id="upload-progress-card" class="upload-progress-card" hidden>
         <div class="upload-progress-head">
-          <strong>Téléversement</strong>
+          <strong>Téléversement en cours</strong>
           <span id="upload-progress-value">0%</span>
         </div>
         <div class="upload-progress-track">
@@ -145,16 +193,32 @@ cms_render_admin_start('Images', '/admin/media');
       </div>
 
       <div class="media-upload-actions">
-        <button id="media-submit-button" class="primary-button" type="submit">Téléverser</button>
+        <button id="media-submit-button" class="primary-button" type="submit">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Téléverser
+        </button>
       </div>
     </div>
   </form>
 </section>
 
-<section id="media-grid" class="media-grid">
-  <?php foreach ($mediaItems as $item): ?>
-    <?php cms_render_media_card($item); ?>
-  <?php endforeach; ?>
+<section class="panel">
+  <div class="media-toolbar">
+    <div>
+      <h2 style="margin:0">Bibliothèque</h2>
+      <p class="lead" style="margin:0.2rem 0 0"><?= count($mediaItems) ?> fichier<?= count($mediaItems) > 1 ? 's' : '' ?> · cliquez sur « Copier » pour récupérer le lien public.</p>
+    </div>
+    <label class="media-search-input">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" id="media-filter-input" placeholder="Rechercher dans la bibliothèque…">
+    </label>
+  </div>
+
+  <div id="media-grid" class="media-grid-pro">
+    <?php foreach ($mediaItems as $item): ?>
+      <?php cms_render_media_card($item); ?>
+    <?php endforeach; ?>
+  </div>
 </section>
 
 <script>
@@ -210,6 +274,18 @@ cms_render_admin_start('Images', '/admin/media');
 
   bindCopyButtons();
   updateFileName();
+
+  // Filtre de recherche bibliothèque
+  const filterInput = document.getElementById('media-filter-input');
+  if (filterInput) {
+    filterInput.addEventListener('input', () => {
+      const needle = filterInput.value.trim().toLowerCase();
+      mediaGrid.querySelectorAll('.media-card').forEach((card) => {
+        const blob = card.getAttribute('data-media-search') || '';
+        card.style.display = needle === '' || blob.includes(needle) ? '' : 'none';
+      });
+    });
+  }
 
   fileInput.addEventListener('change', updateFileName);
 

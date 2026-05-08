@@ -1,7 +1,7 @@
 ---
 interface Props {
   href?: string;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'light';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
   class?: string;
@@ -19,37 +19,34 @@ const {
   rel
 } = Astro.props;
 
-const baseStyles =
-  'inline-flex items-center justify-center gap-2 rounded-xl border text-sm font-semibold tracking-[0.01em] transition duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-bg)]';
+const base =
+  'group inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-tight transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-bg)]';
 
 const variantStyles = {
   primary:
-    'border-[color:var(--color-accent)] bg-[color:var(--color-accent)] text-white hover:bg-[color:var(--color-accent-strong)] hover:border-[color:var(--color-accent-strong)]',
+    'bg-[color:var(--color-ink-strong)] text-white hover:bg-[color:var(--color-accent-strong)]',
   secondary:
-    'border-[color:var(--color-ink-strong)] bg-[color:var(--color-ink-strong)] text-white hover:bg-[#22343d]',
+    'bg-[color:var(--color-accent)] text-white hover:bg-[color:var(--color-accent-strong)]',
   outline:
-    'border-[color:var(--color-border-strong)] bg-white text-[color:var(--color-ink-strong)] hover:border-[color:var(--color-accent)] hover:text-[color:var(--color-accent-strong)]',
-  ghost: 'border-transparent bg-transparent text-[color:var(--color-ink-strong)] hover:text-[color:var(--color-accent-strong)]'
+    'bg-transparent text-[color:var(--color-ink-strong)] ring-1 ring-inset ring-[color:var(--color-ink-strong)]/15 hover:ring-[color:var(--color-ink-strong)] hover:bg-[color:var(--color-ink-strong)] hover:text-white',
+  ghost:
+    'bg-transparent text-[color:var(--color-ink-strong)] hover:text-[color:var(--color-accent-strong)]',
+  light:
+    'bg-white text-[color:var(--color-ink-strong)] hover:bg-[color:var(--color-bg-soft)]'
 };
 
 const sizeStyles = {
-  sm: 'px-4 py-2.5',
-  md: 'px-5 py-3',
-  lg: 'px-6 py-3.5 text-[0.95rem]'
+  sm: 'px-4 py-2 text-[0.82rem]',
+  md: 'px-5 py-2.5 text-[0.88rem]',
+  lg: 'px-6 py-3.5 text-[0.92rem]'
 };
 
 const widthClass = fullWidth ? 'w-full' : '';
-const styleClass = `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${widthClass} ${customClass}`;
+const styleClass = `${base} ${variantStyles[variant]} ${sizeStyles[size]} ${widthClass} ${customClass}`;
 
 const Tag = href ? 'a' : 'button';
 ---
 
-<Tag
-  href={href}
-  class={styleClass}
-  target={target}
-  rel={rel}
-  {...(href === undefined && { type: 'button' })}
->
+<Tag href={href} class={styleClass} target={target} rel={rel} {...(href === undefined && { type: 'button' })}>
   <slot />
 </Tag>

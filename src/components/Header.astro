@@ -1,116 +1,109 @@
 ---
 import BrandLogo from './BrandLogo.astro';
 import Button from './Button.astro';
+import { getSiteSettings } from '../lib/content';
 
 interface Props {
   currentPage?: string;
 }
 
-const { currentPage = '' } = Astro.props;
+const { currentPage = '/' } = Astro.props;
+const siteSettings = await getSiteSettings();
 
-const navItems = [
+const navLinks = [
   { label: 'Accueil', href: '/' },
-  { label: 'Histoire', href: '/#histoire' },
+  { label: 'Histoire', href: '/histoire' },
+  { label: 'Prestations', href: '/prestations' },
   { label: 'Secteur', href: '/secteur' },
-  { label: 'Prestations', href: '/#prestations' },
-  { label: 'Avis clients', href: '/#avis-clients' },
-  { label: 'Blog', href: '/blog' },
-  { label: 'Contact', href: '/contact', mobileOnly: true }
+  { label: 'Avis', href: '/avis' },
+  { label: 'Blog', href: '/blog' }
 ];
 
 const isActive = (href: string) => {
-  if (href === '/') {
-    return currentPage === '/';
-  }
-
-  if (href.startsWith('/#')) {
-    return false;
-  }
-
-  return currentPage.startsWith(href);
+  if (href === '/') return currentPage === '/';
+  return currentPage === href || currentPage.startsWith(`${href}/`);
 };
 ---
 
-<header class="sticky top-0 z-50 border-b border-[color:var(--color-border)] bg-white/96 backdrop-blur-sm">
-  <div class="shell">
-    <nav class="flex min-h-24 items-center justify-between gap-6 py-5">
-      <a href="/" class="flex min-w-0 items-center text-left" aria-label="Accueil Immobilier Auxois Morvan">
-        <BrandLogo compact />
-      </a>
+<header class="sticky top-0 z-50 bg-[color:var(--color-bg)]/85 backdrop-blur-xl">
+  <div class="shell flex items-center justify-between gap-4 py-4 md:py-5">
+    <a href="/" class="inline-flex items-center" aria-label="Accueil">
+      <BrandLogo compact />
+    </a>
 
-      <div class="hidden items-center gap-6 lg:flex">
-        {navItems.filter((item) => !item.mobileOnly).map((item) => (
-          <a
-            href={item.href}
-            class={`border-b-2 px-0 py-2 text-sm font-semibold ${
-              isActive(item.href)
-                ? 'border-[color:var(--color-accent)] text-[color:var(--color-ink-strong)]'
-                : 'border-transparent text-[color:var(--color-muted)] hover:border-[color:var(--color-border-strong)] hover:text-[color:var(--color-ink-strong)]'
-            }`}
-          >
-            {item.label}
-          </a>
-        ))}
-      </div>
-
-      <div class="hidden items-center gap-3 lg:flex">
-        <Button href="/contact" size="md">
-          Contactez-nous
-        </Button>
-      </div>
-
-      <button
-        id="mobile-menu-btn"
-        class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[color:var(--color-border-strong)] bg-white text-[color:var(--color-ink-strong)] lg:hidden"
-        type="button"
-        aria-expanded="false"
-        aria-controls="mobile-menu"
-        aria-label="Ouvrir le menu"
-      >
-        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16"></path>
-        </svg>
-      </button>
-    </nav>
-  </div>
-
-  <div id="mobile-menu" class="hidden border-t border-[color:var(--color-border)] bg-white lg:hidden">
-    <div class="shell flex flex-col gap-2 py-4">
-      {navItems.map((item) => (
+    <nav class="hidden lg:flex items-center gap-1" aria-label="Navigation principale">
+      {navLinks.map((link) => (
         <a
-          href={item.href}
-          class={`rounded-xl border px-4 py-3 text-sm font-semibold ${
-            isActive(item.href)
-              ? 'border-[color:var(--color-accent)] text-[color:var(--color-ink-strong)]'
-              : 'border-transparent text-[color:var(--color-ink)] hover:border-[color:var(--color-border)]'
-          }`}
+          href={link.href}
+          class:list={[
+            'px-3.5 py-2 rounded-full text-[0.92rem] font-medium tracking-tight transition-colors',
+            isActive(link.href)
+              ? 'bg-[color:var(--color-ink-strong)] text-white'
+              : 'text-[color:var(--color-ink)] hover:text-[color:var(--color-accent-strong)]'
+          ]}
         >
-          {item.label}
+          {link.label}
         </a>
       ))}
-      <div class="pt-2">
-        <Button href="/contact" fullWidth size="md">
-          Contactez-nous
-        </Button>
-      </div>
+    </nav>
+
+    <div class="hidden lg:flex items-center gap-3">
+      {siteSettings.phone && (
+        <a href={`tel:${siteSettings.phone.replace(/\./g, '')}`} class="text-[0.92rem] font-medium text-[color:var(--color-ink-strong)] hover:text-[color:var(--color-accent-strong)]">
+          {siteSettings.phone}
+        </a>
+      )}
+      <Button href="/contact" variant="primary" size="md">Contact</Button>
+    </div>
+
+    <button
+      id="mobile-menu-btn"
+      class="lg:hidden inline-flex h-11 w-11 items-center justify-center rounded-full bg-[color:var(--color-bg-soft)] text-[color:var(--color-ink-strong)]"
+      aria-controls="mobile-menu"
+      aria-expanded="false"
+      aria-label="Ouvrir le menu"
+    >
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="4" y1="7" x2="20" y2="7" />
+        <line x1="4" y1="12" x2="20" y2="12" />
+        <line x1="4" y1="17" x2="20" y2="17" />
+      </svg>
+    </button>
+  </div>
+
+  <div id="mobile-menu" class="hidden lg:hidden">
+    <div class="shell pb-6">
+      <nav class="surface-soft rounded-[1.5rem] p-3" aria-label="Navigation mobile">
+        {navLinks.map((link) => (
+          <a
+            href={link.href}
+            class:list={[
+              'flex items-center justify-between rounded-2xl px-4 py-3.5 text-[1rem] font-medium',
+              isActive(link.href)
+                ? 'bg-[color:var(--color-ink-strong)] text-white'
+                : 'text-[color:var(--color-ink-strong)] hover:bg-white'
+            ]}
+          >
+            <span>{link.label}</span>
+            <svg class="h-4 w-4 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6" /></svg>
+          </a>
+        ))}
+        <a href="/contact" class="mt-2 flex items-center justify-center rounded-2xl bg-[color:var(--color-accent)] px-4 py-3.5 text-[1rem] font-semibold text-white">
+          Nous contacter
+        </a>
+      </nav>
     </div>
   </div>
 </header>
 
 <script>
-  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-  const mobileMenu = document.getElementById('mobile-menu');
-
-  mobileMenuBtn?.addEventListener('click', () => {
-    mobileMenu?.classList.toggle('hidden');
-    const expanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
-    mobileMenuBtn.setAttribute('aria-expanded', String(!expanded));
-  });
-
-  document.querySelectorAll('#mobile-menu a').forEach((link) => {
-    link.addEventListener('click', () => {
-      mobileMenu?.classList.add('hidden');
-      mobileMenuBtn?.setAttribute('aria-expanded', 'false');
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  if (btn && menu) {
+    btn.addEventListener('click', () => {
+      const isOpen = !menu.classList.contains('hidden');
+      menu.classList.toggle('hidden');
+      btn.setAttribute('aria-expanded', String(!isOpen));
     });
-  });
+  }
 </script>

@@ -1,0 +1,152 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import Button from '../components/Button.astro';
+import CTASection from '../components/CTASection.astro';
+import { getPageContent, getSiteSettings, resolveAssetSrc } from '../lib/content';
+
+const [page, siteSettings] = await Promise.all([
+  getPageContent('accueil'),
+  getSiteSettings()
+]);
+
+const reassurance = page.data.sections[0];
+const heroImage = resolveAssetSrc(page.data.heroImage);
+
+const heroPeople = [
+  {
+    name: siteSettings.mickaelName,
+    role: 'Conseiller immobilier local',
+    image: siteSettings.mickaelPhoto ? resolveAssetSrc(siteSettings.mickaelPhoto) : undefined
+  },
+  {
+    name: siteSettings.marionName,
+    role: 'Conseillère immobilier locale',
+    image: siteSettings.marionPhoto ? resolveAssetSrc(siteSettings.marionPhoto) : undefined
+  }
+];
+
+const humanCities = ['Arnay-le-Duc', 'Pouilly-en-Auxois', 'Autun', 'Beaune'].filter((area) => siteSettings.coveredAreas.includes(area));
+
+const milestones = [
+  { year: 'Au quotidien', label: 'Présence locale', text: 'Basés en Auxois, nous suivons concrètement les villes, villages et bassins de vie où nous accompagnons des projets.' },
+  { year: 'Méthode', label: 'Approche humaine', text: 'Un échange clair, une lecture honnête du marché, un suivi régulier — sans pression ni jargon.' },
+  { year: 'Réseau IAD', label: 'Visibilité solide', text: 'L\'appui d\'un réseau national pour la diffusion, les outils et la sécurité juridique de chaque transaction.' }
+];
+---
+
+<Layout title="Notre histoire" description="Mickael Gury et Marion Roulier accompagnent vos projets immobiliers en Auxois-Morvan, avec une approche locale, claire et humaine." currentPage="/histoire">
+
+  <section class="section">
+    <div class="shell">
+      <div class="grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-14">
+        <div>
+          <p class="eyebrow">Notre histoire</p>
+          <h1 class="mt-6 display-1 balanced-text">Deux conseillers, un même cap : l'Auxois-Morvan.</h1>
+          <p class="mt-6 max-w-xl text-[1.02rem] leading-[1.8] text-[color:var(--color-muted)]">
+            Mickael Gury et Marion Roulier accompagnent les vendeurs, acheteurs et porteurs de projets dans l'Auxois, le Morvan et plus largement en Côte-d'Or et Bourgogne. Notre présence locale est notre première force.
+          </p>
+          <div class="mt-9 flex flex-wrap gap-3">
+            <Button href="/contact" size="lg" variant="primary">Nous rencontrer</Button>
+            <Button href="/prestations" size="lg" variant="outline">Voir nos prestations</Button>
+          </div>
+        </div>
+        {heroImage && (
+          <div class="zoom-img relative aspect-[4/5] w-full overflow-hidden rounded-[2rem] bg-[color:var(--color-bg-warm)]">
+            <img src={heroImage} alt={page.data.heroImageAlt ?? 'Auxois Morvan'} class="h-full w-full object-cover" loading="eager" decoding="async" />
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <section class="section pt-0">
+    <div class="shell">
+      <div class="grid gap-5 md:grid-cols-2">
+        {heroPeople.map((person, index) => (
+          <article class={`relative overflow-hidden rounded-[2rem] p-7 md:p-9 lift ${index === 0 ? 'surface-warm' : 'surface-accent'}`}>
+            <div class="flex items-center gap-5">
+              {person.image ? (
+                <img src={person.image} alt={person.name} class="h-20 w-20 rounded-full object-cover" loading="lazy" decoding="async" />
+              ) : (
+                <div class="flex h-20 w-20 items-center justify-center rounded-full bg-white font-[family-name:var(--font-display)] text-3xl text-[color:var(--color-ink-strong)]">
+                  {person.name.charAt(0)}
+                </div>
+              )}
+              <div>
+                <h2 class="font-[family-name:var(--font-display)] text-[1.8rem] leading-tight text-[color:var(--color-ink-strong)] md:text-[2.1rem]">{person.name}</h2>
+                <p class="mt-1 text-[0.9rem] text-[color:var(--color-muted)]">{person.role}</p>
+              </div>
+            </div>
+            <p class="mt-7 text-[0.98rem] leading-7 text-[color:var(--color-ink)]">
+              Un interlocuteur unique, ancré localement, qui connaît les secteurs, les profils acquéreurs et les particularités de chaque bien. Un suivi régulier, sans flottement, jusqu'à la signature.
+            </p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section pt-0">
+    <div class="shell">
+      <SectionHeader eyebrow="Ce qui nous anime" title="Trois piliers, un même cap" />
+      <div class="mt-12 grid gap-5 md:grid-cols-3">
+        {milestones.map((m, i) => (
+          <article class="surface-soft rounded-[1.5rem] p-7 md:p-8 lift">
+            <p class="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-[color:var(--color-accent)]">0{i + 1} · {m.year}</p>
+            <h3 class="mt-5 font-[family-name:var(--font-display)] text-[1.6rem] leading-tight">{m.label}</h3>
+            <p class="mt-4 text-[0.95rem] leading-7 text-[color:var(--color-muted)]">{m.text}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section pt-0">
+    <div class="shell">
+      <div class="surface-dark relative overflow-hidden rounded-[2rem] p-8 md:p-14">
+        <div class="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <div>
+            <p class="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-white/60">Présence locale</p>
+            <h2 class="mt-5 display-2 text-white">L'Auxois-Morvan, notre terrain de jeu.</h2>
+            <p class="mt-6 max-w-xl text-[1rem] leading-[1.8] text-white/75">
+              Nous parcourons régulièrement les villes et villages du secteur. Cette présence concrète change tout : repérer les bons indices de marché, anticiper les profils acquéreurs, qualifier la valeur d'un bien avec justesse.
+            </p>
+            {reassurance?.items && (
+              <ul class="mt-8 grid gap-3">
+                {reassurance.items.map((item: string) => (
+                  <li class="flex items-start gap-3 text-[0.95rem] leading-7 text-white/85">
+                    <span class="mt-3 h-1 w-7 flex-shrink-0 rounded-full bg-[color:var(--color-warm)]"></span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div class="grid gap-3">
+            <p class="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-white/60">Villes suivies en direct</p>
+            <div class="flex flex-wrap gap-2.5">
+              {humanCities.map((city) => (
+                <span class="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white">{city}</span>
+              ))}
+            </div>
+            <p class="mt-4 text-sm text-white/60">Et plus largement : {siteSettings.coveredAreas.join(' · ')}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section pt-0">
+    <div class="shell">
+      <CTASection
+        title="Parlons de votre projet."
+        description="<p>Un appel, un échange autour d'un café, une visite sur place : le premier pas se fait simplement.</p>"
+        primaryButtonText="Nous contacter"
+        primaryButtonHref="/contact"
+        secondaryButtonText="Faire estimer un bien"
+        secondaryButtonHref="/estimation"
+      />
+    </div>
+  </section>
+</Layout>
