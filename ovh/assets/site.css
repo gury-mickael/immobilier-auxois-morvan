@@ -1810,14 +1810,27 @@ form input[name="website"] {
     .estimate-contact-grid { grid-template-columns: 1fr 1fr; }
 }
 .estimate-contact-grid label {
-    display: grid;
-    gap: 0.4rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--color-ink);
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-muted);
 }
 .estimate-contact-grid label.full { grid-column: 1 / -1; }
-.required-mark { color: var(--color-warm); font-weight: 700; }
+.estimate-contact-grid label > input,
+.estimate-contact-grid label > .estimate-input-with-icon {
+    display: flex;
+    margin-top: 0.55rem;
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 400;
+}
+.required-mark {
+    color: var(--color-warm);
+    font-weight: 700;
+    margin-left: 0.15rem;
+}
 .estimate-contact-grid input,
 .estimate-contact-grid select,
 .estimate-contact-grid textarea,
@@ -1853,7 +1866,6 @@ form input[name="website"] {
 }
 
 .estimate-rgpd,
-.estimate-consent-line,
 .privacy-line {
     margin-top: 1rem;
     font-size: 0.78rem;
@@ -1861,10 +1873,67 @@ form input[name="website"] {
     color: var(--color-muted);
 }
 .estimate-rgpd a,
-.estimate-consent-line a,
-.privacy-line a {
+.privacy-line a,
+.estimate-consent-line a {
     color: var(--color-accent-strong);
     text-decoration: underline;
+}
+
+/* === Premium checkbox (consent) === */
+.estimate-consent-line {
+    margin-top: 1.25rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 0.95rem 1.1rem;
+    background: var(--color-bg-soft);
+    border-radius: 0.95rem;
+    cursor: pointer;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--color-ink);
+    transition: background 220ms ease;
+}
+.estimate-consent-line:hover { background: var(--color-accent-soft); }
+.estimate-consent-line input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    flex-shrink: 0;
+    width: 1.4rem;
+    height: 1.4rem;
+    margin: 0;
+    border-radius: 0.45rem;
+    background: #fff;
+    cursor: pointer;
+    position: relative;
+    transition: background 200ms ease, transform 200ms ease;
+}
+.estimate-consent-line input[type="checkbox"]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12.5l4.5 4.5L19 7.5'/></svg>");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 70%;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity 200ms ease, transform 220ms cubic-bezier(0.22, 1.4, 0.36, 1);
+}
+.estimate-consent-line input[type="checkbox"]:checked {
+    background: var(--color-accent-strong);
+}
+.estimate-consent-line input[type="checkbox"]:checked::after {
+    opacity: 1;
+    transform: scale(1);
+}
+.estimate-consent-line input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+.estimate-consent-line > span {
+    flex: 1;
+    color: var(--color-ink);
 }
 
 /* === Boutons / actions === */
