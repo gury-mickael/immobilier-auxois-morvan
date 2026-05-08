@@ -53,11 +53,87 @@ function cms_render_admin_end(): void
     <?php
 }
 
+function cms_render_media_picker_field(string $label, string $name, string $value = '', string $placeholder = '/uploads/cms/nom-image.webp'): void
+{
+    $previewValue = trim($value);
+    $previewSrc = '';
+
+    if ($previewValue !== '') {
+        $previewSrc = preg_match('#^https?://#i', $previewValue) === 1 ? $previewValue : cms_url($previewValue);
+    }
+    ?>
+    <div class="media-picker-field">
+      <span class="media-picker-label"><?= cms_h($label) ?></span>
+      <div class="media-picker-input-row">
+        <input name="<?= cms_h($name) ?>" value="<?= cms_h($value) ?>" placeholder="<?= cms_h($placeholder) ?>" class="js-media-picker-input">
+        <button type="button" class="ghost-button" data-open-media-picker>Choisir</button>
+        <button type="button" class="secondary-button media-picker-clear" data-clear-media-picker>Vider</button>
+      </div>
+      <div class="media-picker-preview<?= $previewSrc !== '' ? ' has-image' : '' ?>">
+        <?php if ($previewSrc !== ''): ?>
+          <img src="<?= cms_h($previewSrc) ?>" alt="Aperçu du média sélectionné" class="js-media-picker-preview" loading="lazy" decoding="async">
+        <?php else: ?>
+          <div class="media-picker-preview-empty js-media-picker-empty">Aucune image sélectionnée</div>
+          <img src="" alt="Aperçu du média sélectionné" class="js-media-picker-preview" hidden>
+        <?php endif; ?>
+      </div>
+    </div>
+    <?php
+}
+
+function cms_render_media_picker_modal(array $mediaItems): void
+{
+    ?>
+    <div class="media-library-modal" id="media-library-modal" hidden>
+      <div class="media-library-backdrop" data-close-media-picker></div>
+      <div class="media-library-dialog" role="dialog" aria-modal="true" aria-labelledby="media-library-title">
+        <div class="media-library-head">
+          <div>
+            <p class="eyebrow">Médiathèque</p>
+            <h2 id="media-library-title">Choisir une image</h2>
+          </div>
+          <button type="button" class="secondary-button" data-close-media-picker>Fermer</button>
+        </div>
+        <label class="media-library-search">
+          Rechercher
+          <input type="search" id="media-library-search" placeholder="Nom, alt, chemin...">
+        </label>
+        <div class="media-library-grid" id="media-library-grid">
+          <?php foreach ($mediaItems as $item): ?>
+            <?php if (!cms_media_is_available($item)) {
+                continue;
+            } ?>
+            <?php
+              $rawUrl = cms_media_public_url($item);
+              $displayUrl = preg_match('#^https?://#i', $rawUrl) === 1 ? $rawUrl : cms_url($rawUrl);
+              $title = (string) ($item['title'] ?: $item['original_name']);
+              $alt = trim((string) ($item['alt_text'] ?? ''));
+              $searchBlob = strtolower(trim($title . ' ' . $alt . ' ' . $rawUrl));
+            ?>
+            <button
+              type="button"
+              class="media-library-item"
+              data-media-url="<?= cms_h($rawUrl) ?>"
+              data-media-src="<?= cms_h($displayUrl) ?>"
+              data-media-search="<?= cms_h($searchBlob) ?>"
+            >
+              <img src="<?= cms_h($displayUrl) ?>" alt="<?= cms_h($alt !== '' ? $alt : $title) ?>" loading="lazy" decoding="async">
+              <span class="media-library-item-title"><?= cms_h($title) ?></span>
+              <span class="media-library-item-path"><?= cms_h($rawUrl) ?></span>
+            </button>
+          <?php endforeach; ?>
+        </div>
+      </div>
+    </div>
+    <?php
+}
+
 function cms_render_page_form(array $page, string $mode, string $actionLabel): void
 {
     $sections = cms_page_sections($page);
     $advantages = implode("\n", cms_json_list($page['local_advantages_json'] ?? '[]'));
     $nearbyCities = implode("\n", cms_json_list($page['nearby_cities_json'] ?? '[]'));
+    $mediaItems = cms_media_items();
     ?>
     <form method="post" class="admin-form-stack">
       <input type="hidden" name="_csrf" value="<?= cms_h(cms_csrf_token()) ?>">
@@ -124,10 +200,7 @@ function cms_render_page_form(array $page, string $mode, string $actionLabel): v
             Titre hero
             <input name="hero_title" value="<?= cms_h((string) $page['hero_title']) ?>" required>
           </label>
-          <label>
-            Image hero
-            <input name="hero_image" value="<?= cms_h((string) $page['hero_image']) ?>" placeholder="/uploads/cms/nom-image.webp">
-          </label>
+          <?php cms_render_media_picker_field('Image hero', 'hero_image', (string) ($page['hero_image'] ?? '')); ?>
           <label class="full">
             Sous-titre hero
             <textarea name="hero_subtitle" rows="4" required><?= cms_h((string) $page['hero_subtitle']) ?></textarea>
@@ -205,6 +278,8 @@ function cms_render_page_form(array $page, string $mode, string $actionLabel): v
       <?php cms_render_section_editor('__INDEX__', ['eyebrow' => '', 'title' => '', 'text' => '<p></p>', 'image' => '', 'imageAlt' => '', 'buttonLabel' => '', 'buttonUrl' => '', 'items' => [], 'stats' => []]); ?>
     </template>
 
+    <?php cms_render_media_picker_modal($mediaItems); ?>
+
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
     <script>
@@ -236,6 +311,113 @@ function cms_render_page_form(array $page, string $mode, string $actionLabel): v
       const container = document.getElementById('sections-container');
       const countField = document.getElementById('section-count');
       const template = document.getElementById('section-template');
+      const mediaPickerModal = document.getElementById('media-library-modal');
+      const mediaPickerSearch = document.getElementById('media-library-search');
+      const mediaPickerGrid = document.getElementById('media-library-grid');
+      let activeMediaField = null;
+
+      const syncMediaPreview = (field) => {
+        const input = field?.querySelector('.js-media-picker-input');
+        const image = field?.querySelector('.js-media-picker-preview');
+        const preview = field?.querySelector('.media-picker-preview');
+        const empty = field?.querySelector('.js-media-picker-empty');
+        const value = (input?.value || '').trim();
+
+        if (!input || !image || !preview) {
+          return;
+        }
+
+        if (!value) {
+          image.hidden = true;
+          image.setAttribute('src', '');
+          preview.classList.remove('has-image');
+          if (empty) {
+            empty.hidden = false;
+          }
+          return;
+        }
+
+        image.hidden = false;
+        image.setAttribute('src', value.startsWith('http') ? value : `<?= cms_h(cms_url('/')) ?>${value.replace(/^\//, '')}`);
+        preview.classList.add('has-image');
+        if (empty) {
+          empty.hidden = true;
+        }
+      };
+
+      const openMediaPicker = (field) => {
+        activeMediaField = field;
+        mediaPickerModal.hidden = false;
+        document.body.classList.add('media-library-open');
+        if (mediaPickerSearch) {
+          mediaPickerSearch.value = '';
+          mediaPickerGrid?.querySelectorAll('.media-library-item').forEach((item) => {
+            item.hidden = false;
+          });
+          mediaPickerSearch.focus();
+        }
+      };
+
+      const closeMediaPicker = () => {
+        mediaPickerModal.hidden = true;
+        document.body.classList.remove('media-library-open');
+        activeMediaField = null;
+      };
+
+      document.addEventListener('click', (event) => {
+        const openTrigger = event.target.closest('[data-open-media-picker]');
+        if (openTrigger) {
+          const field = openTrigger.closest('.media-picker-field');
+          if (field) {
+            openMediaPicker(field);
+          }
+          return;
+        }
+
+        const clearTrigger = event.target.closest('[data-clear-media-picker]');
+        if (clearTrigger) {
+          const field = clearTrigger.closest('.media-picker-field');
+          const input = field?.querySelector('.js-media-picker-input');
+          if (input) {
+            input.value = '';
+            syncMediaPreview(field);
+          }
+          return;
+        }
+
+        const closeTrigger = event.target.closest('[data-close-media-picker]');
+        if (closeTrigger) {
+          closeMediaPicker();
+          return;
+        }
+
+        const mediaItem = event.target.closest('.media-library-item');
+        if (mediaItem && activeMediaField) {
+          const input = activeMediaField.querySelector('.js-media-picker-input');
+          if (input) {
+            input.value = mediaItem.dataset.mediaUrl || '';
+            const image = activeMediaField.querySelector('.js-media-picker-preview');
+            if (image) {
+              image.setAttribute('src', mediaItem.dataset.mediaSrc || '');
+            }
+            syncMediaPreview(activeMediaField);
+          }
+          closeMediaPicker();
+        }
+      });
+
+      mediaPickerSearch?.addEventListener('input', () => {
+        const term = mediaPickerSearch.value.trim().toLowerCase();
+        mediaPickerGrid?.querySelectorAll('.media-library-item').forEach((item) => {
+          item.hidden = term !== '' && !(item.dataset.mediaSearch || '').includes(term);
+        });
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && mediaPickerModal && !mediaPickerModal.hidden) {
+          closeMediaPicker();
+        }
+      });
 
       document.getElementById('add-section')?.addEventListener('click', () => {
         const index = Number(countField.value || '0');
@@ -249,6 +431,7 @@ function cms_render_page_form(array $page, string $mode, string $actionLabel): v
         container.appendChild(node);
         countField.value = String(index + 1);
         initEditors(node);
+        node.querySelectorAll('.media-picker-field').forEach((field) => syncMediaPreview(field));
       });
 
       container?.addEventListener('click', (event) => {
@@ -261,6 +444,8 @@ function cms_render_page_form(array $page, string $mode, string $actionLabel): v
           section.remove();
         }
       });
+
+      document.querySelectorAll('.media-picker-field').forEach((field) => syncMediaPreview(field));
     </script>
     <?php
 }
@@ -287,10 +472,7 @@ function cms_render_section_editor($index, array $section): void
           Titre
           <input name="section_title[]" value="<?= cms_h((string) ($section['title'] ?? '')) ?>" required>
         </label>
-        <label>
-          Image
-          <input name="section_image[]" value="<?= cms_h((string) ($section['image'] ?? '')) ?>">
-        </label>
+        <?php cms_render_media_picker_field('Image', 'section_image[]', (string) ($section['image'] ?? '')); ?>
         <label>
           Alt image
           <input name="section_image_alt[]" value="<?= cms_h((string) ($section['imageAlt'] ?? '')) ?>">
