@@ -1463,12 +1463,13 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
             addressAbortController.abort();
           }
           addressAbortController = new AbortController();
-          const params = new URLSearchParams({ q: trimmed, autocomplete: '1', limit: '6', type: 'housenumber' });
+          const params = new URLSearchParams({ q: trimmed, autocomplete: '1', limit: '8' });
           const postcode = (postalCodeInput?.value || '').trim();
           const communeName = (communeInput?.value || '').trim();
           if (postcode) {
             params.set('postcode', postcode);
-          } else if (communeName) {
+          }
+          if (communeName && !postcode) {
             params.set('q', `${trimmed} ${communeName}`);
           }
           try {
@@ -1482,6 +1483,9 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
             let features = Array.isArray(data?.features) ? data.features : [];
             if (postcode) {
               features = features.filter((feature) => (feature?.properties?.postcode || '') === postcode);
+            } else if (communeName) {
+              const target = communeName.toLowerCase();
+              features = features.filter((feature) => ((feature?.properties?.city || '') + '').toLowerCase().includes(target));
             }
             renderAddressSuggestions(features.slice(0, 6));
           } catch (error) {
