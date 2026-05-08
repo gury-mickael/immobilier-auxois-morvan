@@ -26,3 +26,7 @@ immobilier-auxois-morvan-ovh-build.zip
 
 # jetbrains setting folder
 .idea/
+
+# local PHP dev
+.local-state/
+ovh/uploads

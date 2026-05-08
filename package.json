@@ -13,7 +13,11 @@
     "hash-password": "node ./scripts/hash-password.mjs",
     "ovh:seed": "node ./scripts/export-ovh-seed.mjs",
     "ovh:prepare": "node ./scripts/prepare-ovh-deploy.mjs",
-    "ovh:deploy": "node ./scripts/deploy-ovh.mjs"
+    "ovh:deploy": "node ./scripts/deploy-ovh.mjs",
+    "php:dev": "node ./scripts/dev-php.mjs",
+    "php:stop": "docker compose down",
+    "php:logs": "docker compose logs -f php",
+    "php:db:reset": "docker compose down -v && rm -rf .local-state"
   },
   "dependencies": {
     "@astrojs/node": "^10.1.0",
