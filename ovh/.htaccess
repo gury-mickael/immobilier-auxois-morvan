@@ -1,0 +1,21 @@
+Options -Indexes
+
+RewriteEngine On
+
+RewriteRule ^\.env - [F,L]
+RewriteRule ^app/ - [F,L]
+
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+RewriteRule ^admin/?$ admin/index.php [L,QSA]
+RewriteRule ^admin/login/?$ admin/login.php [L,QSA]
+RewriteRule ^admin/logout/?$ admin/logout.php [L,QSA]
+RewriteRule ^admin/pages/?$ admin/pages.php [L,QSA]
+RewriteRule ^admin/page-edit/?$ admin/page-edit.php [L,QSA]
+RewriteRule ^admin/local-pages/?$ admin/local-pages.php [L,QSA]
+RewriteRule ^admin/local-page-edit/?$ admin/local-page-edit.php [L,QSA]
+RewriteRule ^admin/media/?$ admin/media.php [L,QSA]
+RewriteRule ^admin/users/?$ admin/users.php [L,QSA]
+RewriteRule ^.*$ index.php [L,QSA]
