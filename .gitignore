@@ -17,7 +17,9 @@ pnpm-debug.log*
 .env
 .env.production
 ovh/.env
+.env.deploy
 ovh-build/
+immobilier-auxois-morvan-ovh-build.zip
 
 # macOS-specific files
 .DS_Store

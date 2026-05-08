@@ -355,7 +355,7 @@ function cms_render_contact_page(array $page, array $settings, array $snapshot):
           <form class="contact-premium-form" method="post" action="<?= cms_h(cms_url('/contact')) ?>">
             <input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden-field" aria-hidden="true">
             <p class="eyebrow">Contact direct</p>
-            <h1><?= cms_h((string) $page['hero_title']) ?></h1>
+            <h1>Parlons de votre projet immobilier</h1>
             <p class="contact-form-lead"><?= cms_h(strip_tags((string) $page['hero_subtitle'])) ?></p>
 
             <?php if ($success): ?>
