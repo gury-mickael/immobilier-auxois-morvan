@@ -19,6 +19,21 @@ try {
         exit;
     }
 
+    if ($requestPath === '/histoire' || $requestPath === '/histoire/') {
+        cms_render_histoire_page($settings);
+        exit;
+    }
+
+    if ($requestPath === '/avis' || $requestPath === '/avis/') {
+        cms_render_avis_page($settings);
+        exit;
+    }
+
+    if ($requestPath === '/prestations' || $requestPath === '/prestations/') {
+        cms_render_prestations_page($settings);
+        exit;
+    }
+
     if ($requestPath === '/estimation-en-ligne/confirmation' || $requestPath === '/estimation-immobiliere-auxois-morvan/confirmation') {
       cms_render_estimation_confirmation_page($settings);
       exit;

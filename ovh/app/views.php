@@ -1586,10 +1586,10 @@ function cms_public_nav_items(): array
 {
     return [
         ['label' => 'Accueil', 'href' => '/'],
-        ['label' => 'Histoire', 'href' => '/#histoire'],
+        ['label' => 'Histoire', 'href' => '/histoire'],
         ['label' => 'Secteur', 'href' => '/secteur'],
-        ['label' => 'Prestations', 'href' => '/#prestations'],
-        ['label' => 'Avis clients', 'href' => '/#avis-clients'],
+        ['label' => 'Prestations', 'href' => '/prestations'],
+        ['label' => 'Avis clients', 'href' => '/avis'],
         ['label' => 'Blog', 'href' => '/blog'],
     ];
 }
@@ -1692,8 +1692,10 @@ function cms_render_public_footer(array $settings, array $snapshot): void
             <summary>Navigation</summary>
             <div class="footer-accordion-content">
               <a href="<?= cms_h(cms_url('/')) ?>">Accueil</a>
-              <a href="<?= cms_h(cms_url('/#histoire')) ?>">Histoire</a>
+              <a href="<?= cms_h(cms_url('/histoire')) ?>">Histoire</a>
+              <a href="<?= cms_h(cms_url('/prestations')) ?>">Prestations</a>
               <a href="<?= cms_h(cms_url('/secteur')) ?>">Secteur</a>
+              <a href="<?= cms_h(cms_url('/avis')) ?>">Avis clients</a>
               <a href="<?= cms_h(cms_url('/blog')) ?>">Blog</a>
               <a href="<?= cms_h(cms_url('/contact')) ?>">Contact</a>
             </div>
@@ -1729,9 +1731,10 @@ function cms_render_public_footer(array $settings, array $snapshot): void
             <div>
               <h3>Navigation</h3>
               <a href="<?= cms_h(cms_url('/')) ?>">Accueil</a>
-              <a href="<?= cms_h(cms_url('/#histoire')) ?>">Histoire</a>
+              <a href="<?= cms_h(cms_url('/histoire')) ?>">Histoire</a>
+              <a href="<?= cms_h(cms_url('/prestations')) ?>">Prestations</a>
               <a href="<?= cms_h(cms_url('/secteur')) ?>">Secteur</a>
-              <a href="<?= cms_h(cms_url('/#avis-clients')) ?>">Avis clients</a>
+              <a href="<?= cms_h(cms_url('/avis')) ?>">Avis clients</a>
               <a href="<?= cms_h(cms_url('/blog')) ?>">Blog</a>
               <a href="<?= cms_h(cms_url('/contact')) ?>">Contact</a>
             </div>
@@ -1997,6 +2000,252 @@ function cms_render_standard_public_page(array $page, array $settings, array $sn
       <?php endif; ?>
 
       <section class="section section-tight"><div class="shell"><div class="cta-band"><div><p class="eyebrow">Passer à l’action</p><h2><?= cms_h((string) $page['cta_title']) ?></h2><div class="richtext"><?= (string) $page['cta_text'] ?></div></div><a class="button primary" href="<?= cms_h(cms_url((string) $page['cta_button_url'])) ?>"><?= cms_h((string) $page['cta_button_label']) ?></a></div></div></section>
+    </main>
+    <?php
+    cms_render_public_footer($settings, $snapshot);
+}
+function cms_render_histoire_page(array $settings): void
+{
+    $snapshot = cms_snapshot();
+    $title = 'Notre histoire';
+    $description = 'Découvrez le parcours de Mickael Gury et Marion Roulier, conseillers immobiliers locaux en Auxois-Morvan, et leur méthode de travail.';
+    $mickaelPhoto = trim((string) ($settings['mickael_photo'] ?? ''));
+    $marionPhoto = trim((string) ($settings['marion_photo'] ?? ''));
+    $heroImage = '/uploads/auxois.jpg';
+
+    cms_render_public_document_start($title . ' | ' . (string) $settings['site_name'], $description, true);
+    cms_render_public_header($settings, '/histoire');
+    ?>
+    <main>
+      <section class="section section-hero section-hero-inner">
+        <div class="shell home-hero-grid">
+          <div class="home-hero-copy">
+            <p class="eyebrow">Notre histoire</p>
+            <h1>Deux conseillers locaux pour vous accompagner</h1>
+            <p class="hero-text">Mickael Gury et Marion Roulier, ancrés en Auxois-Morvan, vous accompagnent avec une approche humaine, claire et structurée, soutenue par le réseau IAD.</p>
+            <div class="hero-actions">
+              <a class="button primary" href="<?= cms_h(cms_url('/contact')) ?>">Nous rencontrer</a>
+              <a class="button secondary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Faire estimer mon bien</a>
+            </div>
+          </div>
+          <div class="home-hero-side">
+            <div class="hero-media"><img src="<?= cms_h(cms_url($heroImage)) ?>" alt="Auxois-Morvan"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell">
+          <p class="eyebrow">Présence locale</p>
+          <h2 class="section-title">Vos conseillers</h2>
+          <p class="section-subtitle">Une connaissance fine du terrain, une lecture honnête du marché local et un suivi régulier, du premier échange à la signature.</p>
+          <div class="cards-grid two-cols">
+            <article class="soft-card">
+              <?php if ($mickaelPhoto !== ''): ?><img src="<?= cms_h(cms_url($mickaelPhoto)) ?>" alt="<?= cms_h((string) $settings['mickael_name']) ?>" loading="lazy" decoding="async"><?php endif; ?>
+              <div>
+                <p class="card-kicker">Conseiller</p>
+                <h3><?= cms_h((string) $settings['mickael_name']) ?></h3>
+                <p>Conseiller immobilier local, Mickael accompagne vendeurs et acheteurs en Auxois-Morvan avec rigueur, écoute et un sens du terrain.</p>
+              </div>
+            </article>
+            <article class="soft-card">
+              <?php if ($marionPhoto !== ''): ?><img src="<?= cms_h(cms_url($marionPhoto)) ?>" alt="<?= cms_h((string) $settings['marion_name']) ?>" loading="lazy" decoding="async"><?php endif; ?>
+              <div>
+                <p class="card-kicker">Conseillère</p>
+                <h3><?= cms_h((string) $settings['marion_name']) ?></h3>
+                <p>Conseillère immobilier locale, Marion porte une attention particulière à la qualité de l’accompagnement, du cadrage initial à l’acte authentique.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell">
+          <div class="panel-card panel-muted">
+            <p class="eyebrow">Notre méthode</p>
+            <h2>Une approche locale, humaine et structurée</h2>
+            <p class="panel-copy">Nous croyons à une immobilier de proximité : être disponibles, transparents et précis. Pour chaque projet, nous prenons le temps de comprendre les enjeux, d’analyser le marché local et de définir une stratégie claire.</p>
+            <ul class="accent-list">
+              <li>Une lecture honnête du marché et des prix</li>
+              <li>Un plan d’action sur-mesure pour chaque bien</li>
+              <li>Un suivi régulier, sans rupture de communication</li>
+              <li>La force du réseau IAD pour une diffusion large</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell">
+          <div class="cta-band cta-band-hero">
+            <div>
+              <p class="eyebrow">Faisons connaissance</p>
+              <h2>Parlons de votre projet</h2>
+              <div class="richtext"><p>Un échange simple et sans engagement pour comprendre votre situation et identifier ensemble la meilleure démarche.</p></div>
+            </div>
+            <div class="cta-actions">
+              <a class="button primary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a>
+              <a class="button secondary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Estimer un bien</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <?php
+    cms_render_public_footer($settings, $snapshot);
+}
+
+function cms_render_avis_page(array $settings): void
+{
+    $snapshot = cms_snapshot();
+    $testimonials = $snapshot['testimonials'] ?? [];
+    $title = 'Avis clients';
+    $description = 'Découvrez les retours de propriétaires et acheteurs accompagnés par Immobilier Auxois-Morvan en Auxois, Morvan et Côte-d\'Or.';
+
+    cms_render_public_document_start($title . ' | ' . (string) $settings['site_name'], $description, true);
+    cms_render_public_header($settings, '/avis');
+    ?>
+    <main>
+      <section class="section section-hero section-hero-inner">
+        <div class="shell home-hero-grid">
+          <div class="home-hero-copy">
+            <p class="eyebrow">Ils nous ont fait confiance</p>
+            <h1>Avis clients</h1>
+            <p class="hero-text">Des retours fondés sur la qualité du suivi, la clarté des échanges et la réussite du projet immobilier.</p>
+            <div class="hero-actions">
+              <a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Faire estimer mon bien</a>
+              <a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a>
+            </div>
+          </div>
+          <div class="home-hero-side">
+            <div class="hero-media"><img src="<?= cms_h(cms_url('/uploads/auxois.jpg')) ?>" alt="Auxois-Morvan"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell">
+          <p class="eyebrow">Témoignages</p>
+          <h2 class="section-title">Ce qu'ils disent de notre accompagnement</h2>
+          <div class="cards-grid three-cols">
+            <?php foreach ($testimonials as $testimonial): ?>
+              <article class="testimonial-card">
+                <div class="dots-row"><?php for ($i = 0; $i < (int) ($testimonial['rating'] ?? 5); $i += 1): ?><span></span><?php endfor; ?></div>
+                <p class="testimonial-quote">“<?= cms_h((string) $testimonial['quote']) ?>”</p>
+                <div class="testimonial-meta">
+                  <strong><?= cms_h((string) $testimonial['author']) ?></strong>
+                  <span><?= cms_h(implode(' — ', array_filter([(string) ($testimonial['title'] ?? ''), (string) ($testimonial['location'] ?? '')]))) ?></span>
+                </div>
+              </article>
+            <?php endforeach; ?>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell">
+          <div class="cta-band cta-band-hero">
+            <div>
+              <p class="eyebrow">À votre tour</p>
+              <h2>Et si on parlait de votre projet ?</h2>
+              <div class="richtext"><p>Vendre, acheter, estimer : prenons le temps d'un échange simple pour identifier la meilleure stratégie.</p></div>
+            </div>
+            <div class="cta-actions">
+              <a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Faire estimer mon bien</a>
+              <a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <?php
+    cms_render_public_footer($settings, $snapshot);
+}
+
+function cms_render_prestations_page(array $settings): void
+{
+    $snapshot = cms_snapshot();
+    $services = $snapshot['services'] ?? [];
+    $title = 'Nos prestations';
+    $description = 'Vendre, acheter, estimer un bien ou transmettre un fonds de commerce en Auxois-Morvan : découvrez nos prestations immobilières.';
+
+    cms_render_public_document_start($title . ' | ' . (string) $settings['site_name'], $description, true);
+    cms_render_public_header($settings, '/prestations');
+    ?>
+    <main>
+      <section class="section section-hero section-hero-inner">
+        <div class="shell home-hero-grid">
+          <div class="home-hero-copy">
+            <p class="eyebrow">Nos services</p>
+            <h1>Nos prestations</h1>
+            <p class="hero-text">Une présence utile pour vendre, acheter, estimer un bien ou transmettre un fonds de commerce, avec une méthode claire et un suivi humain.</p>
+            <div class="hero-actions">
+              <a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Faire estimer mon bien</a>
+              <a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a>
+            </div>
+          </div>
+          <div class="home-hero-side">
+            <div class="hero-media"><img src="<?= cms_h(cms_url('/uploads/auxois.jpg')) ?>" alt="Auxois-Morvan"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell">
+          <p class="eyebrow">Services</p>
+          <h2 class="section-title">Ce que nous faisons pour vous</h2>
+          <p class="section-subtitle">Quatre domaines d'expertise pour répondre concrètement à votre projet immobilier ou commercial.</p>
+          <div class="services-grid">
+            <?php foreach ($services as $service): ?>
+              <a class="service-card" href="<?= cms_h(cms_url((string) $service['href'])) ?>">
+                <p class="card-kicker">Service</p>
+                <h3><?= cms_h((string) $service['title']) ?></h3>
+                <p><?= cms_h((string) $service['description']) ?></p>
+                <ul class="accent-list compact-list">
+                  <?php foreach (array_slice(($service['features'] ?? []), 0, 4) as $feature): ?>
+                    <li><?= cms_h((string) $feature) ?></li>
+                  <?php endforeach; ?>
+                </ul>
+                <span class="card-link">En savoir plus →</span>
+              </a>
+            <?php endforeach; ?>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell">
+          <div class="panel-card iad-panel">
+            <div>
+              <p class="eyebrow">Réseau</p>
+              <h2>La proximité locale, avec la puissance du réseau IAD</h2>
+              <div class="richtext panel-copy"><p>Vous bénéficiez d'un accompagnement de proximité, tout en profitant de la visibilité et des outils du réseau IAD. Un interlocuteur local, avec une diffusion solide et un suivi régulier jusqu'à la signature.</p></div>
+            </div>
+            <div class="iad-points-grid">
+              <article class="tile-card"><strong>01</strong><span>Diffusion large des biens</span></article>
+              <article class="tile-card"><strong>02</strong><span>Suivi humain et régulier</span></article>
+              <article class="tile-card"><strong>03</strong><span>Accompagnement jusqu'à la signature</span></article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell">
+          <div class="cta-band cta-band-hero">
+            <div>
+              <p class="eyebrow">Échangeons</p>
+              <h2>Un projet immobilier en tête ?</h2>
+              <div class="richtext"><p>Parlons-en simplement. Nous vous orienterons vers la prestation la plus adaptée à votre situation.</p></div>
+            </div>
+            <div class="cta-actions">
+              <a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Faire estimer mon bien</a>
+              <a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
     <?php
     cms_render_public_footer($settings, $snapshot);
