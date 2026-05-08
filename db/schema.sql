@@ -1,0 +1,109 @@
+CREATE TABLE IF NOT EXISTS cms_admin_users (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR(150) NOT NULL,
+  email VARCHAR(190) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  role VARCHAR(50) NOT NULL DEFAULT 'admin',
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uniq_cms_admin_users_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS cms_pages (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  page_type ENUM('main', 'local') NOT NULL,
+  page_key VARCHAR(100) DEFAULT NULL,
+  slug VARCHAR(255) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  meta_description TEXT NOT NULL,
+  is_indexable TINYINT(1) NOT NULL DEFAULT 1,
+  h1 VARCHAR(255) NOT NULL,
+  hero_title VARCHAR(255) NOT NULL,
+  hero_subtitle LONGTEXT NOT NULL,
+  hero_image VARCHAR(255) DEFAULT NULL,
+  hero_image_alt VARCHAR(255) DEFAULT NULL,
+  intro_html LONGTEXT NOT NULL,
+  sections_json LONGTEXT NOT NULL,
+  cta_title VARCHAR(255) NOT NULL,
+  cta_text LONGTEXT NOT NULL,
+  cta_button_label VARCHAR(150) NOT NULL,
+  cta_button_url VARCHAR(255) NOT NULL,
+  city VARCHAR(150) DEFAULT NULL,
+  local_page_type VARCHAR(150) DEFAULT NULL,
+  local_advantages_json LONGTEXT DEFAULT NULL,
+  nearby_cities_json LONGTEXT DEFAULT NULL,
+  status ENUM('draft', 'published') NOT NULL DEFAULT 'draft',
+  published_at DATETIME DEFAULT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uniq_cms_pages_slug (slug),
+  UNIQUE KEY uniq_cms_pages_page_key (page_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS cms_blog_posts (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  title VARCHAR(255) NOT NULL,
+  slug VARCHAR(255) NOT NULL,
+  excerpt TEXT NOT NULL,
+  category VARCHAR(150) DEFAULT NULL,
+  featured_image VARCHAR(255) DEFAULT NULL,
+  featured_image_alt VARCHAR(255) DEFAULT NULL,
+  content_html LONGTEXT NOT NULL,
+  meta_title VARCHAR(255) DEFAULT NULL,
+  meta_description TEXT DEFAULT NULL,
+  is_indexable TINYINT(1) NOT NULL DEFAULT 1,
+  status ENUM('draft', 'published') NOT NULL DEFAULT 'draft',
+  published_at DATETIME DEFAULT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uniq_cms_blog_posts_slug (slug)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS cms_media (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  original_name VARCHAR(255) NOT NULL,
+  file_name VARCHAR(255) NOT NULL,
+  public_url VARCHAR(255) NOT NULL,
+  mime_type VARCHAR(100) NOT NULL,
+  size_bytes INT UNSIGNED NOT NULL,
+  alt_text VARCHAR(255) DEFAULT NULL,
+  title VARCHAR(255) DEFAULT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uniq_cms_media_file_name (file_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS cms_site_settings (
+  id TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  site_name VARCHAR(255) NOT NULL,
+  baseline LONGTEXT NOT NULL,
+  mickael_name VARCHAR(150) NOT NULL,
+  marion_name VARCHAR(150) NOT NULL,
+  phone VARCHAR(50) NOT NULL,
+  email VARCHAR(190) NOT NULL,
+  main_city VARCHAR(150) NOT NULL,
+  covered_areas_json LONGTEXT NOT NULL,
+  facebook_url VARCHAR(255) DEFAULT NULL,
+  instagram_url VARCHAR(255) DEFAULT NULL,
+  iad_url VARCHAR(255) DEFAULT NULL,
+  footer_text LONGTEXT NOT NULL,
+  main_cta_label VARCHAR(150) NOT NULL,
+  main_cta_url VARCHAR(255) NOT NULL,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS cms_contact_requests (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR(150) NOT NULL,
+  email VARCHAR(190) NOT NULL,
+  phone VARCHAR(50) DEFAULT NULL,
+  subject VARCHAR(255) DEFAULT NULL,
+  message TEXT NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -9,6 +9,7 @@ import LocalPageCard from '../components/LocalPageCard.astro';
 import TestimonialCard from '../components/TestimonialCard.astro';
 import BlogCard from '../components/BlogCard.astro';
 import CTASection from '../components/CTASection.astro';
+import RichTextContent from '../components/RichTextContent.astro';
 import {
   formatLongDate,
   getPageContent,
@@ -101,7 +102,7 @@ const areaImages: Record<string, string> = {
           <div>
             <p class="eyebrow">Immobilier en Auxois et Morvan</p>
             <h2 class="mt-5 text-4xl leading-tight md:text-5xl">{reassurance.title}</h2>
-            <p class="mt-5 max-w-3xl text-[1.02rem] leading-8 text-[color:var(--color-muted)]">{reassurance.text}</p>
+            <RichTextContent html={reassurance.text} className="mt-5 max-w-3xl text-[1.02rem] leading-8 text-[color:var(--color-muted)]" />
             <ul class="mt-6 grid gap-3">
               {reassurance.items?.map((item) => (
                 <li class="flex items-start gap-3 text-sm leading-7 text-[color:var(--color-ink)]">
@@ -171,7 +172,7 @@ const areaImages: Record<string, string> = {
               pageType={localPage.data.pageType}
               href={`/${localPage.data.slug}`}
               excerpt={localPage.data.intro}
-              image={resolveAssetSrc(localPage.data.featuredImage)}
+              image={resolveAssetSrc(localPage.data.heroImage)}
             />
           ))}
         </div>
@@ -220,7 +221,7 @@ const areaImages: Record<string, string> = {
       <div class="mt-10 grid gap-6 lg:grid-cols-3">
         {featuredPosts.map((post) => (
           <BlogCard
-            title={post.data.title}
+            title={post.data.displayTitle ?? post.data.title}
             excerpt={post.data.excerpt}
             href={`/blog/${post.data.slug}`}
             category={post.data.category}

@@ -1,0 +1,81 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getAdminFromSession } from '../../lib/server/auth';
+import { getAdminLocalPages, seedCmsFromContentFiles } from '../../lib/server/cms';
+import { isDatabaseConfigured } from '../../lib/server/config';
+
+const admin = await getAdminFromSession(Astro.session);
+
+if (!admin) {
+  return Astro.redirect('/admin/login');
+}
+
+if (Astro.request.method === 'POST') {
+  await seedCmsFromContentFiles();
+  return Astro.redirect('/admin/local-pages?seeded=1');
+}
+
+const pages = await getAdminLocalPages();
+const databaseReady = isDatabaseConfigured();
+const seeded = Astro.url.searchParams.get('seeded') === '1';
+
+function getStatusLabel(status: string) {
+  if (status === 'published') return 'Publié';
+  if (status === 'draft') return 'Brouillon';
+  return 'Fichier source';
+}
+
+function getStatusClass(status: string) {
+  if (status === 'published') return 'admin-badge';
+  if (status === 'draft') return 'admin-badge admin-badge-draft';
+  return 'admin-badge admin-badge-file';
+}
+---
+
+<AdminLayout title="Pages locales" description="Pilotage SEO local" adminName={admin.name} currentPath="/admin/local-pages">
+  <section class="admin-card">
+    <div class="admin-card-body">
+      <h1 class="admin-title">Pages locales SEO</h1>
+      <p class="admin-subtitle">Les pages locales peuvent maintenant être importées en base, modifiées et publiées avec une URL propre sans casser les pages existantes.</p>
+
+      {seeded && <div class="admin-success" style="margin-top: 1rem;">Les pages locales des fichiers ont été importées.</div>}
+
+      <div class="admin-actions" style="margin-top: 1rem;">
+        <form method="post">
+          <button type="submit" class="admin-button" disabled={!databaseReady}>Importer les pages locales en base</button>
+        </form>
+      </div>
+      {!databaseReady && <p class="admin-help" style="margin-top: 0.9rem;">Le bouton d'import s'active dès que les variables DB_* sont configurées.</p>}
+    </div>
+  </section>
+
+  <section class="admin-card" style="margin-top: 1rem; overflow: hidden;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Titre</th>
+          <th>Ville</th>
+          <th>Slug</th>
+          <th>État</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {pages.map((page) => (
+          <tr>
+            <td>
+              <strong>{page.title}</strong>
+              <div class="admin-help">{page.pageType.replaceAll('-', ' ')}</div>
+            </td>
+            <td>{page.city}</td>
+            <td>/{page.slug}</td>
+            <td><span class={getStatusClass(page.status)}>{getStatusLabel(page.status)}</span></td>
+            <td>
+              <a href={`/admin/local-pages/${page.slug}`} class="admin-button-secondary">Modifier</a>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+</AdminLayout>

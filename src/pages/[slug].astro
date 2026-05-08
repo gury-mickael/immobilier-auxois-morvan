@@ -6,16 +6,13 @@ import SectionHeader from '../components/SectionHeader.astro';
 import CTASection from '../components/CTASection.astro';
 import { getPublishedLocalPages, resolveAssetSrc } from '../lib/content';
 
-export async function getStaticPaths() {
-  const pages = await getPublishedLocalPages();
+const allPages = await getPublishedLocalPages();
+const page = allPages.find((entry) => entry.data.slug === Astro.params.slug);
 
-  return pages.map((page) => ({
-    params: { slug: page.data.slug },
-    props: { page, allPages: pages }
-  }));
+if (!page) {
+  return new Response('Page introuvable', { status: 404 });
 }
 
-const { page, allPages } = Astro.props;
 const currentPath = `/${page.data.slug}`;
 const heroImage = resolveAssetSrc(page.data.heroImage);
 

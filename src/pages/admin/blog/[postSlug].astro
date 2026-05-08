@@ -1,0 +1,164 @@
+---
+import 'quill/dist/quill.snow.css';
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { getAdminFromSession } from '../../../lib/server/auth';
+import { getAdminBlogPost, upsertBlogPost } from '../../../lib/server/cms';
+import { isDatabaseConfigured } from '../../../lib/server/config';
+
+const admin = await getAdminFromSession(Astro.session);
+
+if (!admin) {
+  return Astro.redirect('/admin/login');
+}
+
+const postSlug = Astro.params.postSlug;
+
+if (!postSlug) {
+  return new Response('Article introuvable', { status: 404 });
+}
+
+let errorMessage = '';
+
+if (Astro.request.method === 'POST') {
+  const formData = await Astro.request.formData();
+
+  if (!isDatabaseConfigured()) {
+    errorMessage = 'La base de données n’est pas configurée. Impossible d’enregistrer cet article pour le moment.';
+  } else {
+    const submittedSlug = String(formData.get('slug') ?? '').trim();
+
+    await upsertBlogPost(postSlug, {
+      title: String(formData.get('displayTitle') ?? '').trim(),
+      metaTitle: String(formData.get('title') ?? '').trim(),
+      metaDescription: String(formData.get('metaDescription') ?? '').trim(),
+      slug: submittedSlug,
+      category: String(formData.get('category') ?? '').trim(),
+      excerpt: String(formData.get('excerpt') ?? '').trim(),
+      featuredImage: String(formData.get('featuredImage') ?? '').trim() || undefined,
+      featuredImageAlt: String(formData.get('featuredImageAlt') ?? '').trim() || undefined,
+      contentHtml: String(formData.get('contentHtml') ?? '').trim(),
+      isIndexable: String(formData.get('isIndexable') ?? '1') === '1',
+      status: String(formData.get('status') ?? 'draft') === 'published' ? 'published' : 'draft'
+    });
+
+    return Astro.redirect(`/admin/blog/${submittedSlug}?saved=1`);
+  }
+}
+
+const editorData = await getAdminBlogPost(postSlug);
+
+if (!editorData) {
+  return new Response('Article introuvable', { status: 404 });
+}
+
+const saved = Astro.url.searchParams.get('saved') === '1';
+const currentStatus = editorData.status === 'published' ? 'published' : 'draft';
+---
+
+<AdminLayout title={`Modifier ${editorData.data.displayTitle ?? editorData.data.title}`} description="Édition des articles" adminName={admin.name} currentPath="/admin/blog">
+  <section class="admin-card">
+    <div class="admin-card-body">
+      <h1 class="admin-title">{editorData.data.displayTitle ?? editorData.data.title}</h1>
+      <p class="admin-subtitle">Les articles publiés en base alimentent automatiquement la page d’accueil, la liste blog et les URLs publiques.</p>
+
+      {saved && <div class="admin-success" style="margin-top: 1rem;">L’article a été enregistré.</div>}
+      {errorMessage && <div class="admin-alert" style="margin-top: 1rem;">{errorMessage}</div>}
+    </div>
+  </section>
+
+  <section class="admin-card" style="margin-top: 1rem;">
+    <div class="admin-card-body">
+      <form method="post" class="admin-form">
+        <div class="admin-form-grid">
+          <div class="admin-field">
+            <label for="displayTitle">Titre affiché</label>
+            <input id="displayTitle" name="displayTitle" value={editorData.data.displayTitle ?? editorData.data.title} required />
+          </div>
+          <div class="admin-field">
+            <label for="title">Meta title</label>
+            <input id="title" name="title" value={editorData.data.title} required />
+          </div>
+          <div class="admin-field">
+            <label for="slug">Slug</label>
+            <input id="slug" name="slug" value={editorData.data.slug} required />
+          </div>
+          <div class="admin-field">
+            <label for="category">Catégorie</label>
+            <input id="category" name="category" value={editorData.data.category} required />
+          </div>
+          <div class="admin-field">
+            <label for="featuredImage">Image mise en avant</label>
+            <input id="featuredImage" name="featuredImage" value={editorData.data.featuredImage} />
+          </div>
+          <div class="admin-field">
+            <label for="featuredImageAlt">Alt image</label>
+            <input id="featuredImageAlt" name="featuredImageAlt" value={editorData.data.featuredImageAlt} />
+          </div>
+          <div class="admin-field">
+            <label for="status">Statut</label>
+            <select id="status" name="status">
+              <option value="draft" selected={currentStatus === 'draft'}>Brouillon</option>
+              <option value="published" selected={currentStatus === 'published'}>Publié</option>
+            </select>
+          </div>
+          <div class="admin-field">
+            <label for="isIndexable">Indexable</label>
+            <select id="isIndexable" name="isIndexable">
+              <option value="1" selected={editorData.data.isIndexable}>Oui</option>
+              <option value="0" selected={!editorData.data.isIndexable}>Non</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="admin-field">
+          <label for="excerpt">Extrait</label>
+          <textarea id="excerpt" name="excerpt" required>{editorData.data.excerpt}</textarea>
+        </div>
+
+        <div class="admin-field">
+          <label for="metaDescription">Meta description</label>
+          <textarea id="metaDescription" name="metaDescription" required>{editorData.data.metaDescription}</textarea>
+        </div>
+
+        <div class="admin-field">
+          <label>Contenu</label>
+          <div class="admin-editor js-editor" data-target="contentHtml"></div>
+          <textarea hidden id="contentHtml" name="contentHtml">{editorData.bodyHtml}</textarea>
+        </div>
+
+        <div class="admin-actions">
+          <button type="submit" class="admin-button">Enregistrer</button>
+          <a href={`/blog/${editorData.data.slug}`} class="admin-button-secondary" target="_blank" rel="noreferrer">Voir l’article</a>
+          <a href="/admin/blog" class="admin-button-secondary">Retour à la liste</a>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <script>
+    import Quill from 'quill';
+
+    const source = document.getElementById('contentHtml');
+    const container = document.querySelector('.js-editor');
+
+    if (source instanceof HTMLTextAreaElement && container) {
+      const quill = new Quill(container, {
+        theme: 'snow',
+        modules: {
+          toolbar: [
+            [{ header: [2, 3, false] }],
+            ['bold', 'italic', 'underline'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            ['link'],
+            ['clean']
+          ]
+        }
+      });
+
+      quill.root.innerHTML = source.value || '';
+      quill.on('text-change', () => {
+        source.value = quill.root.innerHTML;
+      });
+    }
+  </script>
+</AdminLayout>

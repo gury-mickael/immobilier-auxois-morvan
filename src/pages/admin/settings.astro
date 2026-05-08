@@ -1,0 +1,128 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getAdminFromSession } from '../../lib/server/auth';
+import { getAdminSiteSettings, upsertSiteSettings } from '../../lib/server/cms';
+import { isDatabaseConfigured } from '../../lib/server/config';
+
+const admin = await getAdminFromSession(Astro.session);
+
+if (!admin) {
+  return Astro.redirect('/admin/login');
+}
+
+let errorMessage = '';
+
+if (Astro.request.method === 'POST') {
+  const formData = await Astro.request.formData();
+
+  if (!isDatabaseConfigured()) {
+    errorMessage = 'La base de données n’est pas configurée. Impossible d’enregistrer les paramètres pour le moment.';
+  } else {
+    await upsertSiteSettings({
+      siteName: String(formData.get('siteName') ?? '').trim(),
+      baseline: String(formData.get('baseline') ?? '').trim(),
+      mickaelName: String(formData.get('mickaelName') ?? '').trim(),
+      marionName: String(formData.get('marionName') ?? '').trim(),
+      phone: String(formData.get('phone') ?? '').trim(),
+      email: String(formData.get('email') ?? '').trim(),
+      mainCity: String(formData.get('mainCity') ?? '').trim(),
+      coveredAreas: String(formData.get('coveredAreas') ?? '')
+        .split(/\r?\n/)
+        .map((item) => item.trim())
+        .filter(Boolean),
+      facebookUrl: String(formData.get('facebookUrl') ?? '').trim() || undefined,
+      instagramUrl: String(formData.get('instagramUrl') ?? '').trim() || undefined,
+      iadUrl: String(formData.get('iadUrl') ?? '').trim() || undefined,
+      footerText: String(formData.get('footerText') ?? '').trim(),
+      mainCtaLabel: String(formData.get('mainCtaLabel') ?? '').trim(),
+      mainCtaUrl: String(formData.get('mainCtaUrl') ?? '').trim()
+    });
+
+    return Astro.redirect('/admin/settings?saved=1');
+  }
+}
+
+const settings = await getAdminSiteSettings();
+const saved = Astro.url.searchParams.get('saved') === '1';
+---
+
+<AdminLayout title="Paramètres" description="Réglages globaux du site" adminName={admin.name} currentPath="/admin/settings">
+  <section class="admin-card">
+    <div class="admin-card-body">
+      <h1 class="admin-title">Paramètres du site</h1>
+      <p class="admin-subtitle">Ces informations alimentent le footer, les coordonnées, les zones couvertes et les CTA transverses du site public.</p>
+
+      {saved && <div class="admin-success" style="margin-top: 1rem;">Les paramètres ont été enregistrés.</div>}
+      {errorMessage && <div class="admin-alert" style="margin-top: 1rem;">{errorMessage}</div>}
+
+      <form method="post" class="admin-form" style="margin-top: 1rem;">
+        <div class="admin-form-grid">
+          <div class="admin-field">
+            <label for="siteName">Nom du site</label>
+            <input id="siteName" name="siteName" value={settings.siteName} required />
+          </div>
+          <div class="admin-field">
+            <label for="mainCity">Ville principale</label>
+            <input id="mainCity" name="mainCity" value={settings.mainCity} required />
+          </div>
+          <div class="admin-field">
+            <label for="mickaelName">Nom Mickael</label>
+            <input id="mickaelName" name="mickaelName" value={settings.mickaelName} required />
+          </div>
+          <div class="admin-field">
+            <label for="marionName">Nom Marion</label>
+            <input id="marionName" name="marionName" value={settings.marionName} required />
+          </div>
+          <div class="admin-field">
+            <label for="phone">Téléphone</label>
+            <input id="phone" name="phone" value={settings.phone} required />
+          </div>
+          <div class="admin-field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" value={settings.email} required />
+          </div>
+          <div class="admin-field">
+            <label for="mainCtaLabel">Libellé CTA global</label>
+            <input id="mainCtaLabel" name="mainCtaLabel" value={settings.mainCtaLabel} required />
+          </div>
+          <div class="admin-field">
+            <label for="mainCtaUrl">URL CTA global</label>
+            <input id="mainCtaUrl" name="mainCtaUrl" value={settings.mainCtaUrl} required />
+          </div>
+          <div class="admin-field">
+            <label for="facebookUrl">Facebook</label>
+            <input id="facebookUrl" name="facebookUrl" value={settings.facebookUrl} />
+          </div>
+          <div class="admin-field">
+            <label for="instagramUrl">Instagram</label>
+            <input id="instagramUrl" name="instagramUrl" value={settings.instagramUrl} />
+          </div>
+          <div class="admin-field">
+            <label for="iadUrl">Lien IAD</label>
+            <input id="iadUrl" name="iadUrl" value={settings.iadUrl} />
+          </div>
+        </div>
+
+        <div class="admin-field">
+          <label for="baseline">Baseline</label>
+          <textarea id="baseline" name="baseline" required>{settings.baseline}</textarea>
+        </div>
+
+        <div class="admin-field">
+          <label for="coveredAreas">Zones couvertes</label>
+          <textarea id="coveredAreas" name="coveredAreas">{settings.coveredAreas.join('\n')}</textarea>
+          <div class="admin-help">Une ligne = une zone ou une ville.</div>
+        </div>
+
+        <div class="admin-field">
+          <label for="footerText">Texte du footer</label>
+          <textarea id="footerText" name="footerText" required>{settings.footerText}</textarea>
+        </div>
+
+        <div class="admin-actions">
+          <button type="submit" class="admin-button">Enregistrer les paramètres</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</AdminLayout>

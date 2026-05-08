@@ -139,6 +139,37 @@ section[id] {
 	text-underline-offset: 0.18rem;
 }
 
+.cms-richtext {
+	display: grid;
+	gap: 1rem;
+}
+
+.cms-richtext p,
+.cms-richtext li {
+	margin: 0;
+}
+
+.cms-richtext ul,
+.cms-richtext ol {
+	padding-left: 1.2rem;
+	margin: 0;
+	display: grid;
+	gap: 0.45rem;
+}
+
+.cms-richtext a {
+	color: var(--color-accent-strong);
+	text-decoration: underline;
+	text-decoration-color: rgba(22, 101, 138, 0.35);
+	text-underline-offset: 0.18rem;
+}
+
+.cms-richtext h2,
+.cms-richtext h3,
+.cms-richtext h4 {
+	margin: 0;
+}
+
 .balanced-text {
 	text-wrap: balance;
 }

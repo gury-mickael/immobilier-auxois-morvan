@@ -1,4 +1,6 @@
 ---
+import RichTextContent from './RichTextContent.astro';
+
 interface Props {
   eyebrow?: string;
   title: string;
@@ -13,9 +15,5 @@ const centered = align === 'center';
 <div class={`max-w-3xl ${centered ? 'mx-auto text-center' : ''}`}>
   {eyebrow && <p class={`eyebrow ${centered ? 'justify-center' : ''}`}>{eyebrow}</p>}
   <h2 class="mt-5 text-4xl leading-tight md:text-5xl">{title}</h2>
-  {subtitle && (
-    <p class={`mt-4 text-[1.02rem] leading-8 text-[color:var(--color-muted)] ${centered ? 'mx-auto' : ''}`}>
-      {subtitle}
-    </p>
-  )}
+  {subtitle && <RichTextContent html={subtitle} className={`mt-4 text-[1.02rem] leading-8 text-[color:var(--color-muted)] ${centered ? 'mx-auto' : ''}`} />}
 </div>

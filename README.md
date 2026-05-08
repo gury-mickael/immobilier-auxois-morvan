@@ -1,22 +1,24 @@
 # Immobilier Auxois Morvan
 
-Site vitrine Astro pour Mickael Gury et Marion Roulier, avec contenu éditable dans le dépôt et administration Git via Sveltia CMS.
+Site Astro en mode serveur avec CMS maison progressif.
 
-## Stack
+Le site public conserve le design et le contenu existants, avec une migration progressive vers une base MySQL/MariaDB. Tant qu'un contenu n'est pas publié en base, le site continue d'utiliser les fichiers actuels.
 
-- Astro 6
+## Stack actuelle
+
+- Astro 6 en mode serveur via @astrojs/node
 - Tailwind CSS 4
-- Contenus Markdown et JSON dans src/content
-- Administration statique sur /admin via Sveltia CMS
+- MySQL / MariaDB via mysql2
+- Auth admin email + mot de passe hashé via bcrypt
+- Uploads images sur le filesystem de l'hébergement
+- Éditeur riche Quill pour l'admin
 
-## Démarrage
+## Démarrage local
 
 ```bash
 npm install
 npm run dev
 ```
-
-Le site est alors disponible sur http://localhost:4321 et l'admin sur http://localhost:4321/admin.
 
 Build de production :
 
@@ -24,71 +26,115 @@ Build de production :
 npm run build
 ```
 
-## Structure utile
+## Variables d'environnement
 
-- src/content/pages : pages principales
-- src/content/local-pages : pages locales SEO
-- src/content/blog : articles
-- src/content/testimonials : avis clients
-- src/content/settings/site.json : paramètres globaux
-- public/uploads : médias utilisés par le site et par le CMS
-- public/admin : interface Sveltia CMS
+Exemple dans [.env.example](.env.example).
 
-## Administration
+Variables attendues :
 
-L'administration est servie sur /admin.
+- DB_HOST
+- DB_PORT
+- DB_USER
+- DB_PASSWORD
+- DB_NAME
+- DB_SSL
+- CMS_UPLOAD_DIR
+- CMS_SESSION_TTL
 
-Collections disponibles :
+## Schéma SQL
 
-- Pages principales
-- Pages locales SEO
-- Articles de blog
-- Avis clients
-- Paramètres globaux
+Le schéma initial du CMS est dans [db/schema.sql](db/schema.sql).
 
-Les images envoyées depuis le CMS sont stockées dans public/uploads et référencées sur le site via /uploads/....
+Il crée notamment :
 
-## Authentification GitHub
+- cms_admin_users
+- cms_pages
+- cms_blog_posts
+- cms_media
+- cms_site_settings
+- cms_contact_requests
 
-La configuration actuelle pointe sur le dépôt GitHub gury-mickael/immobilier-auxois-morvan avec la branche main.
+## Création des comptes admin
 
-Deux modes sont possibles :
+1. Générez un hash bcrypt pour chaque mot de passe :
 
-1. Mode simple pour un usage technique : connexion GitHub via token personnel si aucun pont OAuth n'est configuré.
-2. Mode confortable pour Marion et les éditeurs non techniques : ajouter un pont OAuth compatible Decap/Sveltia, puis compléter backend.base_url et backend.auth_endpoint dans public/admin/config.yml.
+```bash
+npm run hash-password -- "votre-mot-de-passe"
+```
 
-Pour un déploiement Vercel sans backend maison, le plus propre est d'utiliser un service tiers de pont OAuth compatible GitHub. Une fois ce service créé, il suffit de :
+2. Remplacez les placeholders dans [db/admin-users.example.sql](db/admin-users.example.sql).
 
-1. Garder backend.name, repo et branch.
-2. Ajouter backend.base_url.
-3. Ajouter backend.auth_endpoint.
-4. Redéployer le site.
+3. Exécutez le SQL sur la base OVH.
 
-Après cela, la connexion depuis /admin se fait via GitHub sans demander de token manuel.
+Le login se fait ensuite sur /admin/login.
 
-## Modifier le contenu
+## Administration disponible
 
-Depuis /admin, vous pouvez :
+Routes actuellement en place :
 
-1. Modifier les pages principales existantes.
-2. Créer ou dépublier une page locale SEO.
-3. Rédiger un article de blog avec image mise en avant.
-4. Ajouter un avis client.
-5. Mettre à jour les coordonnées, zones couvertes et CTA globaux.
+- /admin
+- /admin/login
+- /admin/pages
+- /admin/local-pages
+- /admin/blog
+- /admin/media
+- /admin/settings
 
-Chaque sauvegarde crée un commit Git dans le dépôt configuré.
+Modules actuellement fonctionnels :
 
-## Déploiement
+- Connexion admin avec session serveur
+- Tableau de bord privé
+- Édition des pages principales
+- Édition des pages locales SEO
+- Édition du blog
+- Réglages globaux du site
+- Upload d'images JPG / PNG / WebP
 
-Le site reste entièrement statique. Un build Astro suffit.
+## Fallback public
 
-Réglages attendus sur Vercel :
+Le site public lit progressivement la base :
 
-- Build command : npm run build
-- Output directory : dist
+- pages principales publiées en base si elles existent
+- pages locales publiées en base si elles existent
+- articles de blog publiés en base si ils existent
+- réglages globaux depuis la base si ils existent
 
-## Notes
+Sinon, il retombe automatiquement sur les fichiers dans src/content.
 
-- L'ancienne configuration Pages CMS a été retirée au profit de Sveltia.
-- Le schéma de contenu Astro reste la source de vérité applicative dans src/content.config.ts.
-- Si vous changez le nom du dépôt ou la branche principale, mettez aussi à jour public/admin/config.yml.
+## Déploiement OVH
+
+Objectif de déploiement :
+
+- code déployé depuis GitHub
+- contenu modifié directement depuis l'admin
+- base de données OVH pour les contenus
+- dossier uploads sur l'hébergement OVH
+- aucune nécessité de redéployer pour une modification de contenu
+
+Étapes recommandées :
+
+1. Créer la base MySQL/MariaDB OVH.
+2. Importer [db/schema.sql](db/schema.sql).
+3. Créer les comptes admin avec [db/admin-users.example.sql](db/admin-users.example.sql).
+4. Renseigner les variables d'environnement serveur à partir de [.env.example](.env.example).
+5. Déployer le build Astro serveur sur l'hébergement Node compatible, ou sur une cible OVH adaptée.
+6. Vérifier les droits d'écriture du dossier défini par CMS_UPLOAD_DIR.
+
+## État de migration
+
+Déjà migré :
+
+- mode serveur
+- auth admin
+- pages principales
+- pages locales
+- blog
+- réglages globaux
+- uploads de base
+
+Encore à finaliser :
+
+- médiathèque avancée : suppression, alt, renommage
+- SEO avancé : sitemap, robots, canonical, indexabilité complète
+- formulaires / demandes reçues
+- durcissement sécurité et documentation d'exploitation OVH plus détaillée

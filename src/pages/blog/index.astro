@@ -37,7 +37,7 @@ const blogHeroImageAlt = 'Maison en pierre typique de l’Auxois Morvan';
       <div class="mt-10 grid gap-6">
         {blogPosts.map((post) => (
           <BlogCard
-            title={post.data.title}
+            title={post.data.displayTitle ?? post.data.title}
             excerpt={post.data.excerpt}
             href={`/blog/${post.data.slug}`}
             category={post.data.category}

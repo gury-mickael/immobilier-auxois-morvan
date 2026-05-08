@@ -1,0 +1,76 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getAdminFromSession } from '../../lib/server/auth';
+import { createMediaRecord } from '../../lib/server/cms';
+import { listUploadedFiles, saveUploadedImage } from '../../lib/server/uploads';
+
+const admin = await getAdminFromSession(Astro.session);
+
+if (!admin) {
+  return Astro.redirect('/admin/login');
+}
+
+let errorMessage = '';
+
+if (Astro.request.method === 'POST') {
+  const formData = await Astro.request.formData();
+  const file = formData.get('image');
+
+  if (!(file instanceof File)) {
+    errorMessage = 'Sélectionnez une image avant de valider.';
+  } else {
+    try {
+      const storedFile = await saveUploadedImage(file);
+      await createMediaRecord(storedFile);
+      return Astro.redirect('/admin/media?uploaded=1');
+    } catch (error) {
+      errorMessage = error instanceof Error ? error.message : 'Upload impossible.';
+    }
+  }
+}
+
+const uploaded = Astro.url.searchParams.get('uploaded') === '1';
+const files = await listUploadedFiles();
+---
+
+<AdminLayout title="Médiathèque" description="Uploads stockés sur l'hébergement" adminName={admin.name} currentPath="/admin/media">
+  <section class="admin-card">
+    <div class="admin-card-body">
+      <h1 class="admin-title">Médiathèque</h1>
+      <p class="admin-subtitle">
+        Upload d'images en JPG, PNG ou WebP. Les fichiers sont enregistrés dans le dossier uploads du site et restent disponibles sans redéploiement.
+      </p>
+
+      {uploaded && <div class="admin-success" style="margin-top: 1rem;">Image envoyée avec succès.</div>}
+      {errorMessage && <div class="admin-alert" style="margin-top: 1rem;">{errorMessage}</div>}
+
+      <form method="post" enctype="multipart/form-data" class="admin-form" style="margin-top: 1rem;">
+        <div class="admin-field">
+          <label for="image">Nouvelle image</label>
+          <input id="image" type="file" name="image" accept="image/jpeg,image/png,image/webp" required />
+          <div class="admin-help">Formats autorisés : JPG, PNG, WebP. Taille maximale : 5 Mo.</div>
+        </div>
+        <div class="admin-actions">
+          <button type="submit" class="admin-button">Envoyer l'image</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="admin-card" style="margin-top: 1rem;">
+    <div class="admin-card-body">
+      <div class="admin-media-grid">
+        {files.map((file) => (
+          <article class="admin-media-card">
+            <img src={file.publicUrl} alt={file.fileName} loading="lazy" decoding="async" />
+            <div class="admin-media-card-body">
+              <strong>{file.fileName}</strong>
+              <span class="admin-help">{Math.round(file.sizeBytes / 1024)} Ko</span>
+              <a href={file.publicUrl} target="_blank" rel="noreferrer" class="admin-button-secondary">Ouvrir</a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+</AdminLayout>

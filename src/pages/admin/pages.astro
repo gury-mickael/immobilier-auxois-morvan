@@ -1,0 +1,83 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getAdminFromSession } from '../../lib/server/auth';
+import { getAdminMainPages, seedCmsFromContentFiles } from '../../lib/server/cms';
+import { isDatabaseConfigured } from '../../lib/server/config';
+
+const admin = await getAdminFromSession(Astro.session);
+
+if (!admin) {
+  return Astro.redirect('/admin/login');
+}
+
+if (Astro.request.method === 'POST') {
+  await seedCmsFromContentFiles();
+  return Astro.redirect('/admin/pages?seeded=1');
+}
+
+const pages = await getAdminMainPages();
+const databaseReady = isDatabaseConfigured();
+const seeded = Astro.url.searchParams.get('seeded') === '1';
+
+function getStatusLabel(status: string) {
+  if (status === 'published') return 'Publié';
+  if (status === 'draft') return 'Brouillon';
+  return 'Fichier source';
+}
+
+function getStatusClass(status: string) {
+  if (status === 'published') return 'admin-badge';
+  if (status === 'draft') return 'admin-badge admin-badge-draft';
+  return 'admin-badge admin-badge-file';
+}
+---
+
+<AdminLayout title="Pages" description="Pilotage des pages principales" adminName={admin.name} currentPath="/admin/pages">
+  <section class="admin-card">
+    <div class="admin-card-body">
+      <h1 class="admin-title">Pages principales</h1>
+      <p class="admin-subtitle">
+        Vous pouvez importer le contenu actuel dans la base, travailler en brouillon, puis publier sans casser le site existant. Tant qu'une version publiée n'existe pas en base, le site public continue d'utiliser les fichiers actuels.
+      </p>
+
+      {seeded && <div class="admin-success" style="margin-top: 1rem;">Le contenu actuel a été importé dans la base.</div>}
+
+      <div class="admin-actions" style="margin-top: 1rem;">
+        <form method="post">
+          <button type="submit" class="admin-button" disabled={!databaseReady}>Importer le contenu actuel en base</button>
+        </form>
+      </div>
+      {!databaseReady && <p class="admin-help" style="margin-top: 0.9rem;">Le bouton d'import s'active dès que les variables DB_* sont configurées.</p>}
+    </div>
+  </section>
+
+  <section class="admin-card" style="margin-top: 1rem; overflow: hidden;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Page</th>
+          <th>Slug</th>
+          <th>État</th>
+          <th>Mise à jour</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {pages.map((page) => (
+          <tr>
+            <td>
+              <strong>{page.title}</strong>
+              <div class="admin-help">Clé technique : {page.pageKey}</div>
+            </td>
+            <td>{page.slug}</td>
+            <td><span class={getStatusClass(page.status)}>{getStatusLabel(page.status)}</span></td>
+            <td>{page.updatedAt ? new Date(page.updatedAt).toLocaleString('fr-FR') : 'Fichier actuel'}</td>
+            <td>
+              <a href={`/admin/pages/${page.pageKey}`} class="admin-button-secondary">Modifier</a>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+</AdminLayout>

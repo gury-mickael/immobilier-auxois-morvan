@@ -1,5 +1,6 @@
 ---
 import SectionHeader from './SectionHeader.astro';
+import RichTextContent from './RichTextContent.astro';
 
 interface SectionStat {
   label: string;
@@ -42,7 +43,7 @@ const formatIndex = (index: number) => String(index + 1).padStart(2, '0');
         <p class="eyebrow">{introEyebrow}</p>
         <div>
           <h2 class="text-4xl leading-tight md:text-5xl">{introTitle}</h2>
-          <p class="mt-5 max-w-4xl text-[1.02rem] leading-8 text-[color:var(--color-muted)]">{intro}</p>
+          <RichTextContent html={intro} className="mt-5 max-w-4xl text-[1.02rem] leading-8 text-[color:var(--color-muted)]" />
         </div>
       </div>
     </div>
@@ -96,7 +97,7 @@ const formatIndex = (index: number) => String(index + 1).padStart(2, '0');
 
         <div>
           <SectionHeader eyebrow={section.eyebrow} title={section.title} />
-          <p class="mt-6 max-w-3xl text-[1rem] leading-8 text-[color:var(--color-ink)]">{section.text}</p>
+          <RichTextContent html={section.text} className="mt-6 max-w-3xl text-[1rem] leading-8 text-[color:var(--color-ink)]" />
           {section.buttonLabel && section.buttonUrl && (
             <a href={section.buttonUrl} class="mt-8 inline-flex rounded-full border border-[color:var(--color-accent)] bg-[color:var(--color-accent)] px-5 py-3 text-sm font-semibold text-white hover:border-[color:var(--color-accent-strong)] hover:bg-[color:var(--color-accent-strong)]">
               {section.buttonLabel}

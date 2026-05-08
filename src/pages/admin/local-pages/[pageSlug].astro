@@ -1,0 +1,297 @@
+---
+import 'quill/dist/quill.snow.css';
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { getAdminFromSession } from '../../../lib/server/auth';
+import { getAdminLocalPage, upsertLocalPage, type CmsSection } from '../../../lib/server/cms';
+import { isDatabaseConfigured } from '../../../lib/server/config';
+
+const admin = await getAdminFromSession(Astro.session);
+
+if (!admin) {
+  return Astro.redirect('/admin/login');
+}
+
+const pageSlug = Astro.params.pageSlug;
+
+if (!pageSlug) {
+  return new Response('Page locale introuvable', { status: 404 });
+}
+
+function splitLines(value: FormDataEntryValue | null) {
+  return String(value ?? '')
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function parseStats(value: FormDataEntryValue | null) {
+  return String(value ?? '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [label, ...valueParts] = line.split('|');
+      return { label: label?.trim() ?? '', value: valueParts.join('|').trim() };
+    })
+    .filter((item) => item.label && item.value);
+}
+
+let errorMessage = '';
+
+if (Astro.request.method === 'POST') {
+  const formData = await Astro.request.formData();
+
+  if (!isDatabaseConfigured()) {
+    errorMessage = 'La base de données n’est pas configurée. Impossible d’enregistrer cette page locale pour le moment.';
+  } else {
+    const sectionCount = Number(formData.get('sectionCount') ?? '0');
+    const sections: CmsSection[] = [];
+
+    for (let index = 0; index < sectionCount; index += 1) {
+      sections.push({
+        eyebrow: String(formData.get(`sectionEyebrow_${index}`) ?? '').trim() || undefined,
+        title: String(formData.get(`sectionTitle_${index}`) ?? '').trim() || `Section ${index + 1}`,
+        text: String(formData.get(`sectionText_${index}`) ?? '').trim(),
+        image: String(formData.get(`sectionImage_${index}`) ?? '').trim() || undefined,
+        imageAlt: String(formData.get(`sectionImageAlt_${index}`) ?? '').trim() || undefined,
+        buttonLabel: String(formData.get(`sectionButtonLabel_${index}`) ?? '').trim() || undefined,
+        buttonUrl: String(formData.get(`sectionButtonUrl_${index}`) ?? '').trim() || undefined,
+        items: splitLines(formData.get(`sectionItems_${index}`)),
+        stats: parseStats(formData.get(`sectionStats_${index}`))
+      });
+    }
+
+    const submittedSlug = String(formData.get('slug') ?? '').trim();
+
+    await upsertLocalPage(pageSlug, {
+      title: String(formData.get('title') ?? '').trim(),
+      metaDescription: String(formData.get('metaDescription') ?? '').trim(),
+      slug: submittedSlug,
+      city: String(formData.get('city') ?? '').trim(),
+      pageType: String(formData.get('pageType') ?? '').trim(),
+      h1: String(formData.get('h1') ?? '').trim(),
+      heroTitle: String(formData.get('heroTitle') ?? '').trim(),
+      heroSubtitle: String(formData.get('heroSubtitle') ?? '').trim(),
+      heroImage: String(formData.get('heroImage') ?? '').trim() || undefined,
+      heroImageAlt: String(formData.get('heroImageAlt') ?? '').trim() || undefined,
+      intro: String(formData.get('intro') ?? '').trim(),
+      sections,
+      localAdvantages: splitLines(formData.get('localAdvantages')),
+      nearbyCities: splitLines(formData.get('nearbyCities')),
+      ctaTitle: String(formData.get('ctaTitle') ?? '').trim(),
+      ctaText: String(formData.get('ctaText') ?? '').trim(),
+      ctaButtonLabel: String(formData.get('ctaButtonLabel') ?? '').trim(),
+      ctaButtonUrl: String(formData.get('ctaButtonUrl') ?? '').trim(),
+      published: String(formData.get('status') ?? 'draft') === 'published',
+      status: String(formData.get('status') ?? 'draft') === 'published' ? 'published' : 'draft'
+    });
+
+    return Astro.redirect(`/admin/local-pages/${submittedSlug}?saved=1`);
+  }
+}
+
+const editorData = await getAdminLocalPage(pageSlug);
+
+if (!editorData) {
+  return new Response('Page locale introuvable', { status: 404 });
+}
+
+const saved = Astro.url.searchParams.get('saved') === '1';
+const currentStatus = editorData.status === 'published' ? 'published' : 'draft';
+---
+
+<AdminLayout title={`Modifier ${editorData.data.title}`} description="Édition des pages locales" adminName={admin.name} currentPath="/admin/local-pages">
+  <section class="admin-card">
+    <div class="admin-card-body">
+      <h1 class="admin-title">{editorData.data.title}</h1>
+      <p class="admin-subtitle">Vous pouvez modifier la ville, le type de page, les sections SEO locales et publier la version base sans casser la version fichier tant qu’elle reste en brouillon.</p>
+
+      {saved && <div class="admin-success" style="margin-top: 1rem;">La page locale a été enregistrée.</div>}
+      {errorMessage && <div class="admin-alert" style="margin-top: 1rem;">{errorMessage}</div>}
+    </div>
+  </section>
+
+  <section class="admin-card" style="margin-top: 1rem;">
+    <div class="admin-card-body">
+      <form method="post" class="admin-form">
+        <input type="hidden" name="sectionCount" value={editorData.data.sections.length} />
+
+        <div class="admin-form-grid">
+          <div class="admin-field">
+            <label for="title">Titre SEO</label>
+            <input id="title" name="title" value={editorData.data.title} required />
+          </div>
+          <div class="admin-field">
+            <label for="metaDescription">Meta description</label>
+            <textarea id="metaDescription" name="metaDescription" required>{editorData.data.metaDescription}</textarea>
+          </div>
+          <div class="admin-field">
+            <label for="slug">Slug</label>
+            <input id="slug" name="slug" value={editorData.data.slug} required />
+          </div>
+          <div class="admin-field">
+            <label for="city">Ville</label>
+            <input id="city" name="city" value={editorData.data.city} required />
+          </div>
+          <div class="admin-field">
+            <label for="pageType">Type de page</label>
+            <input id="pageType" name="pageType" value={editorData.data.pageType} required />
+          </div>
+          <div class="admin-field">
+            <label for="h1">H1</label>
+            <input id="h1" name="h1" value={editorData.data.h1} required />
+          </div>
+          <div class="admin-field">
+            <label for="heroTitle">Titre hero</label>
+            <input id="heroTitle" name="heroTitle" value={editorData.data.heroTitle} required />
+          </div>
+          <div class="admin-field">
+            <label for="heroSubtitle">Sous-titre hero</label>
+            <textarea id="heroSubtitle" name="heroSubtitle" required>{editorData.data.heroSubtitle}</textarea>
+          </div>
+          <div class="admin-field">
+            <label for="heroImage">Image hero</label>
+            <input id="heroImage" name="heroImage" value={editorData.data.heroImage} />
+          </div>
+          <div class="admin-field">
+            <label for="heroImageAlt">Alt image hero</label>
+            <input id="heroImageAlt" name="heroImageAlt" value={editorData.data.heroImageAlt} />
+          </div>
+        </div>
+
+        <div class="admin-field">
+          <label>Introduction</label>
+          <div class="admin-editor js-editor" data-target="introEditor"></div>
+          <textarea hidden id="introEditor" name="intro">{editorData.data.intro}</textarea>
+        </div>
+
+        <section class="admin-sections">
+          {editorData.data.sections.map((section, index) => (
+            <article class="admin-section-card">
+              <h2 style="margin: 0 0 1rem; font-size: 1.3rem;">Section {index + 1}</h2>
+              <div class="admin-form-grid">
+                <div class="admin-field">
+                  <label for={`sectionEyebrow_${index}`}>Surtitre</label>
+                  <input id={`sectionEyebrow_${index}`} name={`sectionEyebrow_${index}`} value={section.eyebrow} />
+                </div>
+                <div class="admin-field">
+                  <label for={`sectionTitle_${index}`}>Titre</label>
+                  <input id={`sectionTitle_${index}`} name={`sectionTitle_${index}`} value={section.title} required />
+                </div>
+                <div class="admin-field">
+                  <label for={`sectionImage_${index}`}>Image</label>
+                  <input id={`sectionImage_${index}`} name={`sectionImage_${index}`} value={section.image} />
+                </div>
+                <div class="admin-field">
+                  <label for={`sectionImageAlt_${index}`}>Alt image</label>
+                  <input id={`sectionImageAlt_${index}`} name={`sectionImageAlt_${index}`} value={section.imageAlt} />
+                </div>
+                <div class="admin-field">
+                  <label for={`sectionButtonLabel_${index}`}>Libellé bouton</label>
+                  <input id={`sectionButtonLabel_${index}`} name={`sectionButtonLabel_${index}`} value={section.buttonLabel} />
+                </div>
+                <div class="admin-field">
+                  <label for={`sectionButtonUrl_${index}`}>URL bouton</label>
+                  <input id={`sectionButtonUrl_${index}`} name={`sectionButtonUrl_${index}`} value={section.buttonUrl} />
+                </div>
+                <div class="admin-field">
+                  <label for={`sectionItems_${index}`}>Liste à puces</label>
+                  <textarea id={`sectionItems_${index}`} name={`sectionItems_${index}`}>{section.items?.join('\n')}</textarea>
+                </div>
+                <div class="admin-field">
+                  <label for={`sectionStats_${index}`}>Chiffres clés</label>
+                  <textarea id={`sectionStats_${index}`} name={`sectionStats_${index}`}>{section.stats?.map((stat) => `${stat.label}|${stat.value}`).join('\n')}</textarea>
+                </div>
+              </div>
+
+              <div class="admin-field" style="margin-top: 1rem;">
+                <label>Texte de section</label>
+                <div class="admin-editor js-editor" data-target={`sectionText_${index}`}></div>
+                <textarea hidden id={`sectionText_${index}`} name={`sectionText_${index}`}>{section.text}</textarea>
+              </div>
+            </article>
+          ))}
+        </section>
+
+        <div class="admin-form-grid">
+          <div class="admin-field">
+            <label for="localAdvantages">Atouts locaux</label>
+            <textarea id="localAdvantages" name="localAdvantages">{editorData.data.localAdvantages.join('\n')}</textarea>
+          </div>
+          <div class="admin-field">
+            <label for="nearbyCities">Villes proches</label>
+            <textarea id="nearbyCities" name="nearbyCities">{editorData.data.nearbyCities.join('\n')}</textarea>
+          </div>
+          <div class="admin-field">
+            <label for="ctaTitle">Titre CTA</label>
+            <input id="ctaTitle" name="ctaTitle" value={editorData.data.ctaTitle} required />
+          </div>
+          <div class="admin-field">
+            <label for="ctaButtonLabel">Libellé bouton CTA</label>
+            <input id="ctaButtonLabel" name="ctaButtonLabel" value={editorData.data.ctaButtonLabel} required />
+          </div>
+          <div class="admin-field">
+            <label for="ctaButtonUrl">URL bouton CTA</label>
+            <input id="ctaButtonUrl" name="ctaButtonUrl" value={editorData.data.ctaButtonUrl} required />
+          </div>
+          <div class="admin-field">
+            <label for="status">Statut</label>
+            <select id="status" name="status">
+              <option value="draft" selected={currentStatus === 'draft'}>Brouillon</option>
+              <option value="published" selected={currentStatus === 'published'}>Publié</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="admin-field">
+          <label for="ctaText">Texte CTA</label>
+          <textarea id="ctaText" name="ctaText">{editorData.data.ctaText}</textarea>
+        </div>
+
+        <div class="admin-actions">
+          <button type="submit" class="admin-button">Enregistrer</button>
+          <a href={`/${editorData.data.slug}`} class="admin-button-secondary" target="_blank" rel="noreferrer">Voir la page publique</a>
+          <a href="/admin/local-pages" class="admin-button-secondary">Retour à la liste</a>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <script>
+    import Quill from 'quill';
+
+    const editors = document.querySelectorAll('.js-editor');
+
+    editors.forEach((container) => {
+      const targetId = container.getAttribute('data-target');
+
+      if (!targetId) {
+        return;
+      }
+
+      const source = document.getElementById(targetId);
+
+      if (!(source instanceof HTMLTextAreaElement)) {
+        return;
+      }
+
+      const quill = new Quill(container, {
+        theme: 'snow',
+        modules: {
+          toolbar: [
+            [{ header: [2, 3, false] }],
+            ['bold', 'italic', 'underline'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            ['link'],
+            ['clean']
+          ]
+        }
+      });
+
+      quill.root.innerHTML = source.value || '';
+      quill.on('text-change', () => {
+        source.value = quill.root.innerHTML;
+      });
+    });
+  </script>
+</AdminLayout>

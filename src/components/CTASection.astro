@@ -1,4 +1,6 @@
 ---
+import RichTextContent from './RichTextContent.astro';
+
 interface Props {
   title: string;
   description?: string;
@@ -31,11 +33,7 @@ import Button from './Button.astro';
       <h2 class="mt-5 text-4xl leading-tight text-white md:text-5xl">
         {title}
       </h2>
-  {description && (
-        <p class="mt-4 max-w-2xl text-[1.02rem] leading-8 text-white/80">
-          {description}
-        </p>
-  )}
+  {description && <RichTextContent html={description} className="mt-4 max-w-2xl text-[1.02rem] leading-8 text-white/80" />}
     </div>
     <div class="flex flex-col gap-3 sm:flex-row lg:flex-col">
       <Button href={primaryButtonHref} variant="primary" size="lg">

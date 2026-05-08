@@ -1,5 +1,6 @@
 import { getCollection } from 'astro:content';
 import siteSettings from '../content/settings/site.json';
+import { getPublishedBlogOverrides, getPublishedLocalPageOverrides, getPublishedMainPageOverride, getSiteSettingsOverride } from './server/cms';
 
 export type MainPageId =
   | 'accueil'
@@ -21,10 +22,18 @@ const pageSlugById: Record<MainPageId, string> = {
 };
 
 export async function getSiteSettings() {
-  return siteSettings;
+  const dbSettings = await getSiteSettingsOverride();
+
+  return dbSettings ?? siteSettings;
 }
 
 export async function getPageContent(id: MainPageId) {
+  const dbPage = await getPublishedMainPageOverride(id);
+
+  if (dbPage) {
+    return dbPage;
+  }
+
   const targetSlug = pageSlugById[id];
   const entries = await getCollection('pages');
   const entry = entries.find((item) => item.data.slug === targetSlug);
@@ -37,9 +46,38 @@ export async function getPageContent(id: MainPageId) {
 }
 
 export async function getPublishedBlogPosts() {
-  const entries = await getCollection('blog', ({ data }) => data.published);
+  const [entries, dbOverrides] = await Promise.all([
+    getCollection('blog', ({ data }) => data.published),
+    getPublishedBlogOverrides()
+  ]);
 
-  return entries.sort((left, right) => right.data.date.getTime() - left.data.date.getTime());
+  const posts = entries.map((entry) => ({
+    id: entry.id,
+    source: 'file' as const,
+    entry,
+    bodyHtml: entry.body,
+    data: {
+      title: entry.data.title,
+      displayTitle: entry.data.title,
+      metaDescription: entry.data.metaDescription,
+      slug: entry.data.slug,
+      category: entry.data.category,
+      date: entry.data.date,
+      excerpt: entry.data.excerpt,
+      featuredImage: entry.data.featuredImage,
+      featuredImageAlt: entry.data.featuredImageAlt,
+      published: entry.data.published,
+      isIndexable: true
+    }
+  }));
+
+  const bySlug = new Map(posts.map((post) => [post.data.slug, post]));
+
+  for (const post of dbOverrides) {
+    bySlug.set(post.data.slug, post);
+  }
+
+  return Array.from(bySlug.values()).sort((left, right) => right.data.date.getTime() - left.data.date.getTime());
 }
 
 export async function getPublishedTestimonials() {
@@ -52,9 +90,18 @@ export async function getPublishedTestimonials() {
 }
 
 export async function getPublishedLocalPages() {
-  const entries = await getCollection('local-pages', ({ data }) => data.published);
+  const [entries, dbOverrides] = await Promise.all([
+    getCollection('local-pages', ({ data }) => data.published),
+    getPublishedLocalPageOverrides()
+  ]);
 
-  return entries.sort((left, right) => left.data.city.localeCompare(right.data.city, 'fr'));
+  const bySlug = new Map(entries.map((entry) => [entry.data.slug, entry]));
+
+  for (const page of dbOverrides) {
+    bySlug.set(page.data.slug, page);
+  }
+
+  return Array.from(bySlug.values()).sort((left, right) => left.data.city.localeCompare(right.data.city, 'fr'));
 }
 
 export function formatLongDate(date: Date) {
