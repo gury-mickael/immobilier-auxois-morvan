@@ -103,6 +103,8 @@ const settings = defineCollection({
     baseline: z.string(),
     mickaelName: z.string(),
     marionName: z.string(),
+    mickaelPhoto: z.string().optional(),
+    marionPhoto: z.string().optional(),
     phone: z.string(),
     email: z.string(),
     mainCity: z.string(),

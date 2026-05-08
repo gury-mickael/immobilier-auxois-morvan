@@ -11,7 +11,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "hash-password": "node ./scripts/hash-password.mjs",
-    "ovh:seed": "node ./scripts/export-ovh-seed.mjs"
+    "ovh:seed": "node ./scripts/export-ovh-seed.mjs",
+    "ovh:prepare": "node ./scripts/prepare-ovh-deploy.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^10.1.0",

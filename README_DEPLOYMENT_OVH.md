@@ -5,6 +5,8 @@ Ce dépôt contient désormais deux couches distinctes :
 - Astro reste la source de travail pour le design, les composants et l'évolution technique locale.
 - ovh contient le mini-CMS PHP + MySQL compatible hébergement OVH mutualisé, sans serveur Node permanent.
 
+Pour une bascule rapide, l'objectif n'est plus de publier Astro côté OVH. Le site en ligne doit servir directement le dossier ovh.
+
 ## Architecture retenue
 
 La migration la plus fiable pour OVH mutualisé consiste à faire tourner le back-office et le front public éditable en PHP + MySQL.
@@ -24,6 +26,7 @@ Pourquoi :
 - gestion des pages principales
 - gestion des pages locales
 - gestion des images
+- gestion des réglages globaux du site
 - gestion des deux comptes admin
 - rendu public PHP lisant directement MySQL
 
@@ -75,13 +78,28 @@ DB_PASSWORD=mot-de-passe-reel
 SESSION_COOKIE_NAME=immobilier_auxois_admin
 UPLOAD_DIR=uploads/cms
 UPLOAD_PUBLIC_BASE=/uploads/cms
+INSTALL_TOKEN=jeton-long-et-aleatoire
 ```
 
 Ce fichier ne doit jamais être versionné.
 
 ## 4. Publier sur l'hébergement OVH
 
-Upload le contenu du dossier ovh vers la racine web OVH.
+Prépare d'abord un dossier de déploiement complet :
+
+```bash
+npm run ovh:prepare
+```
+
+Cette commande génère le dossier ovh-build avec :
+
+- le mini-CMS PHP
+- les images existantes de public/uploads
+- favicon.ico et favicon.svg
+- les scripts SQL d'installation initiale
+- le dossier uploads/cms pour les futurs médias
+
+Upload ensuite le contenu du dossier ovh-build vers la racine web OVH.
 
 Concrètement, côté OVH tu dois avoir :
 
@@ -93,10 +111,18 @@ Concrètement, côté OVH tu dois avoir :
 - uploads/cms/
 - .env
 
+Si le site Astro actuel est déjà en ligne sur le même domaine, remplace la racine publiée par le contenu de ovh-build au moment de la bascule.
+
 Important :
 
 - .htaccess protège .env et app/
 - uploads/cms doit être inscriptible par PHP
+
+Pour une préproduction sans écraser l'existant, tu peux aussi uploader ovh-build dans un sous-dossier comme cms-preview, puis lancer :
+
+- /cms-preview/admin/install.php?token=INSTALL_TOKEN
+
+Cela crée les tables si besoin et importe les textes/pages seedés depuis le serveur OVH lui-même.
 
 ## 5. Vérifier après mise en ligne
 
@@ -107,6 +133,9 @@ Important :
 5. recharge la page publique correspondante
 6. téléverse une image depuis /admin/media
 7. colle son URL dans une page et republie
+8. ajuste les informations globales du site depuis /admin/settings
+9. contrôle les images historiques déjà présentes sur le site public
+10. supprime ensuite admin/install.php et le dossier install si tu ne veux plus laisser l'outil d'import sur le serveur
 
 ## 6. Cycle de travail recommandé
 
@@ -126,12 +155,12 @@ Pour le contenu :
 
 - le rendu public PHP reprend l'identité visuelle et le modèle de contenu, mais pas l'intégralité des composants Astro avancés
 - le blog Astro existant n'a pas encore été rebranché sur le runtime PHP mutualisé
-- les réglages globaux de site sont semés via SQL mais ne disposent pas encore d'un écran dédié dans l'admin
+- la couche PHP est prête pour une mise en ligne rapide, mais demandera encore un second passage si tu veux un rendu pixel-perfect par rapport au front Astro actuel
 
 ## 8. Étape suivante recommandée
 
 Après la première mise en ligne, la suite logique est :
 
-1. ajouter un écran admin de réglages globaux
-2. brancher le blog sur le front PHP si tu veux l'éditer depuis le CMS aussi
-3. rapprocher encore le rendu PHP de la home Astro actuelle si tu veux un match visuel presque parfait
+1. brancher le blog sur le front PHP si tu veux l'éditer depuis le CMS aussi
+2. rapprocher encore le rendu PHP de la home Astro actuelle si tu veux un match visuel presque parfait
+3. ajouter un export/sauvegarde automatisé de la base et des uploads pour l'exploitation OVH

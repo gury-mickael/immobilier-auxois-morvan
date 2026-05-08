@@ -83,6 +83,8 @@ CREATE TABLE IF NOT EXISTS cms_site_settings (
   baseline LONGTEXT NOT NULL,
   mickael_name VARCHAR(150) NOT NULL,
   marion_name VARCHAR(150) NOT NULL,
+  mickael_photo VARCHAR(255) DEFAULT NULL,
+  marion_photo VARCHAR(255) DEFAULT NULL,
   phone VARCHAR(50) NOT NULL,
   email VARCHAR(190) NOT NULL,
   main_city VARCHAR(150) NOT NULL,

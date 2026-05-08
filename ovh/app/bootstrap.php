@@ -53,6 +53,7 @@ function cms_config(): array
         'session_cookie_name' => (string) $get('SESSION_COOKIE_NAME', 'immobilier_auxois_admin'),
         'upload_dir' => trim((string) $get('UPLOAD_DIR', 'uploads/cms'), '/'),
         'upload_public_base' => '/' . trim((string) $get('UPLOAD_PUBLIC_BASE', '/uploads/cms'), '/'),
+        'install_token' => (string) $get('INSTALL_TOKEN', ''),
     ];
 
     return $config;
@@ -93,6 +94,7 @@ function cms_db(): PDO
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
+        PDO::MYSQL_ATTR_MULTI_STATEMENTS => true,
     ]);
 
     return $pdo;
@@ -105,18 +107,16 @@ function cms_h(?string $value): string
 
 function cms_base_url(): string
 {
-    $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
-    $directory = trim(str_replace('\\', '/', dirname($scriptName)), '/');
+    $appUrl = cms_config()['app_url'] ?? '';
+    $path = parse_url($appUrl, PHP_URL_PATH);
 
-    if ($directory === '' || $directory === '.') {
+    if (!is_string($path)) {
         return '';
     }
 
-    if (str_ends_with($directory, '/admin')) {
-        return '/' . trim(substr($directory, 0, -6), '/');
-    }
+    $path = trim($path, '/');
 
-    return '/' . $directory;
+    return $path === '' ? '' : '/' . $path;
 }
 
 function cms_url(string $path = '/'): string
@@ -161,8 +161,9 @@ function cms_require_csrf(): void
 {
     cms_bootstrap_session();
     $token = $_POST['_csrf'] ?? '';
+    $sessionToken = $_SESSION['csrf_token'] ?? null;
 
-    if (!is_string($token) || !hash_equals((string) ($_SESSION['csrf_token'] ?? ''), $token)) {
+    if (!is_string($token) || $token === '' || !is_string($sessionToken) || $sessionToken === '' || !hash_equals($sessionToken, $token)) {
         http_response_code(419);
         exit('Jeton CSRF invalide.');
     }
@@ -175,6 +176,8 @@ function cms_default_settings(): array
         'baseline' => 'Mickael Gury et Marion Roulier accompagnent les projets immobiliers en Auxois et dans le Morvan.',
         'mickael_name' => 'Mickael Gury',
         'marion_name' => 'Marion Roulier',
+        'mickael_photo' => '',
+        'marion_photo' => '',
         'phone' => '',
         'email' => '',
         'main_city' => 'Arnay-le-Duc',
@@ -188,8 +191,40 @@ function cms_default_settings(): array
     ];
 }
 
+function cms_ensure_site_settings_media_columns(): void
+{
+    static $done = false;
+
+    if ($done) {
+        return;
+    }
+
+    $pdo = cms_db();
+    $statement = $pdo->prepare(
+        "SELECT COLUMN_NAME
+           FROM INFORMATION_SCHEMA.COLUMNS
+          WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_NAME = 'cms_site_settings'
+            AND COLUMN_NAME IN ('mickael_photo', 'marion_photo')"
+    );
+    $statement->execute();
+    $existing = array_flip(array_column($statement->fetchAll(), 'COLUMN_NAME'));
+
+    if (!isset($existing['mickael_photo'])) {
+        $pdo->exec("ALTER TABLE cms_site_settings ADD COLUMN mickael_photo VARCHAR(255) DEFAULT NULL AFTER marion_name");
+    }
+
+    if (!isset($existing['marion_photo'])) {
+        $pdo->exec("ALTER TABLE cms_site_settings ADD COLUMN marion_photo VARCHAR(255) DEFAULT NULL AFTER mickael_photo");
+    }
+
+    $done = true;
+}
+
 function cms_settings(): array
 {
+    cms_ensure_site_settings_media_columns();
+
     $defaults = cms_default_settings();
     $statement = cms_db()->query('SELECT * FROM cms_site_settings WHERE id = 1 LIMIT 1');
     $row = $statement->fetch();
@@ -199,6 +234,55 @@ function cms_settings(): array
     }
 
     return array_merge($defaults, $row);
+}
+
+function cms_save_settings(array $payload): void
+{
+    cms_ensure_site_settings_media_columns();
+
+    $statement = cms_db()->prepare(
+        'INSERT INTO cms_site_settings (
+            id, site_name, baseline, mickael_name, marion_name, phone, email, main_city,
+            mickael_photo, marion_photo, covered_areas_json, facebook_url, instagram_url, iad_url, footer_text,
+            main_cta_label, main_cta_url
+         ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+            site_name = VALUES(site_name),
+            baseline = VALUES(baseline),
+            mickael_name = VALUES(mickael_name),
+            marion_name = VALUES(marion_name),
+            mickael_photo = VALUES(mickael_photo),
+            marion_photo = VALUES(marion_photo),
+            phone = VALUES(phone),
+            email = VALUES(email),
+            main_city = VALUES(main_city),
+            covered_areas_json = VALUES(covered_areas_json),
+            facebook_url = VALUES(facebook_url),
+            instagram_url = VALUES(instagram_url),
+            iad_url = VALUES(iad_url),
+            footer_text = VALUES(footer_text),
+            main_cta_label = VALUES(main_cta_label),
+            main_cta_url = VALUES(main_cta_url)'
+    );
+
+    $statement->execute([
+        trim((string) ($payload['site_name'] ?? '')),
+        trim((string) ($payload['baseline'] ?? '')),
+        trim((string) ($payload['mickael_name'] ?? '')),
+        trim((string) ($payload['marion_name'] ?? '')),
+        trim((string) ($payload['phone'] ?? '')),
+        trim((string) ($payload['email'] ?? '')),
+        trim((string) ($payload['main_city'] ?? '')),
+        trim((string) ($payload['mickael_photo'] ?? '')) ?: null,
+        trim((string) ($payload['marion_photo'] ?? '')) ?: null,
+        json_encode(cms_parse_lines((string) ($payload['covered_areas'] ?? '')), JSON_UNESCAPED_UNICODE),
+        trim((string) ($payload['facebook_url'] ?? '')) ?: null,
+        trim((string) ($payload['instagram_url'] ?? '')) ?: null,
+        trim((string) ($payload['iad_url'] ?? '')) ?: null,
+        trim((string) ($payload['footer_text'] ?? '')),
+        trim((string) ($payload['main_cta_label'] ?? '')),
+        trim((string) ($payload['main_cta_url'] ?? '')),
+    ]);
 }
 
 function cms_main_page_defaults(): array
@@ -552,7 +636,7 @@ function cms_upload_directory(): string
     return $directory;
 }
 
-function cms_store_uploaded_media(array $file, string $title = '', string $altText = ''): void
+function cms_store_uploaded_media(array $file, string $title = '', string $altText = ''): string
 {
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
         throw new RuntimeException('Le téléversement a échoué.');
@@ -595,6 +679,78 @@ function cms_store_uploaded_media(array $file, string $title = '', string $altTe
         $altText !== '' ? $altText : null,
         $title !== '' ? $title : null,
     ]);
+
+    return $publicUrl;
+}
+
+function cms_handle_contact_request(array $settings): array
+{
+    $trap = trim((string) ($_POST['website'] ?? ''));
+
+    if ($trap !== '') {
+        return [];
+    }
+
+    $name = trim((string) ($_POST['name'] ?? ''));
+    $email = trim((string) ($_POST['email'] ?? ''));
+    $phone = trim((string) ($_POST['phone'] ?? ''));
+    $project = trim((string) ($_POST['project'] ?? ''));
+    $location = trim((string) ($_POST['location'] ?? ''));
+    $subject = trim((string) ($_POST['subject'] ?? ''));
+    $message = trim((string) ($_POST['message'] ?? ''));
+    $privacy = (string) ($_POST['privacy'] ?? '');
+    $errors = [];
+
+    if ($name === '') {
+        $errors[] = 'Indiquez votre nom.';
+    }
+
+    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Indiquez une adresse email valide.';
+    }
+
+    if ($subject === '') {
+        $errors[] = 'Choisissez l’objet de votre demande.';
+    }
+
+    if ($message === '') {
+        $errors[] = 'Ajoutez votre message.';
+    }
+
+    if ($privacy !== '1') {
+        $errors[] = 'Validez l’autorisation de contact.';
+    }
+
+    if ($errors !== []) {
+        return $errors;
+    }
+
+    $fullSubject = trim(implode(' — ', array_filter([$subject, $project, $location])));
+    $statement = cms_db()->prepare(
+        'INSERT INTO cms_contact_requests (name, email, phone, subject, message) VALUES (?, ?, ?, ?, ?)'
+    );
+    $statement->execute([
+        $name,
+        $email,
+        $phone !== '' ? $phone : null,
+        $fullSubject !== '' ? $fullSubject : null,
+        $message,
+    ]);
+
+    $to = trim((string) ($settings['email'] ?? ''));
+    if ($to !== '' && filter_var($to, FILTER_VALIDATE_EMAIL)) {
+        $body = "Nouvelle demande depuis le site\n\n"
+            . "Nom : {$name}\n"
+            . "Email : {$email}\n"
+            . "Téléphone : {$phone}\n"
+            . "Projet : {$project}\n"
+            . "Localisation : {$location}\n"
+            . "Objet : {$subject}\n\n"
+            . $message;
+        @mail($to, 'Nouvelle demande de contact', $body, 'Reply-To: ' . $email);
+    }
+
+    return [];
 }
 
 function cms_admin_users(): array
@@ -701,6 +857,31 @@ function cms_current_admin(): ?array
     return is_array($user) ? $user : null;
 }
 
+function cms_install_token_is_valid(?string $providedToken): bool
+{
+    $configuredToken = cms_config()['install_token'] ?? '';
+
+    return $configuredToken !== ''
+        && is_string($providedToken)
+        && $providedToken !== ''
+        && hash_equals((string) $configuredToken, $providedToken);
+}
+
+function cms_run_sql_file(string $filePath): void
+{
+    if (!is_file($filePath)) {
+        throw new RuntimeException('Fichier SQL introuvable : ' . $filePath);
+    }
+
+    $sql = trim((string) file_get_contents($filePath));
+
+    if ($sql === '') {
+        return;
+    }
+
+    cms_db()->exec($sql);
+}
+
 function cms_require_admin(): array
 {
     $user = cms_current_admin();
@@ -743,6 +924,63 @@ function cms_public_navigation(): array
     }
 
     return $items;
+}
+
+function cms_snapshot(): array
+{
+    static $snapshot = null;
+
+    if (is_array($snapshot)) {
+        return $snapshot;
+    }
+
+    $path = cms_config()['root'] . '/data/content-snapshot.json';
+
+    if (!is_file($path)) {
+        $snapshot = [
+            'siteSettings' => [],
+            'localPages' => [],
+            'blogPosts' => [],
+            'testimonials' => [],
+            'services' => [],
+            'areaDescriptions' => [],
+            'areaImages' => [],
+        ];
+
+        return $snapshot;
+    }
+
+    $decoded = json_decode((string) file_get_contents($path), true);
+    $snapshot = is_array($decoded) ? $decoded : [];
+
+    return $snapshot;
+}
+
+function cms_format_long_date(string $value): string
+{
+    try {
+        $date = new DateTimeImmutable($value);
+    } catch (Throwable) {
+        return $value;
+    }
+
+    $months = [
+        1 => 'janvier',
+        2 => 'fevrier',
+        3 => 'mars',
+        4 => 'avril',
+        5 => 'mai',
+        6 => 'juin',
+        7 => 'juillet',
+        8 => 'aout',
+        9 => 'septembre',
+        10 => 'octobre',
+        11 => 'novembre',
+        12 => 'decembre',
+    ];
+
+    $month = $months[(int) $date->format('n')] ?? $date->format('m');
+    return $date->format('j') . ' ' . $month . ' ' . $date->format('Y');
 }
 
 require_once __DIR__ . '/views.php';

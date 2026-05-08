@@ -78,6 +78,8 @@ interface CmsSettingsRow {
   baseline: string;
   mickael_name: string;
   marion_name: string;
+  mickael_photo: string | null;
+  marion_photo: string | null;
   phone: string;
   email: string;
   main_city: string;
@@ -245,7 +247,7 @@ export async function getPublishedMainPageOverride(pageKey: MainPageKey) {
 export async function getSiteSettingsOverride() {
   return withDb(async (db) => {
     const [rows] = await db.query(
-      `SELECT site_name, baseline, mickael_name, marion_name, phone, email, main_city,
+      `SELECT site_name, baseline, mickael_name, marion_name, mickael_photo, marion_photo, phone, email, main_city,
               covered_areas_json, facebook_url, instagram_url, iad_url, footer_text,
               main_cta_label, main_cta_url
          FROM cms_site_settings
@@ -264,6 +266,8 @@ export async function getSiteSettingsOverride() {
       baseline: row.baseline,
       mickaelName: row.mickael_name,
       marionName: row.marion_name,
+      mickaelPhoto: row.mickael_photo ?? undefined,
+      marionPhoto: row.marion_photo ?? undefined,
       phone: row.phone,
       email: row.email,
       mainCity: row.main_city,
@@ -289,14 +293,16 @@ export async function upsertSiteSettings(payload: typeof siteSettingsFile) {
     await db.query(
       `INSERT INTO cms_site_settings (
          id, site_name, baseline, mickael_name, marion_name, phone, email, main_city,
-         covered_areas_json, facebook_url, instagram_url, iad_url, footer_text,
+         mickael_photo, marion_photo, covered_areas_json, facebook_url, instagram_url, iad_url, footer_text,
          main_cta_label, main_cta_url
-       ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE
          site_name = VALUES(site_name),
          baseline = VALUES(baseline),
          mickael_name = VALUES(mickael_name),
          marion_name = VALUES(marion_name),
+         mickael_photo = VALUES(mickael_photo),
+         marion_photo = VALUES(marion_photo),
          phone = VALUES(phone),
          email = VALUES(email),
          main_city = VALUES(main_city),
@@ -315,6 +321,8 @@ export async function upsertSiteSettings(payload: typeof siteSettingsFile) {
         payload.phone,
         payload.email,
         payload.mainCity,
+        payload.mickaelPhoto ?? null,
+        payload.marionPhoto ?? null,
         JSON.stringify(payload.coveredAreas),
         payload.facebookUrl ?? null,
         payload.instagramUrl ?? null,

@@ -13,6 +13,7 @@ try {
     }
 
     $page = cms_public_page_by_path($requestPath);
+    $settings = cms_settings();
 
     if (!$page) {
         http_response_code(404);
@@ -36,7 +37,17 @@ try {
         exit;
     }
 
-    cms_render_public_page($page, cms_settings());
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($page['page_key'] ?? null) === 'contact') {
+      $errors = cms_handle_contact_request($settings);
+
+      if ($errors === []) {
+        cms_redirect('/contact?merci=1');
+      }
+
+      $page['_contact_errors'] = $errors;
+    }
+
+    cms_render_public_page($page, $settings);
 } catch (Throwable $exception) {
     http_response_code(500);
     ?><!doctype html>

@@ -11,6 +11,7 @@ function cms_render_admin_start(string $title, string $currentNav): void
         '/admin/pages' => 'Pages principales',
         '/admin/local-pages' => 'Pages locales',
         '/admin/media' => 'Images',
+      '/admin/settings' => 'Réglages',
         '/admin/users' => 'Utilisateurs',
     ];
     ?>
@@ -322,11 +323,134 @@ function cms_render_section_editor($index, array $section): void
 
 function cms_render_public_page(array $page, array $settings): void
 {
-    $sections = cms_page_sections($page);
-    $navigation = cms_public_navigation();
-    $title = $page['title'] ?: $settings['site_name'];
-    $description = $page['meta_description'] ?: $settings['baseline'];
-    $heroImage = trim((string) ($page['hero_image'] ?? ''));
+    $snapshot = cms_snapshot();
+
+    if (($page['page_key'] ?? null) === 'accueil') {
+        cms_render_homepage($page, $settings, $snapshot);
+        return;
+    }
+
+    if (($page['page_key'] ?? null) === 'contact') {
+        cms_render_contact_page($page, $settings, $snapshot);
+        return;
+    }
+
+    cms_render_standard_public_page($page, $settings, $snapshot);
+}
+
+function cms_render_contact_page(array $page, array $settings, array $snapshot): void
+{
+    $areas = array_slice($snapshot['siteSettings']['coveredAreas'] ?? cms_json_list($settings['covered_areas_json'] ?? '[]'), 0, 8);
+    $errors = $page['_contact_errors'] ?? [];
+    $success = ($_GET['merci'] ?? '') === '1';
+    $mickaelPhoto = trim((string) ($settings['mickael_photo'] ?? ''));
+    $marionPhoto = trim((string) ($settings['marion_photo'] ?? ''));
+
+    cms_render_public_document_start((string) $page['title'] . ' | ' . (string) $settings['site_name'], (string) ($page['meta_description'] ?? $settings['baseline']), (int) ($page['is_indexable'] ?? 1) === 1);
+    cms_render_public_header($settings, (string) ($page['slug'] ?? '/contact'));
+    ?>
+    <main>
+      <section class="contact-premium-hero">
+        <div class="shell contact-premium-grid">
+          <form class="contact-premium-form" method="post" action="<?= cms_h(cms_url('/contact')) ?>">
+            <input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden-field" aria-hidden="true">
+            <p class="eyebrow">Contact direct</p>
+            <h1><?= cms_h((string) $page['hero_title']) ?></h1>
+            <p class="contact-form-lead"><?= cms_h(strip_tags((string) $page['hero_subtitle'])) ?></p>
+
+            <?php if ($success): ?>
+              <div class="contact-alert success">Merci, votre demande a bien été transmise. Nous revenons vers vous rapidement.</div>
+            <?php endif; ?>
+            <?php if ($errors): ?>
+              <div class="contact-alert error"><?= cms_h(implode(' ', $errors)) ?></div>
+            <?php endif; ?>
+
+            <div class="contact-fields three">
+              <label>Votre projet<select name="project"><option value="">Choisir</option><option value="Vendre">Vendre</option><option value="Acheter">Acheter</option><option value="Estimation">Faire estimer</option><option value="Fonds de commerce">Fonds de commerce</option></select></label>
+              <label>Localisation<input name="location" placeholder="Arnay-le-Duc, Autun..."></label>
+              <label>Objet<select name="subject" required><option value="">Choisir</option><option value="Premier rendez-vous">Premier rendez-vous</option><option value="Demande d'estimation">Demande d'estimation</option><option value="Recherche de bien">Recherche de bien</option><option value="Autre demande">Autre demande</option></select></label>
+            </div>
+            <div class="contact-fields two">
+              <label>Nom<input name="name" placeholder="Votre nom" required></label>
+              <label>Email<input type="email" name="email" placeholder="vous@exemple.fr" required></label>
+              <label>Téléphone<input type="tel" name="phone" placeholder="07.64.86.59.93"></label>
+            </div>
+            <label>Message<textarea name="message" placeholder="Décrivez votre projet, votre secteur et votre calendrier." required></textarea></label>
+            <label class="privacy-line"><input type="checkbox" name="privacy" value="1" required><span>J’accepte d’être recontacté au sujet de ma demande.</span></label>
+            <button class="button primary contact-submit" type="submit">Envoyer le message</button>
+          </form>
+
+          <aside class="contact-premium-side">
+            <div class="contact-side-card featured">
+              <p class="eyebrow">Réponse rapide</p>
+              <h2>Parlez directement à Marion et Mickael</h2>
+              <a class="contact-phone" href="<?= cms_h('tel:' . preg_replace('/\s+/', '', (string) $settings['phone'])) ?>"><?= cms_h((string) $settings['phone']) ?></a>
+              <a class="contact-mail" href="<?= cms_h('mailto:' . (string) $settings['email']) ?>"><?= cms_h((string) $settings['email']) ?></a>
+            </div>
+
+            <div class="team-photo-card">
+              <div>
+                <?php if ($marionPhoto !== ''): ?><img src="<?= cms_h(cms_url($marionPhoto)) ?>" alt="<?= cms_h((string) $settings['marion_name']) ?>"><?php else: ?><span><?= cms_h(substr((string) $settings['marion_name'], 0, 1)) ?></span><?php endif; ?>
+                <strong><?= cms_h((string) $settings['marion_name']) ?></strong>
+              </div>
+              <div>
+                <?php if ($mickaelPhoto !== ''): ?><img src="<?= cms_h(cms_url($mickaelPhoto)) ?>" alt="<?= cms_h((string) $settings['mickael_name']) ?>"><?php else: ?><span><?= cms_h(substr((string) $settings['mickael_name'], 0, 1)) ?></span><?php endif; ?>
+                <strong><?= cms_h((string) $settings['mickael_name']) ?></strong>
+              </div>
+            </div>
+
+            <div class="contact-side-card">
+              <h3>Ce que l’on prépare avec vous</h3>
+              <ul class="accent-list compact-list">
+                <li>Une estimation claire et argumentée</li>
+                <li>Un plan de vente adapté au secteur</li>
+                <li>Une recherche qualifiée si vous achetez</li>
+                <li>Un rendez-vous simple, au téléphone ou sur place</li>
+              </ul>
+            </div>
+
+            <div class="contact-side-card">
+              <h3>Secteur couvert</h3>
+              <div class="contact-tags"><?php foreach ($areas as $area): ?><span><?= cms_h((string) $area) ?></span><?php endforeach; ?></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section section-tight"><div class="shell"><article class="panel-card intro-card richtext"><?= (string) $page['intro_html'] ?></article></div></section>
+      <section class="section section-tight"><div class="shell"><div class="cta-band"><div><p class="eyebrow">Passer à l’action</p><h2><?= cms_h((string) $page['cta_title']) ?></h2><div class="richtext"><?= (string) $page['cta_text'] ?></div></div><a class="button primary" href="<?= cms_h(cms_url('/estimation')) ?>">Demander une estimation</a></div></div></section>
+    </main>
+    <?php
+    cms_render_public_footer($settings, $snapshot);
+}
+
+function cms_public_nav_items(): array
+{
+    return [
+        ['label' => 'Accueil', 'href' => '/'],
+        ['label' => 'Histoire', 'href' => '/#histoire'],
+        ['label' => 'Secteur', 'href' => '/secteur'],
+        ['label' => 'Prestations', 'href' => '/#prestations'],
+        ['label' => 'Avis clients', 'href' => '/#avis-clients'],
+        ['label' => 'Blog', 'href' => '/blog'],
+    ];
+}
+
+function cms_is_active_nav(string $currentPage, string $href): bool
+{
+    if ($href === '/') {
+        return $currentPage === '/';
+    }
+
+    if (str_starts_with($href, '/#')) {
+        return false;
+    }
+
+    return str_starts_with($currentPage, $href);
+}
+
+function cms_render_public_document_start(string $title, string $description, bool $indexable = true): void
+{
     ?>
     <!doctype html>
     <html lang="fr">
@@ -334,147 +458,250 @@ function cms_render_public_page(array $page, array $settings): void
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="<?= cms_h($description) ?>">
-        <?php if ((int) ($page['is_indexable'] ?? 1) !== 1): ?>
+        <?php if (!$indexable): ?>
           <meta name="robots" content="noindex,nofollow">
         <?php endif; ?>
-        <title><?= cms_h($title) ?> | <?= cms_h((string) $settings['site_name']) ?></title>
+        <title><?= cms_h($title) ?></title>
         <link rel="icon" type="image/svg+xml" href="<?= cms_h(cms_url('/favicon.svg')) ?>">
         <link rel="icon" href="<?= cms_h(cms_url('/favicon.ico')) ?>">
         <link rel="stylesheet" href="<?= cms_h(cms_url('/assets/site.css')) ?>">
       </head>
       <body>
-        <header class="site-header">
-          <div class="shell site-header-inner">
-            <a class="site-brand" href="<?= cms_h(cms_url('/')) ?>"><?= cms_h((string) $settings['site_name']) ?></a>
-            <nav class="site-nav">
-              <?php foreach ($navigation as $item): ?>
-                <a href="<?= cms_h(cms_url((string) $item['href'])) ?>"><?= cms_h((string) $item['label']) ?></a>
-              <?php endforeach; ?>
-            </nav>
-            <a class="site-cta" href="<?= cms_h(cms_url((string) $settings['main_cta_url'])) ?>"><?= cms_h((string) $settings['main_cta_label']) ?></a>
+    <?php
+}
+
+function cms_render_public_header(array $settings, string $currentPage): void
+{
+    ?>
+    <header class="site-header">
+      <div class="shell">
+        <nav class="site-header-bar">
+          <a class="site-logo-link" href="<?= cms_h(cms_url('/')) ?>" aria-label="Accueil Immobilier Auxois Morvan">
+            <img src="<?= cms_h(cms_url('/uploads/cropped-logo.png')) ?>" alt="Immobilier Auxois Morvan" class="site-logo">
+          </a>
+          <div class="site-nav desktop-only">
+            <?php foreach (cms_public_nav_items() as $item): ?>
+              <a class="site-nav-link<?= cms_is_active_nav($currentPage, (string) $item['href']) ? ' is-active' : '' ?>" href="<?= cms_h(cms_url((string) $item['href'])) ?>"><?= cms_h((string) $item['label']) ?></a>
+            <?php endforeach; ?>
           </div>
-        </header>
+          <a class="site-cta desktop-only" href="<?= cms_h(cms_url('/contact')) ?>">Contactez-nous</a>
+          <a class="mobile-contact" href="<?= cms_h(cms_url('/contact')) ?>">Contact</a>
+        </nav>
+      </div>
+    </header>
+    <?php
+}
 
-        <main>
-          <section class="hero">
-            <div class="shell hero-grid">
-              <div>
-                <p class="eyebrow">Immobilier Auxois Morvan</p>
-                <h1><?= cms_h((string) $page['hero_title']) ?></h1>
-                <p class="hero-text"><?= nl2br(cms_h((string) $page['hero_subtitle'])) ?></p>
-                <div class="hero-actions">
-                  <a class="button primary" href="<?= cms_h(cms_url((string) $page['cta_button_url'])) ?>"><?= cms_h((string) $page['cta_button_label']) ?></a>
-                  <a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a>
-                </div>
-              </div>
-              <div class="hero-media<?= $heroImage !== '' ? '' : ' no-image' ?>">
-                <?php if ($heroImage !== ''): ?>
-                  <img src="<?= cms_h(cms_url($heroImage)) ?>" alt="<?= cms_h((string) $page['hero_image_alt']) ?>">
-                <?php else: ?>
-                  <div class="hero-placeholder">Ajoutez une image hero depuis l’admin.</div>
-                <?php endif; ?>
-              </div>
-            </div>
-          </section>
-
-          <section class="section">
-            <div class="shell">
-              <article class="intro-card richtext"><?= (string) $page['intro_html'] ?></article>
-            </div>
-          </section>
-
-          <section class="section">
-            <div class="shell content-stack">
-              <?php foreach ($sections as $section): ?>
-                <article class="content-card">
-                  <div>
-                    <?php if (!empty($section['eyebrow'])): ?>
-                      <p class="eyebrow"><?= cms_h((string) $section['eyebrow']) ?></p>
-                    <?php endif; ?>
-                    <h2><?= cms_h((string) ($section['title'] ?? 'Section')) ?></h2>
-                    <div class="richtext"><?= (string) ($section['text'] ?? '') ?></div>
-                    <?php if (!empty($section['items'])): ?>
-                      <ul class="bullet-list">
-                        <?php foreach ($section['items'] as $item): ?>
-                          <li><?= cms_h((string) $item) ?></li>
-                        <?php endforeach; ?>
-                      </ul>
-                    <?php endif; ?>
-                    <?php if (!empty($section['buttonLabel']) && !empty($section['buttonUrl'])): ?>
-                      <a class="button tertiary" href="<?= cms_h(cms_url((string) $section['buttonUrl'])) ?>"><?= cms_h((string) $section['buttonLabel']) ?></a>
-                    <?php endif; ?>
-                  </div>
-                  <div>
-                    <?php if (!empty($section['image'])): ?>
-                      <img class="section-image" src="<?= cms_h(cms_url((string) $section['image'])) ?>" alt="<?= cms_h((string) ($section['imageAlt'] ?? '')) ?>">
-                    <?php endif; ?>
-                    <?php if (!empty($section['stats'])): ?>
-                      <div class="stats-grid">
-                        <?php foreach ($section['stats'] as $stat): ?>
-                          <div class="stat-card">
-                            <strong><?= cms_h((string) ($stat['value'] ?? '')) ?></strong>
-                            <span><?= cms_h((string) ($stat['label'] ?? '')) ?></span>
-                          </div>
-                        <?php endforeach; ?>
-                      </div>
-                    <?php endif; ?>
-                  </div>
-                </article>
-              <?php endforeach; ?>
-            </div>
-          </section>
-
-          <?php if (($page['page_type'] ?? 'main') === 'local'): ?>
-            <?php $advantages = cms_json_list($page['local_advantages_json'] ?? '[]'); ?>
-            <?php $nearbyCities = cms_json_list($page['nearby_cities_json'] ?? '[]'); ?>
-            <section class="section">
-              <div class="shell twin-panels">
-                <article class="content-card compact-card">
-                  <h2>Atouts locaux</h2>
-                  <ul class="bullet-list">
-                    <?php foreach ($advantages as $item): ?>
-                      <li><?= cms_h($item) ?></li>
-                    <?php endforeach; ?>
-                  </ul>
-                </article>
-                <article class="content-card compact-card">
-                  <h2>Villes proches</h2>
-                  <div class="tag-list">
-                    <?php foreach ($nearbyCities as $city): ?>
-                      <span><?= cms_h($city) ?></span>
-                    <?php endforeach; ?>
-                  </div>
-                </article>
-              </div>
-            </section>
-          <?php endif; ?>
-
-          <section class="section">
-            <div class="shell cta-band">
-              <div>
-                <p class="eyebrow">Passer à l’action</p>
-                <h2><?= cms_h((string) $page['cta_title']) ?></h2>
-                <div class="richtext"><?= (string) $page['cta_text'] ?></div>
-              </div>
-              <a class="button primary" href="<?= cms_h(cms_url((string) $page['cta_button_url'])) ?>"><?= cms_h((string) $page['cta_button_label']) ?></a>
-            </div>
-          </section>
-        </main>
-
-        <footer class="site-footer">
-          <div class="shell footer-grid">
-            <div>
-              <strong><?= cms_h((string) $settings['site_name']) ?></strong>
-              <p><?= cms_h((string) $settings['footer_text']) ?></p>
-            </div>
-            <div>
-              <p><?= cms_h((string) $settings['mickael_name']) ?> & <?= cms_h((string) $settings['marion_name']) ?></p>
-              <p><?= cms_h((string) $settings['phone']) ?></p>
-              <p><?= cms_h((string) $settings['email']) ?></p>
+function cms_render_public_footer(array $settings, array $snapshot): void
+{
+    $areas = array_slice($snapshot['siteSettings']['coveredAreas'] ?? cms_json_list($settings['covered_areas_json'] ?? '[]'), 0, 6);
+    $services = $snapshot['services'] ?? [];
+    ?>
+    <footer class="site-footer">
+      <div class="shell footer-shell">
+        <div class="footer-top">
+          <div class="footer-brand-column">
+            <img src="<?= cms_h(cms_url('/uploads/cropped-logo.png')) ?>" alt="Immobilier Auxois Morvan" class="footer-logo">
+            <p class="footer-copy"><?= cms_h((string) $settings['footer_text']) ?></p>
+            <div class="footer-socials">
+              <?php if (!empty($settings['facebook_url'])): ?><a href="<?= cms_h((string) $settings['facebook_url']) ?>">Facebook</a><?php endif; ?>
+              <?php if (!empty($settings['instagram_url'])): ?><a href="<?= cms_h((string) $settings['instagram_url']) ?>">Instagram</a><?php endif; ?>
+              <?php if (!empty($settings['iad_url'])): ?><a href="<?= cms_h((string) $settings['iad_url']) ?>">IAD</a><?php endif; ?>
             </div>
           </div>
-        </footer>
-      </body>
+          <div class="footer-columns">
+            <div>
+              <h3>Navigation</h3>
+              <a href="<?= cms_h(cms_url('/')) ?>">Accueil</a>
+              <a href="<?= cms_h(cms_url('/#histoire')) ?>">Histoire</a>
+              <a href="<?= cms_h(cms_url('/secteur')) ?>">Secteur</a>
+              <a href="<?= cms_h(cms_url('/#avis-clients')) ?>">Avis clients</a>
+              <a href="<?= cms_h(cms_url('/blog')) ?>">Blog</a>
+              <a href="<?= cms_h(cms_url('/contact')) ?>">Contact</a>
+            </div>
+            <div>
+              <h3>Prestations</h3>
+              <?php foreach ($services as $service): ?>
+                <a href="<?= cms_h(cms_url((string) $service['href'])) ?>"><?= cms_h((string) $service['title']) ?></a>
+              <?php endforeach; ?>
+            </div>
+            <div>
+              <h3>Secteur</h3>
+              <?php foreach ($areas as $area): ?>
+                <span><?= cms_h((string) $area) ?></span>
+              <?php endforeach; ?>
+            </div>
+            <div>
+              <h3>Conseillers</h3>
+              <span><?= cms_h((string) $settings['marion_name']) ?></span>
+              <span><?= cms_h((string) $settings['mickael_name']) ?></span>
+              <span><?= cms_h((string) $settings['main_city']) ?></span>
+              <a href="<?= cms_h(cms_url('/contact')) ?>">Voir la page contact</a>
+            </div>
+            <div>
+              <h3>Contact</h3>
+              <a href="<?= cms_h('tel:' . preg_replace('/\s+/', '', (string) $settings['phone'])) ?>"><?= cms_h((string) $settings['phone']) ?></a>
+              <a href="<?= cms_h('mailto:' . (string) $settings['email']) ?>"><?= cms_h((string) $settings['email']) ?></a>
+              <a class="footer-button" href="<?= cms_h(cms_url('/contact')) ?>">Nous écrire</a>
+            </div>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p><?= cms_h((string) $settings['footer_text']) ?></p>
+          <div>
+            <a href="<?= cms_h(cms_url('/contact')) ?>">Mentions légales</a>
+            <a href="<?= cms_h(cms_url('/contact')) ?>">Politique de confidentialité</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+    </body>
     </html>
     <?php
+}
+
+function cms_visible_sections(array $page): array
+{
+  return cms_page_sections($page);
+}
+
+function cms_render_homepage(array $page, array $settings, array $snapshot): void
+{
+    $sections = cms_visible_sections($page);
+    $reassurance = $sections[0] ?? null;
+    $whyUs = $sections[1] ?? null;
+    $iadSupport = $sections[2] ?? null;
+    $heroImage = trim((string) ($page['hero_image'] ?? ''));
+    $areas = array_slice($snapshot['siteSettings']['coveredAreas'] ?? cms_json_list($settings['covered_areas_json'] ?? '[]'), 0, 6);
+    $services = $snapshot['services'] ?? [];
+    $localPages = array_slice($snapshot['localPages'] ?? [], 0, 3);
+    $blogPosts = array_slice($snapshot['blogPosts'] ?? [], 0, 3);
+    $testimonials = $snapshot['testimonials'] ?? [];
+
+    cms_render_public_document_start((string) $page['title'] . ' | ' . (string) $settings['site_name'], (string) ($page['meta_description'] ?? $settings['baseline']), (int) ($page['is_indexable'] ?? 1) === 1);
+    cms_render_public_header($settings, '/');
+    ?>
+    <main>
+      <section class="section section-hero">
+        <div class="shell home-hero-grid">
+          <div class="home-hero-copy">
+            <p class="eyebrow">Conseillers immobiliers locaux</p>
+            <h1><?= cms_h((string) $page['hero_title']) ?></h1>
+            <div class="hero-text richtext"><?= (string) $page['hero_subtitle'] ?></div>
+            <div class="hero-actions">
+              <a class="button primary" href="<?= cms_h(cms_url('/estimation')) ?>">Faire estimer mon bien</a>
+              <a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a>
+            </div>
+          </div>
+          <div class="home-hero-side">
+            <div class="hero-media<?= $heroImage !== '' ? '' : ' no-image' ?>"><?php if ($heroImage !== ''): ?><img src="<?= cms_h(cms_url($heroImage)) ?>" alt="<?= cms_h((string) $page['hero_image_alt']) ?>"><?php endif; ?></div>
+            <div class="home-stats-grid">
+              <div class="home-stat-card"><p><?= cms_h((string) $settings['main_city']) ?></p><span>Ville repère</span></div>
+              <div class="home-stat-card"><p>Auxois &amp; Morvan</p><span>Secteur couvert</span></div>
+              <div class="home-stat-card"><p>IAD France</p><span>Réseau national</span></div>
+              <div class="home-stat-card"><p>Suivi humain</p><span>Méthode de travail</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="histoire" class="section section-tight">
+        <div class="shell duo-grid">
+          <article class="panel-card">
+            <p class="eyebrow">Immobilier en Auxois et Morvan</p>
+            <h2><?= cms_h((string) ($reassurance['title'] ?? 'Un accompagnement cadré, clair et humain')) ?></h2>
+            <div class="richtext panel-copy"><?= (string) ($reassurance['text'] ?? $page['intro_html']) ?></div>
+            <?php if (!empty($reassurance['items'])): ?><ul class="accent-list"><?php foreach ($reassurance['items'] as $item): ?><li><?= cms_h((string) $item) ?></li><?php endforeach; ?></ul><?php endif; ?>
+          </article>
+          <article class="panel-card panel-muted">
+            <p class="eyebrow">Qui sommes-nous ?</p>
+            <h2><?= cms_h((string) $settings['mickael_name']) ?> &amp; <?= cms_h((string) $settings['marion_name']) ?></h2>
+            <p class="panel-copy"><?= cms_h((string) $settings['baseline']) ?></p>
+            <div class="mini-grid"><?php foreach (array_slice($areas, 0, 4) as $area): ?><div><?= cms_h((string) $area) ?></div><?php endforeach; ?></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="prestations" class="section section-tight">
+        <div class="shell duo-grid duo-grid-small">
+          <?php if ($whyUs): ?><article class="panel-card feature-card"><h3><?= cms_h((string) $whyUs['title']) ?></h3><div class="richtext panel-copy"><?= (string) $whyUs['text'] ?></div><?php if (!empty($whyUs['items'])): ?><ul class="accent-list"><?php foreach ($whyUs['items'] as $item): ?><li><?= cms_h((string) $item) ?></li><?php endforeach; ?></ul><?php endif; ?></article><?php endif; ?>
+          <article class="panel-card feature-card"><h3>Une méthode posée, lisible et défendue sur le terrain</h3><div class="richtext panel-copy"><?= (string) $page['intro_html'] ?></div><?php if (!empty($reassurance['items'])): ?><ul class="accent-list"><?php foreach ($reassurance['items'] as $item): ?><li><?= cms_h((string) $item) ?></li><?php endforeach; ?></ul><?php endif; ?></article>
+        </div>
+      </section>
+
+      <section id="avis-clients" class="section section-tight">
+        <div class="shell">
+          <p class="eyebrow">Services</p>
+          <h2 class="section-title">Nos services</h2>
+          <p class="section-subtitle">Une présence utile pour vendre, acheter, estimer un bien ou préparer une transmission de commerce.</p>
+          <div class="services-grid">
+            <?php foreach ($services as $service): ?><a class="service-card" href="<?= cms_h(cms_url((string) $service['href'])) ?>"><p class="card-kicker">Service</p><h3><?= cms_h((string) $service['title']) ?></h3><p><?= cms_h((string) $service['description']) ?></p><ul class="accent-list compact-list"><?php foreach (($service['features'] ?? []) as $feature): ?><li><?= cms_h((string) $feature) ?></li><?php endforeach; ?></ul><span class="card-link">En savoir plus →</span></a><?php endforeach; ?>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell stack-lg">
+          <div>
+            <p class="eyebrow">Secteur local</p>
+            <h2 class="section-title">Notre secteur local</h2>
+            <p class="section-subtitle">Des repères concrets sur les villes et bassins de vie où nous accompagnons régulièrement des projets immobiliers.</p>
+            <div class="cards-grid three-cols"><?php foreach ($areas as $area): ?><article class="soft-card area-card"><img src="<?= cms_h(cms_url((string) ($snapshot['areaImages'][$area] ?? '/uploads/auxois.jpg'))) ?>" alt="<?= cms_h((string) $area) ?>"><div><p class="card-kicker">Secteur</p><h3><?= cms_h((string) $area) ?></h3><p><?= cms_h((string) ($snapshot['areaDescriptions'][$area] ?? 'Un secteur suivi avec attention pour ses dynamiques de marché et ses projets de vie.')) ?></p></div></article><?php endforeach; ?></div>
+          </div>
+          <div>
+            <p class="eyebrow">SEO local</p>
+            <h2 class="section-title">Quelques pages locales déjà prêtes</h2>
+            <p class="section-subtitle">Le site peut accueillir facilement de nouvelles pages ciblées par ville ou intention de recherche.</p>
+            <div class="cards-grid three-cols"><?php foreach ($localPages as $localPage): ?><article class="soft-card local-card"><img src="<?= cms_h(cms_url((string) $localPage['image'])) ?>" alt="<?= cms_h((string) $localPage['title']) ?>"><div><p class="card-kicker"><?= cms_h(str_replace('-', ' ', (string) $localPage['pageType'])) ?></p><h3><?= cms_h((string) $localPage['title']) ?></h3><p class="card-city"><?= cms_h((string) $localPage['city']) ?></p><p><?= cms_h((string) $localPage['excerpt']) ?></p><a class="card-link-inline" href="<?= cms_h(cms_url((string) $localPage['href'])) ?>">Voir la page locale →</a></div></article><?php endforeach; ?></div>
+          </div>
+        </div>
+      </section>
+
+      <?php if ($iadSupport): ?><section class="section section-tight"><div class="shell"><div class="panel-card iad-panel"><div><p class="eyebrow"><?= cms_h((string) ($iadSupport['eyebrow'] ?? 'Réseau')) ?></p><h2><?= cms_h((string) $iadSupport['title']) ?></h2><div class="richtext panel-copy"><?= (string) $iadSupport['text'] ?></div></div><div class="stats-tiles"><?php foreach (($iadSupport['stats'] ?? []) as $stat): ?><div class="tile-card"><strong><?= cms_h((string) ($stat['value'] ?? '')) ?></strong><span><?= cms_h((string) ($stat['label'] ?? '')) ?></span></div><?php endforeach; ?></div></div></div></section><?php endif; ?>
+
+      <section class="section section-tight"><div class="shell"><p class="eyebrow">Avis clients</p><h2 class="section-title">Des retours fondés sur la qualité du suivi</h2><p class="section-subtitle">Des échanges clairs, une présence régulière et une vraie lecture du terrain pour accompagner le projet jusqu’au bout.</p><div class="cards-grid three-cols"><?php foreach ($testimonials as $testimonial): ?><article class="testimonial-card"><div class="dots-row"><?php for ($index = 0; $index < (int) ($testimonial['rating'] ?? 5); $index += 1): ?><span></span><?php endfor; ?></div><p class="testimonial-quote">“<?= cms_h((string) $testimonial['quote']) ?>”</p><div class="testimonial-meta"><strong><?= cms_h((string) $testimonial['author']) ?></strong><span><?= cms_h(implode(' — ', array_filter([(string) ($testimonial['title'] ?? ''), (string) ($testimonial['location'] ?? '')]))) ?></span></div></article><?php endforeach; ?></div></div></section>
+
+      <section class="section section-tight"><div class="shell"><p class="eyebrow">Blog</p><h2 class="section-title">Derniers articles</h2><p class="section-subtitle">Des contenus utiles pour comprendre le marché local, préparer une vente et cadrer un projet immobilier.</p><div class="cards-grid three-cols"><?php foreach ($blogPosts as $post): ?><article class="blog-card"><a href="<?= cms_h(cms_url((string) $post['href'])) ?>"><img src="<?= cms_h(cms_url((string) $post['image'])) ?>" alt="<?= cms_h((string) ($post['imageAlt'] ?? $post['title'])) ?>"><div class="blog-card-body"><div class="blog-meta"><span><?= cms_h((string) $post['category']) ?></span><span class="meta-dot"></span><span><?= cms_h(cms_format_long_date((string) $post['date'])) ?></span></div><h3><?= cms_h((string) $post['title']) ?></h3><p><?= cms_h((string) $post['excerpt']) ?></p><span class="card-link-inline">Lire l'article →</span></div></a></article><?php endforeach; ?></div></div></section>
+
+      <section class="section section-tight"><div class="shell"><div class="cta-band cta-band-hero"><div><p class="eyebrow">Parlez de votre projet avec un conseiller local</p><h2><?= cms_h((string) $page['cta_title']) ?></h2><div class="richtext"><?= (string) $page['cta_text'] ?></div></div><div class="cta-actions"><a class="button primary" href="<?= cms_h(cms_url((string) $page['cta_button_url'])) ?>"><?= cms_h((string) $page['cta_button_label']) ?></a><a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a></div></div></div></section>
+    </main>
+    <?php
+    cms_render_public_footer($settings, $snapshot);
+}
+
+function cms_render_standard_public_page(array $page, array $settings, array $snapshot): void
+{
+    $sections = cms_page_sections($page);
+    $heroImage = trim((string) ($page['hero_image'] ?? ''));
+
+    cms_render_public_document_start((string) $page['title'] . ' | ' . (string) $settings['site_name'], (string) ($page['meta_description'] ?? $settings['baseline']), (int) ($page['is_indexable'] ?? 1) === 1);
+    cms_render_public_header($settings, (string) ($page['slug'] ?? '/'));
+    ?>
+    <main>
+      <section class="section section-hero section-hero-inner">
+        <div class="shell home-hero-grid">
+          <div class="home-hero-copy">
+            <p class="eyebrow"><?= cms_h((string) (($page['page_type'] ?? 'main') === 'local' ? 'Page locale' : 'Conseil immobilier local')) ?></p>
+            <h1><?= cms_h((string) $page['hero_title']) ?></h1>
+            <div class="hero-text richtext"><?= (string) $page['hero_subtitle'] ?></div>
+            <div class="hero-actions"><a class="button primary" href="<?= cms_h(cms_url((string) $page['cta_button_url'])) ?>"><?= cms_h((string) $page['cta_button_label']) ?></a><a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a></div>
+          </div>
+          <div class="home-hero-side"><div class="hero-media<?= $heroImage !== '' ? '' : ' no-image' ?>"><?php if ($heroImage !== ''): ?><img src="<?= cms_h(cms_url($heroImage)) ?>" alt="<?= cms_h((string) $page['hero_image_alt']) ?>"><?php endif; ?></div></div>
+        </div>
+      </section>
+
+      <section class="section section-tight"><div class="shell"><article class="panel-card intro-card richtext"><?= (string) $page['intro_html'] ?></article></div></section>
+
+      <section class="section section-tight"><div class="shell standard-sections"><?php foreach ($sections as $section): ?><article class="panel-card standard-section-card"><div><?php if (!empty($section['eyebrow'])): ?><p class="eyebrow"><?= cms_h((string) $section['eyebrow']) ?></p><?php endif; ?><h2><?= cms_h((string) ($section['title'] ?? 'Section')) ?></h2><div class="richtext panel-copy"><?= (string) ($section['text'] ?? '') ?></div><?php if (!empty($section['items'])): ?><ul class="accent-list"><?php foreach ($section['items'] as $item): ?><li><?= cms_h((string) $item) ?></li><?php endforeach; ?></ul><?php endif; ?></div><div><?php if (!empty($section['image'])): ?><img class="section-image" src="<?= cms_h(cms_url((string) $section['image'])) ?>" alt="<?= cms_h((string) ($section['imageAlt'] ?? '')) ?>"><?php endif; ?><?php if (!empty($section['stats'])): ?><div class="stats-tiles"><?php foreach ($section['stats'] as $stat): ?><div class="tile-card"><strong><?= cms_h((string) ($stat['value'] ?? '')) ?></strong><span><?= cms_h((string) ($stat['label'] ?? '')) ?></span></div><?php endforeach; ?></div><?php endif; ?></div></article><?php endforeach; ?></div></section>
+
+      <?php if (($page['page_type'] ?? 'main') === 'local'): ?>
+        <?php $advantages = cms_json_list($page['local_advantages_json'] ?? '[]'); ?>
+        <?php $nearbyCities = cms_json_list($page['nearby_cities_json'] ?? '[]'); ?>
+        <section class="section section-tight"><div class="shell duo-grid duo-grid-small"><article class="panel-card"><h2>Atouts locaux</h2><ul class="accent-list"><?php foreach ($advantages as $item): ?><li><?= cms_h($item) ?></li><?php endforeach; ?></ul></article><article class="panel-card"><h2>Villes proches</h2><div class="tags-wrap"><?php foreach ($nearbyCities as $city): ?><span><?= cms_h($city) ?></span><?php endforeach; ?></div></article></div></section>
+      <?php endif; ?>
+
+      <section class="section section-tight"><div class="shell"><div class="cta-band"><div><p class="eyebrow">Passer à l’action</p><h2><?= cms_h((string) $page['cta_title']) ?></h2><div class="richtext"><?= (string) $page['cta_text'] ?></div></div><a class="button primary" href="<?= cms_h(cms_url((string) $page['cta_button_url'])) ?>"><?= cms_h((string) $page['cta_button_label']) ?></a></div></div></section>
+    </main>
+    <?php
+    cms_render_public_footer($settings, $snapshot);
 }

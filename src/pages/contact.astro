@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Hero from '../components/Hero.astro';
 import ContentSections from '../components/ContentSections.astro';
 import ContactBlock from '../components/ContactBlock.astro';
 import CTASection from '../components/CTASection.astro';
@@ -9,31 +8,10 @@ import { getPageContent, getSiteSettings, resolveAssetSrc } from '../lib/content
 const [page, siteSettings] = await Promise.all([getPageContent('contact'), getSiteSettings()]);
 
 const heroImage = resolveAssetSrc(page.data.heroImage);
-const stats = [
-  { value: siteSettings.phone, label: 'Téléphone' },
-  { value: siteSettings.email, label: 'Email' },
-  { value: siteSettings.mainCity, label: 'Ville principale' },
-  { value: 'Auxois & Morvan', label: 'Secteur couvert' }
-];
 ---
 
 <Layout title={page.data.title} description={page.data.metaDescription} currentPage="/contact" image={heroImage}>
-  <Hero
-    eyebrow="Contact"
-    title={page.data.heroTitle}
-    subtitle={page.data.heroSubtitle}
-    image={heroImage}
-    imageAlt={page.data.heroImageAlt}
-    stats={stats}
-    actions={[
-      { label: page.data.ctaButtonLabel, href: page.data.ctaButtonUrl, variant: 'primary' },
-      { label: 'Voir notre secteur', href: '/secteur', variant: 'outline' }
-    ]}
-  />
-
-  <ContentSections intro={page.data.intro} introEyebrow="Échange" introTitle="Un premier contact simple et professionnel" sections={page.data.sections} />
-
-  <section class="section pt-0">
+  <section class="section bg-[radial-gradient(circle_at_18%_0%,rgba(22,101,138,0.14),transparent_32%),linear-gradient(180deg,#f7f9fb_0%,#ffffff_72%)] pt-10">
     <div class="shell">
       <ContactBlock
         phone={siteSettings.phone}
@@ -41,9 +19,13 @@ const stats = [
         coveredAreas={siteSettings.coveredAreas}
         mickaelName={siteSettings.mickaelName}
         marionName={siteSettings.marionName}
+        mickaelPhoto={siteSettings.mickaelPhoto}
+        marionPhoto={siteSettings.marionPhoto}
       />
     </div>
   </section>
+
+  <ContentSections intro={page.data.intro} introEyebrow="Échange" introTitle="Un premier contact simple et professionnel" sections={page.data.sections} />
 
   <section class="section pt-0">
     <div class="shell">
