@@ -624,6 +624,61 @@ function cms_media_items(): array
     return $statement->fetchAll();
 }
 
+function cms_media_public_url(array $item): string
+{
+    $publicUrl = trim((string) ($item['public_url'] ?? ''));
+    $fileName = trim((string) ($item['file_name'] ?? ''));
+
+    if ($publicUrl !== '' && preg_match('#^https?://#i', $publicUrl) === 1) {
+        return $publicUrl;
+    }
+
+    $config = cms_config();
+    $uploadBase = rtrim((string) ($config['upload_public_base'] ?? '/uploads/cms'), '/');
+    $candidates = [];
+
+    if ($publicUrl !== '') {
+        $candidates[] = '/' . ltrim($publicUrl, '/');
+    }
+
+    if ($fileName !== '') {
+        $candidates[] = $uploadBase . '/' . ltrim($fileName, '/');
+        $candidates[] = '/uploads/' . ltrim($fileName, '/');
+    }
+
+    if ($publicUrl !== '' && !str_contains($publicUrl, '/')) {
+        $candidates[] = $uploadBase . '/' . $publicUrl;
+        $candidates[] = '/uploads/' . $publicUrl;
+    }
+
+    $seen = [];
+    foreach ($candidates as $candidate) {
+        $normalized = '/' . ltrim($candidate, '/');
+        if (isset($seen[$normalized])) {
+            continue;
+        }
+
+        $seen[$normalized] = true;
+        $path = cms_config()['root'] . $normalized;
+        if (is_file($path)) {
+            return $normalized;
+        }
+    }
+
+    return $publicUrl !== '' ? '/' . ltrim($publicUrl, '/') : $uploadBase . '/' . ltrim($fileName, '/');
+}
+
+function cms_media_is_available(array $item): bool
+{
+    $publicUrl = cms_media_public_url($item);
+
+    if (preg_match('#^https?://#i', $publicUrl) === 1) {
+        return true;
+    }
+
+    return is_file(cms_config()['root'] . '/' . ltrim($publicUrl, '/'));
+}
+
 function cms_upload_directory(): string
 {
     $config = cms_config();

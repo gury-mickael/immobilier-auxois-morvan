@@ -238,6 +238,225 @@ textarea { resize: vertical; min-height: 8rem; }
 .media-card img { width: 100%; aspect-ratio: 1.3 / 1; object-fit: cover; display: block; }
 .media-meta { padding: 1rem; display: grid; gap: 0.75rem; }
 
+.media-panel {
+  padding: 1.75rem;
+}
+
+.media-panel-head {
+  align-items: end;
+}
+
+.media-lead {
+  max-width: 44rem;
+  margin-bottom: 0;
+}
+
+.media-stats-card {
+  min-width: 12rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  background: linear-gradient(180deg, rgba(22, 101, 138, 0.08), rgba(22, 101, 138, 0.03));
+  text-align: right;
+}
+
+.media-stats-card strong {
+  display: block;
+  font-size: 2rem;
+  letter-spacing: -0.05em;
+}
+
+.media-stats-card span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.media-upload-layout {
+  display: grid;
+  grid-template-columns: minmax(18rem, 1.1fr) minmax(20rem, 0.9fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.upload-dropzone {
+  min-height: 18rem;
+  padding: 1.5rem;
+  border: 1px dashed rgba(22, 101, 138, 0.35);
+  border-radius: 1.5rem;
+  background: linear-gradient(180deg, rgba(22, 101, 138, 0.08), rgba(255,255,255,0.9));
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 0.55rem;
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.upload-dropzone:hover,
+.upload-dropzone.is-dragover {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, rgba(22, 101, 138, 0.12), rgba(255,255,255,0.96));
+  transform: translateY(-1px);
+}
+
+.upload-dropzone-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  background: white;
+  color: var(--accent);
+  font-size: 1.8rem;
+  font-weight: 500;
+  border: 1px solid rgba(22, 101, 138, 0.16);
+}
+
+.upload-dropzone strong {
+  font-size: 1.35rem;
+  letter-spacing: -0.04em;
+}
+
+.upload-dropzone span {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.upload-file-name {
+  margin-top: 0.4rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.8);
+  color: var(--ink) !important;
+  font-weight: 700;
+}
+
+.upload-dropzone input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.media-upload-fields {
+  display: grid;
+  gap: 1rem;
+}
+
+.upload-progress-card {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  background: #fcfdfe;
+}
+
+.upload-progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.upload-progress-head span {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.upload-progress-track {
+  height: 0.75rem;
+  border-radius: 999px;
+  background: rgba(22, 101, 138, 0.08);
+  overflow: hidden;
+}
+
+.upload-progress-bar {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), #2d85ad);
+  transition: width 140ms ease;
+}
+
+.media-upload-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.media-preview {
+  position: relative;
+  background: #f8fbfd;
+}
+
+.media-preview.is-missing {
+  min-height: 15rem;
+  display: grid;
+  place-items: center;
+}
+
+.media-card-fallback {
+  display: grid;
+  gap: 0.45rem;
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.media-card-fallback strong {
+  font-size: 1rem;
+}
+
+.media-card-fallback span,
+.media-alt-text {
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.media-meta-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.media-meta-head strong {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.media-status {
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.media-status.is-ok {
+  background: rgba(31, 122, 82, 0.1);
+  color: var(--success);
+}
+
+.media-status.is-error {
+  background: rgba(178, 61, 77, 0.08);
+  color: var(--danger);
+}
+
+.media-copy-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.6rem;
+}
+
+.media-copy-button {
+  white-space: nowrap;
+}
+
 .settings-photo-preview {
   width: 100%;
   max-width: 11rem;
@@ -254,5 +473,5 @@ textarea { resize: vertical; min-height: 8rem; }
 @media (max-width: 1080px) {
   .admin-shell { grid-template-columns: 1fr; }
   .admin-sidebar { position: relative; height: auto; }
-  .stats-row, .shortcut-grid, .media-grid, .grid.two-cols { grid-template-columns: 1fr; }
+  .stats-row, .shortcut-grid, .media-grid, .grid.two-cols, .media-upload-layout { grid-template-columns: 1fr; }
 }
