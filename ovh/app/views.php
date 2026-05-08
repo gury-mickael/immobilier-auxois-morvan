@@ -2011,7 +2011,7 @@ function cms_render_histoire_page(array $settings): void
     $description = 'Découvrez le parcours de Mickael Gury et Marion Roulier, conseillers immobiliers locaux en Auxois-Morvan, et leur méthode de travail.';
     $mickaelPhoto = trim((string) ($settings['mickael_photo'] ?? ''));
     $marionPhoto = trim((string) ($settings['marion_photo'] ?? ''));
-    $heroImage = '/uploads/auxois.jpg';
+    $heroImage = '/uploads/bligny.jpg';
 
     cms_render_public_document_start($title . ' | ' . (string) $settings['site_name'], $description, true);
     cms_render_public_header($settings, '/histoire');
@@ -2119,7 +2119,7 @@ function cms_render_avis_page(array $settings): void
             </div>
           </div>
           <div class="home-hero-side">
-            <div class="hero-media"><img src="<?= cms_h(cms_url('/uploads/auxois.jpg')) ?>" alt="Auxois-Morvan"></div>
+            <div class="hero-media"><img src="<?= cms_h(cms_url('/uploads/pouilly.jpg')) ?>" alt="Auxois-Morvan"></div>
           </div>
         </div>
       </section>
@@ -2186,7 +2186,7 @@ function cms_render_prestations_page(array $settings): void
             </div>
           </div>
           <div class="home-hero-side">
-            <div class="hero-media"><img src="<?= cms_h(cms_url('/uploads/auxois.jpg')) ?>" alt="Auxois-Morvan"></div>
+            <div class="hero-media"><img src="<?= cms_h(cms_url('/uploads/arnay.jpg')) ?>" alt="Auxois-Morvan"></div>
           </div>
         </div>
       </section>

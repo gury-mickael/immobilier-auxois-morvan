@@ -497,6 +497,17 @@ section[id] { scroll-margin-top: 6rem; }
 .section-hero-inner h1 {
     font-size: clamp(2.2rem, 5vw, 3.75rem);
 }
+.section-hero-inner .hero-media {
+    aspect-ratio: 16 / 10;
+    border-radius: 1.5rem;
+    max-height: 320px;
+}
+@media (min-width: 1024px) {
+    .section-hero-inner .hero-media {
+        aspect-ratio: 5 / 4;
+        max-height: 380px;
+    }
+}
 
 /* === GRID LAYOUTS === */
 .duo-grid {
