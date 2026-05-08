@@ -1590,6 +1590,11 @@ form input[name="website"] {
     color: var(--color-muted);
     font-size: 0.95rem;
 }
+.estimate-commune-suffix {
+    color: var(--color-accent-strong);
+    white-space: nowrap;
+}
+.estimate-commune-suffix[hidden] { display: none; }
 
 .estimate-section { display: grid; gap: 1rem; }
 

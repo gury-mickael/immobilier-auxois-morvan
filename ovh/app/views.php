@@ -1041,13 +1041,14 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
               </section>
 
               <section class="estimate-pane" data-step="7" data-field="address_details" hidden>
-                <h2>Quelle est l’adresse ?</h2>
+                <h2>Quelle est l’adresse<span class="estimate-commune-suffix" data-commune-suffix hidden> à <span data-commune-name></span></span> ?</h2>
                 <p>Tapez les premières lettres de votre adresse ou un secteur.</p>
                 <div class="estimate-input-stack">
                   <div class="estimate-search-field">
                     <span class="estimate-search-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
                     <input id="estimate-address-details" name="address_details" autocomplete="off" value="<?= cms_h((string) $formData['address_details']) ?>" placeholder="Rechercher votre adresse…" aria-label="Adresse">
                   </div>
+                  <div id="estimate-address-suggestions" class="estimate-suggestions" hidden></div>
                 </div>
               </section>
 
@@ -1179,6 +1180,9 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
         const suggestionBox = document.getElementById('estimate-commune-suggestions');
         const zoneWarning = document.getElementById('estimate-zone-warning');
         const addressField = document.getElementById('estimate-address-details');
+        const addressSuggestionBox = document.getElementById('estimate-address-suggestions');
+        const communeSuffixHolders = Array.from(form.querySelectorAll('[data-commune-suffix]'));
+        const communeNameHolders = Array.from(form.querySelectorAll('[data-commune-name]'));
         const originPageField = document.getElementById('estimate-origin-page');
         const outsideAreaField = document.getElementById('estimate-outside-area');
         const totalSteps = panes.length;
@@ -1186,8 +1190,10 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
         const autoAdvanceSteps = new Set([1, 2, 3, 4, 5, 8, 9]);
         let activeStep = 1;
         let suggestionAbortController = null;
+        let addressAbortController = null;
         let autoAdvanceTimer = null;
         let suppressNextSuggestion = false;
+        let suppressNextAddressSuggestion = false;
 
         const triggerTracking = (name, payload = {}) => {
           if (typeof window.gtag === 'function') {
@@ -1371,6 +1377,7 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
           nextButton.disabled = !isStepValid(activeStep);
           submitButton.disabled = !isContactStepValid();
           syncChoiceState();
+          updateCommuneSuffix();
         };
 
         form.querySelectorAll('[data-choice-field]').forEach((button) => {
@@ -1398,6 +1405,112 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
               }, 140);
             }
           });
+        });
+
+        const updateCommuneSuffix = () => {
+          const name = (communeInput?.value || '').trim();
+          communeNameHolders.forEach((node) => { node.textContent = name; });
+          communeSuffixHolders.forEach((node) => { node.hidden = name === ''; });
+        };
+
+        const renderAddressSuggestions = (items) => {
+          if (!addressSuggestionBox) {
+            return;
+          }
+          addressSuggestionBox.innerHTML = '';
+          if (!items.length) {
+            addressSuggestionBox.hidden = true;
+            return;
+          }
+          items.forEach((item) => {
+            const props = item?.properties || {};
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'estimate-suggestion-item';
+            button.textContent = props.label || props.name || '';
+            button.addEventListener('click', () => {
+              const label = props.label || props.name || '';
+              if (addressField) {
+                addressField.value = label;
+                setValue('address_details', label);
+              }
+              suppressNextAddressSuggestion = true;
+              addressSuggestionBox.hidden = true;
+              addressSuggestionBox.innerHTML = '';
+              if (addressAbortController) {
+                addressAbortController.abort();
+                addressAbortController = null;
+              }
+              addressField?.blur();
+              updateNavigationState();
+            });
+            addressSuggestionBox.appendChild(button);
+          });
+          addressSuggestionBox.hidden = false;
+        };
+
+        const fetchAddressSuggestions = async (query) => {
+          if (!addressSuggestionBox) {
+            return;
+          }
+          const trimmed = query.trim();
+          if (trimmed.length < 3) {
+            addressSuggestionBox.hidden = true;
+            addressSuggestionBox.innerHTML = '';
+            return;
+          }
+          if (addressAbortController) {
+            addressAbortController.abort();
+          }
+          addressAbortController = new AbortController();
+          const params = new URLSearchParams({ q: trimmed, autocomplete: '1', limit: '6', type: 'housenumber' });
+          const postcode = (postalCodeInput?.value || '').trim();
+          const communeName = (communeInput?.value || '').trim();
+          if (postcode) {
+            params.set('postcode', postcode);
+          } else if (communeName) {
+            params.set('q', `${trimmed} ${communeName}`);
+          }
+          try {
+            const response = await fetch(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`, {
+              signal: addressAbortController.signal
+            });
+            if (!response.ok) {
+              throw new Error('address-lookup-failed');
+            }
+            const data = await response.json();
+            let features = Array.isArray(data?.features) ? data.features : [];
+            if (postcode) {
+              features = features.filter((feature) => (feature?.properties?.postcode || '') === postcode);
+            }
+            renderAddressSuggestions(features.slice(0, 6));
+          } catch (error) {
+            if (error?.name !== 'AbortError') {
+              addressSuggestionBox.hidden = true;
+            }
+          }
+        };
+
+        addressField?.addEventListener('input', () => {
+          if (suppressNextAddressSuggestion) {
+            suppressNextAddressSuggestion = false;
+            return;
+          }
+          setValue('address_details', addressField.value.trim());
+          fetchAddressSuggestions(addressField.value);
+          updateNavigationState();
+        });
+        addressField?.addEventListener('focus', () => {
+          if (addressField.value.trim().length >= 3) {
+            fetchAddressSuggestions(addressField.value);
+          }
+        });
+        addressField?.addEventListener('blur', () => {
+          window.setTimeout(() => {
+            if (addressSuggestionBox) {
+              addressSuggestionBox.hidden = true;
+            }
+          }, 150);
         });
 
         communeInput?.addEventListener('input', () => {
