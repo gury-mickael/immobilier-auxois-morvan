@@ -25,6 +25,29 @@ function cms_load_env(string $path): array
     return $values;
 }
 
+function cms_normalize_upload_public_base(?string $value): string
+{
+    $base = trim((string) ($value ?? '/uploads/cms'));
+
+    if ($base === '') {
+        $base = '/uploads/cms';
+    }
+
+    if (preg_match('#^https?://#i', $base) === 1) {
+        $path = parse_url($base, PHP_URL_PATH);
+        $base = is_string($path) && $path !== '' ? $path : '/uploads/cms';
+    }
+
+    $base = '/' . trim($base, '/');
+    $uploadsPosition = strpos($base, '/uploads/');
+
+    if ($uploadsPosition !== false && $uploadsPosition > 0) {
+        $base = substr($base, $uploadsPosition);
+    }
+
+    return rtrim($base, '/') ?: '/uploads/cms';
+}
+
 function cms_config(): array
 {
     static $config = null;
@@ -52,7 +75,7 @@ function cms_config(): array
         'db_password' => (string) $get('DB_PASSWORD', ''),
         'session_cookie_name' => (string) $get('SESSION_COOKIE_NAME', 'immobilier_auxois_admin'),
         'upload_dir' => trim((string) $get('UPLOAD_DIR', 'uploads/cms'), '/'),
-        'upload_public_base' => '/' . trim((string) $get('UPLOAD_PUBLIC_BASE', '/uploads/cms'), '/'),
+        'upload_public_base' => cms_normalize_upload_public_base($get('UPLOAD_PUBLIC_BASE', '/uploads/cms')),
         'install_token' => (string) $get('INSTALL_TOKEN', ''),
     ];
 
@@ -923,7 +946,13 @@ function cms_media_public_url(array $item): string
     $candidates = [];
 
     if ($publicUrl !== '') {
-        $candidates[] = '/' . ltrim($publicUrl, '/');
+        $normalizedPublicUrl = '/' . ltrim($publicUrl, '/');
+        $candidates[] = $normalizedPublicUrl;
+
+        $uploadsPosition = strpos($normalizedPublicUrl, '/uploads/');
+        if ($uploadsPosition !== false && $uploadsPosition > 0) {
+            $candidates[] = substr($normalizedPublicUrl, $uploadsPosition);
+        }
     }
 
     if ($fileName !== '') {
