@@ -114,24 +114,59 @@
   ],
   "testimonials": [
     {
-      "quote": "Nous avons été accompagnés avec beaucoup de sérieux et de disponibilité. Les conseils sur le secteur ont vraiment fait la différence dans notre décision d'achat.",
-      "author": "Catherine Leblanc",
-      "title": "Achat de maison",
-      "location": "Beaune",
+      "quote": "Avis Immodvisor : professionnalisme, réactivité et accompagnement de qualité sont mis en avant.",
+      "author": "NaguezM",
+      "title": "Je recommande vivement",
+      "location": "Immodvisor — 24 avril 2026",
       "rating": 5
     },
     {
-      "quote": "L'estimation était argumentée et la stratégie de vente claire dès le départ. Le suivi a été fluide jusqu'à la signature, avec une vraie qualité de dialogue.",
-      "author": "Jean-Marc Durand",
-      "title": "Vente de maison",
-      "location": "Semur-en-Auxois",
+      "quote": "Avis Immodvisor : une opération vente/achat menée dans les délais avec une personne jugée fiable.",
+      "author": "Jacques F",
+      "title": "Personne de confiance",
+      "location": "Immodvisor — 13 avril 2026",
+      "rating": 4
+    },
+    {
+      "quote": "Avis Immodvisor : dynamisme, implication et satisfaction complète pour une vente en contexte de succession.",
+      "author": "Cédric D.",
+      "title": "Très bonne expérience",
+      "location": "Immodvisor — 13 avril 2026",
       "rating": 5
     },
     {
-      "quote": "Un accompagnement très professionnel, à la fois humain et précis. Nous avons apprécié la réactivité, la franchise et la bonne connaissance du marché local.",
-      "author": "Sophie Martin",
-      "title": "Vente et achat",
-      "location": "Autun",
+      "quote": "Avis Immodvisor : la vente est décrite comme très rapide, avec une recommandation appuyée.",
+      "author": "Vincent B",
+      "title": "Vente rapide",
+      "location": "Immodvisor — 21 février 2026",
+      "rating": 5
+    },
+    {
+      "quote": "Avis Immodvisor : écoute, ponctualité et professionnalisme ressortent fortement de l’expérience client.",
+      "author": "PaulineN",
+      "title": "Je recommande !",
+      "location": "Immodvisor — 30 décembre 2025",
+      "rating": 5
+    },
+    {
+      "quote": "Avis Immodvisor : disponibilité, chaleur humaine et écoute constante pendant l’accompagnement.",
+      "author": "ManonL",
+      "title": "Super expérience",
+      "location": "Immodvisor — 23 décembre 2025",
+      "rating": 5
+    },
+    {
+      "quote": "Avis Immodvisor : accompagnement à distance, conseils, réactivité et réseau local ont sécurisé la vente.",
+      "author": "Catherine G.",
+      "title": "Très bonne qualité de service",
+      "location": "Immodvisor — 20 décembre 2025",
+      "rating": 5
+    },
+    {
+      "quote": "Avis Immodvisor : sérieux, efficacité, disponibilité et bienveillance tout au long du projet.",
+      "author": "Christine D",
+      "title": "Professionnelle et efficace !",
+      "location": "Immodvisor — 6 novembre 2025",
       "rating": 5
     }
   ],
