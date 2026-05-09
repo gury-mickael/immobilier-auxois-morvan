@@ -1532,7 +1532,7 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
             suppressNextAddressSuggestion = false;
             return;
           }
-          setValue('address_details', addressField.value.trim());
+          setValue('address_details', addressField.value);
           fetchAddressSuggestions(addressField.value);
           updateNavigationState();
         });
