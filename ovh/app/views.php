@@ -1022,7 +1022,7 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
                 <h2>Quelle est la surface du terrain ?</h2>
                 <p>Si le bien n’a pas de terrain, indiquez-le simplement.</p>
                 <div class="estimate-choice-grid one-col">
-                  <?php foreach (['Pas de terrain', 'Moins de 500 m²', '500 – 1 000 m²', '1 000 – 2 000 m²', 'Plus de 2 000 m²'] as $option) { $renderChoiceCard('land_surface', $option, 'align-left'); } ?>
+                  <?php foreach (['Pas de terrain', 'Moins de 500 m²', '500 – 1 000 m²', '1 000 – 2 000 m²', 'Plus de 2 000 m²'] as $option) { $renderChoiceCard('land_surface', $option, 'align-left' . ($option === 'Pas de terrain' ? ' estimate-choice-no-land' : '')); } ?>
                 </div>
               </section>
 
@@ -1371,10 +1371,25 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
           });
         };
 
+        const syncLandSurfaceOptions = () => {
+          const isTerrain = getValue('property_type') === 'Terrain';
+          const noLandButtons = form.querySelectorAll('.estimate-choice-no-land');
+
+          if (isTerrain && getValue('land_surface') === 'Pas de terrain') {
+            setValue('land_surface', '');
+          }
+
+          noLandButtons.forEach((button) => {
+            button.hidden = isTerrain;
+          });
+        };
+
         const updateNavigationState = () => {
           panes.forEach((pane, index) => {
             pane.hidden = index + 1 !== activeStep;
           });
+
+          syncLandSurfaceOptions();
 
           const shouldAutoAdvance = autoAdvanceSteps.has(activeStep);
           const stepIsValid = isStepValid(activeStep);
@@ -1384,7 +1399,7 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
           progressBar.style.width = `${percent}%`;
 
           backButton.hidden = activeStep === 1;
-          nextButton.hidden = activeStep === totalSteps || (shouldAutoAdvance && stepIsValid);
+          nextButton.hidden = activeStep === totalSteps || (activeStep === 1 && shouldAutoAdvance && stepIsValid);
           submitButton.hidden = activeStep !== totalSteps;
           nextButton.disabled = !stepIsValid || shouldAutoAdvance;
           submitButton.disabled = !isContactStepValid();
@@ -1821,7 +1836,7 @@ function cms_render_estimation_header(array $settings): void
         <a class="estimate-header-brand" href="<?= cms_h(cms_url('/')) ?>" aria-label="Retour à l'accueil Immobilier Auxois Morvan">
           <img src="<?= cms_h(cms_url('/uploads/logo-2.png')) ?>" alt="Immobilier Auxois Morvan" class="estimate-header-logo">
         </a>
-        <a class="estimate-header-cta" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Estimation gratuite</a>
+        <span class="estimate-header-cta">Estimation gratuite</span>
       </div>
     </header>
     <?php
