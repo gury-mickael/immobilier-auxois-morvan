@@ -2,12 +2,12 @@
 
 INSERT INTO cms_site_settings (
   id, site_name, baseline, mickael_name, marion_name, phone, email, main_city,
-  mickael_photo, marion_photo, covered_areas_json, facebook_url, instagram_url, iad_url, footer_text, main_cta_label, main_cta_url
+  mickael_photo, marion_photo, covered_areas_json, facebook_url, instagram_url, iad_url, footer_text, main_cta_label, main_cta_url, blog_enabled
 ) VALUES (
   1, 'Immobilier Auxois Morvan', 'Mickael Gury et Marion Roullier accompagnent les projets immobiliers en Auxois et dans le Morvan avec une approche sérieuse, locale et profondément humaine.', 'Mickael Gury', 'Marion Roullier',
   '07.64.86.59.93', 'contact@immobilier-auxois-morvan.fr', 'Arnay-le-Duc', '/uploads/cms/2025-10-photo-IAD-fond-961x1024.jpg', '/uploads/cms/2025-10-marion.jpg', '["Arnay-le-Duc","Pouilly-en-Auxois","Autun","Saulieu","Beaune","Dijon","Vitteaux","Semur-en-Auxois","Auxois","Morvan"]',
   'https://www.facebook.com/profile.php?id=61589488680956', 'https://www.instagram.com/immobilier.auxois.morvan', 'https://www.iadfrance.fr', 'Immobilier Auxois Morvan accompagne les projets immobiliers en Auxois et Morvan avec une approche locale, claire et humaine.',
-  'Contactez-nous', '/contact'
+  'Contactez-nous', '/contact', 0
 ) ON DUPLICATE KEY UPDATE
   site_name = VALUES(site_name),
   baseline = VALUES(baseline),
@@ -24,7 +24,8 @@ INSERT INTO cms_site_settings (
   iad_url = VALUES(iad_url),
   footer_text = VALUES(footer_text),
   main_cta_label = VALUES(main_cta_label),
-  main_cta_url = VALUES(main_cta_url);
+  main_cta_url = VALUES(main_cta_url),
+  blog_enabled = VALUES(blog_enabled);
 
 INSERT INTO cms_pages (
   page_type, page_key, slug, title, meta_description, is_indexable, h1, hero_title, hero_subtitle, hero_image, hero_image_alt,

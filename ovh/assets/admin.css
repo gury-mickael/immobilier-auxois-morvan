@@ -463,6 +463,50 @@ textarea { resize: vertical; min-height: 8rem; line-height: 1.55; }
 
 .toggle-field input { width: 1.1rem; height: 1.1rem; padding: 0; accent-color: var(--accent); }
 
+.blog-visibility-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  margin: 1.25rem 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-soft);
+}
+
+.blog-visibility-toggle {
+  display: grid;
+  margin: 0;
+  background: var(--panel);
+}
+
+.blog-visibility-toggle strong {
+  display: block;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.blog-visibility-toggle small {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.blog-visibility-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .blog-visibility-card { grid-template-columns: 1fr; }
+  .blog-visibility-actions { justify-content: flex-start; }
+}
+
 /* ---------- Section editor ---------- */
 
 .section-stack { display: grid; gap: 1rem; }

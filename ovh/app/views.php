@@ -1777,16 +1777,20 @@ function cms_render_contact_page(array $page, array $settings, array $snapshot):
     cms_render_public_footer($settings, $snapshot);
 }
 
-function cms_public_nav_items(): array
+function cms_public_nav_items(bool $blogEnabled = false): array
 {
-    return [
-        ['label' => 'Accueil', 'href' => '/'],
+    $items = [
         ['label' => 'Histoire', 'href' => '/histoire'],
         ['label' => 'Secteur', 'href' => '/secteur'],
         ['label' => 'Prestations', 'href' => '/prestations'],
         ['label' => 'Avis clients', 'href' => '/avis'],
-        ['label' => 'Blog', 'href' => '/blog'],
     ];
+
+    if ($blogEnabled) {
+        $items[] = ['label' => 'Blog', 'href' => '/blog'];
+    }
+
+    return $items;
 }
 
 function cms_is_active_nav(string $currentPage, string $href): bool
@@ -1828,6 +1832,7 @@ function cms_render_public_document_start(string $title, string $description, bo
 
 function cms_render_public_header(array $settings, string $currentPage): void
 {
+    $blogEnabled = cms_is_blog_public_enabled($settings);
     ?>
     <header class="site-header">
       <div class="shell">
@@ -1836,7 +1841,7 @@ function cms_render_public_header(array $settings, string $currentPage): void
             <img src="<?= cms_h(cms_url('/uploads/logo-2.png')) ?>" alt="Immobilier Auxois Morvan" class="site-logo">
           </a>
           <div class="site-nav desktop-only">
-            <?php foreach (cms_public_nav_items() as $item): ?>
+            <?php foreach (cms_public_nav_items($blogEnabled) as $item): ?>
               <a class="site-nav-link<?= cms_is_active_nav($currentPage, (string) $item['href']) ? ' is-active' : '' ?>" href="<?= cms_h(cms_url((string) $item['href'])) ?>"><?= cms_h((string) $item['label']) ?></a>
             <?php endforeach; ?>
           </div>
@@ -1952,6 +1957,7 @@ function cms_visible_sections(array $page): array
 
 function cms_render_homepage(array $page, array $settings, array $snapshot): void
 {
+    $blogEnabled = cms_is_blog_public_enabled($settings);
     $heroImage = trim((string) ($page['hero_image'] ?? ''));
     $allAreas = $snapshot['siteSettings']['coveredAreas'] ?? cms_json_list($settings['covered_areas_json'] ?? '[]');
     $areaPriority = ['Arnay-le-Duc', 'Pouilly-en-Auxois', 'Autun', 'Saulieu', 'Beaune', 'Dijon', 'Semur-en-Auxois', 'Vitteaux'];
@@ -1973,7 +1979,7 @@ function cms_render_homepage(array $page, array $settings, array $snapshot): voi
             $localPages[] = $localPageByHref[$href];
         }
     }
-    $blogPosts = array_slice($snapshot['blogPosts'] ?? [], 0, 3);
+    $blogPosts = $blogEnabled ? array_slice($snapshot['blogPosts'] ?? [], 0, 3) : [];
     $testimonials = array_slice($snapshot['testimonials'] ?? [], 0, 3);
     $trustReasons = [
         ['title' => 'Estimation argumentée', 'text' => 'Un avis de valeur lisible, ancré dans le marché local et défendu avec méthode.'],
@@ -2107,7 +2113,7 @@ function cms_render_homepage(array $page, array $settings, array $snapshot): voi
             <h2 class="section-title">Notre secteur local</h2>
             <p class="section-subtitle">Des repères concrets sur les villes et bassins de vie où nous accompagnons régulièrement des projets immobiliers.</p>
             <p class="home-local-copy">Nous accompagnons les propriétaires, acheteurs et porteurs de projets dans l’Auxois, le Morvan et plus largement en Côte-d’Or et Bourgogne. Notre secteur couvre notamment Arnay-le-Duc, Pouilly-en-Auxois, Saulieu, Autun, Beaune, Dijon, Vitteaux et Semur-en-Auxois, avec une attention particulière aux maisons anciennes, résidences secondaires, biens familiaux, immeubles et <a href="<?= cms_h(cms_url('/fonds')) ?>">fonds de commerce</a>.</p>
-            <div class="home-link-row"><a href="<?= cms_h(cms_url('/vendre')) ?>">Vendre</a><a href="<?= cms_h(cms_url('/acheter')) ?>">Acheter</a><a href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Estimation</a><a href="<?= cms_h(cms_url('/blog')) ?>">Conseils</a></div>
+            <div class="home-link-row"><a href="<?= cms_h(cms_url('/vendre')) ?>">Vendre</a><a href="<?= cms_h(cms_url('/acheter')) ?>">Acheter</a><a href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Estimation</a><?php if ($blogEnabled): ?><a href="<?= cms_h(cms_url('/blog')) ?>">Conseils</a><?php endif; ?></div>
             <div class="cards-grid three-cols"><?php foreach ($featuredAreas as $index => $area): ?><article class="soft-card area-card<?= $index >= 3 ? ' mobile-hide' : '' ?>"><?php $areaImage = (string) ($snapshot['areaImages'][$area] ?? '/uploads/auxois.jpg'); ?><img src="<?= cms_h(cms_url($areaImage)) ?>" alt="<?= cms_h((string) $area) ?>" loading="lazy" decoding="async"><div><p class="card-kicker">Secteur</p><h3><?= cms_h((string) $area) ?></h3><p><?= cms_h((string) ($snapshot['areaDescriptions'][$area] ?? 'Un secteur suivi avec attention pour ses dynamiques de marché et ses projets de vie.')) ?></p></div></article><?php endforeach; ?></div>
             <div class="section-actions"><a class="button primary" href="<?= cms_h(cms_url('/secteur')) ?>">Voir tout notre secteur</a><span>Arnay-le-Duc, Pouilly-en-Auxois, Autun, Saulieu, Beaune, Dijon, Semur-en-Auxois et Vitteaux.</span></div>
           </div>
@@ -2125,7 +2131,7 @@ function cms_render_homepage(array $page, array $settings, array $snapshot): voi
 
       <section id="avis-clients" class="section section-tight"><div class="shell"><p class="eyebrow">Avis clients</p><h2 class="section-title">Des retours fondés sur la qualité du suivi</h2><p class="section-subtitle">Des échanges clairs, une présence régulière et une vraie lecture du terrain pour accompagner le projet jusqu’au bout.</p><div class="cards-grid three-cols"><?php foreach ($testimonials as $index => $testimonial): ?><article class="testimonial-card<?= $index >= 2 ? ' mobile-hide' : '' ?>"><div class="dots-row"><?php for ($starIndex = 0; $starIndex < (int) ($testimonial['rating'] ?? 5); $starIndex += 1): ?><span></span><?php endfor; ?></div><p class="testimonial-quote">“<?= cms_h((string) $testimonial['quote']) ?>”</p><div class="testimonial-meta"><strong><?= cms_h((string) $testimonial['author']) ?></strong><span><?= cms_h(implode(' — ', array_filter([(string) ($testimonial['title'] ?? ''), (string) ($testimonial['location'] ?? '')]))) ?></span></div></article><?php endforeach; ?></div></div></section>
 
-      <section class="section section-tight"><div class="shell"><p class="eyebrow">Blog</p><h2 class="section-title">Derniers articles</h2><p class="section-subtitle">Des contenus utiles pour comprendre le marché local, préparer une vente et cadrer un projet immobilier.</p><div class="cards-grid three-cols"><?php foreach ($blogPosts as $index => $post): ?><article class="blog-card<?= $index >= 2 ? ' mobile-hide' : '' ?>"><a href="<?= cms_h(cms_url((string) $post['href'])) ?>"><img src="<?= cms_h(cms_url((string) $post['image'])) ?>" alt="<?= cms_h((string) ($post['imageAlt'] ?? $post['title'])) ?>" loading="lazy" decoding="async"><div class="blog-card-body"><div class="blog-meta"><span><?= cms_h((string) $post['category']) ?></span><span class="meta-dot"></span><span><?= cms_h(cms_format_long_date((string) $post['date'])) ?></span></div><h3><?= cms_h((string) $post['title']) ?></h3><p class="clamp-2-mobile"><?= cms_h((string) $post['excerpt']) ?></p><span class="card-link-inline">Lire l'article →</span></div></a></article><?php endforeach; ?></div><div class="section-actions"><a class="button secondary" href="<?= cms_h(cms_url('/blog')) ?>">Voir tous les articles</a></div></div></section>
+      <?php if ($blogEnabled && $blogPosts !== []): ?><section class="section section-tight"><div class="shell"><p class="eyebrow">Blog</p><h2 class="section-title">Derniers articles</h2><p class="section-subtitle">Des contenus utiles pour comprendre le marché local, préparer une vente et cadrer un projet immobilier.</p><div class="cards-grid three-cols"><?php foreach ($blogPosts as $index => $post): ?><article class="blog-card<?= $index >= 2 ? ' mobile-hide' : '' ?>"><a href="<?= cms_h(cms_url((string) $post['href'])) ?>"><img src="<?= cms_h(cms_url((string) $post['image'])) ?>" alt="<?= cms_h((string) ($post['imageAlt'] ?? $post['title'])) ?>" loading="lazy" decoding="async"><div class="blog-card-body"><div class="blog-meta"><span><?= cms_h((string) $post['category']) ?></span><span class="meta-dot"></span><span><?= cms_h(cms_format_long_date((string) $post['date'])) ?></span></div><h3><?= cms_h((string) $post['title']) ?></h3><p class="clamp-2-mobile"><?= cms_h((string) $post['excerpt']) ?></p><span class="card-link-inline">Lire l'article →</span></div></a></article><?php endforeach; ?></div><div class="section-actions"><a class="button secondary" href="<?= cms_h(cms_url('/blog')) ?>">Voir tous les articles</a></div></div></section><?php endif; ?>
 
       <section class="section section-tight"><div class="shell"><div class="cta-band cta-band-hero"><div><p class="eyebrow">Projet immobilier</p><h2>Vous avez un projet immobilier ?</h2><div class="richtext"><p>Parlons simplement de votre bien, de votre secteur et de la meilleure stratégie à adopter.</p></div></div><div class="cta-actions"><a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Faire estimer mon bien</a><a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a></div></div></div></section>
     </main>

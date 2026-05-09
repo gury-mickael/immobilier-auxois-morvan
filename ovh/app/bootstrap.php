@@ -261,6 +261,7 @@ function cms_default_settings(): array
         'footer_text' => 'Immobilier Auxois Morvan accompagne les projets immobiliers en Auxois et Morvan.',
         'main_cta_label' => 'Nous contacter',
         'main_cta_url' => '/contact',
+        'blog_enabled' => 0,
     ];
 }
 
@@ -278,7 +279,7 @@ function cms_ensure_site_settings_media_columns(): void
            FROM INFORMATION_SCHEMA.COLUMNS
           WHERE TABLE_SCHEMA = DATABASE()
             AND TABLE_NAME = 'cms_site_settings'
-            AND COLUMN_NAME IN ('mickael_photo', 'marion_photo')"
+            AND COLUMN_NAME IN ('mickael_photo', 'marion_photo', 'blog_enabled')"
     );
     $statement->execute();
     $existing = array_flip(array_column($statement->fetchAll(), 'COLUMN_NAME'));
@@ -291,7 +292,23 @@ function cms_ensure_site_settings_media_columns(): void
         $pdo->exec("ALTER TABLE cms_site_settings ADD COLUMN marion_photo VARCHAR(255) DEFAULT NULL AFTER mickael_photo");
     }
 
+    if (!isset($existing['blog_enabled'])) {
+        $pdo->exec("ALTER TABLE cms_site_settings ADD COLUMN blog_enabled TINYINT(1) NOT NULL DEFAULT 0 AFTER main_cta_url");
+    }
+
     $done = true;
+}
+
+function cms_is_blog_public_enabled(array $settings): bool
+{
+    return (int) ($settings['blog_enabled'] ?? 0) === 1;
+}
+
+function cms_save_blog_visibility(bool $enabled): void
+{
+    cms_ensure_site_settings_media_columns();
+    $statement = cms_db()->prepare('UPDATE cms_site_settings SET blog_enabled = ? WHERE id = 1');
+    $statement->execute([$enabled ? 1 : 0]);
 }
 
 function cms_settings(): array

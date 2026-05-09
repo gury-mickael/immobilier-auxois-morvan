@@ -5,6 +5,16 @@ declare(strict_types=1);
 require dirname(__DIR__) . '/app/bootstrap.php';
 
 cms_require_admin();
+$settings = cms_settings();
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    cms_require_csrf();
+    cms_save_blog_visibility(isset($_POST['blog_enabled']));
+    cms_flash('success', isset($_POST['blog_enabled']) ? 'Le blog est maintenant visible sur le site public.' : 'Le blog est maintenant masqué sur le site public.');
+    cms_redirect('/admin/blog');
+}
+
+$blogEnabled = cms_is_blog_public_enabled($settings);
 $posts = cms_blog_posts();
 
 cms_render_admin_start('Blog', '/admin/blog');
@@ -18,6 +28,21 @@ cms_render_admin_start('Blog', '/admin/blog');
     </div>
     <a class="primary-button" href="<?= cms_h(cms_url('/admin/blog-edit')) ?>">Nouvel article</a>
   </div>
+
+  <form method="post" class="blog-visibility-card">
+    <input type="hidden" name="_csrf" value="<?= cms_h(cms_csrf_token()) ?>">
+    <label class="toggle-field blog-visibility-toggle">
+      <span>
+        <strong>Afficher le blog sur le site public</strong>
+        <small><?= $blogEnabled ? 'Le menu public, la page d’accueil et les URLs du blog sont visibles.' : 'Le blog est masqué du menu, de la home et des pages publiques.' ?></small>
+      </span>
+      <input type="checkbox" name="blog_enabled" value="1"<?= $blogEnabled ? ' checked' : '' ?>>
+    </label>
+    <div class="blog-visibility-actions">
+      <span class="status-badge status-<?= $blogEnabled ? 'published' : 'draft' ?>"><?= $blogEnabled ? 'Visible' : 'Masqué' ?></span>
+      <button class="secondary-button" type="submit">Enregistrer l’affichage</button>
+    </div>
+  </form>
 
   <div class="table-wrap">
     <table class="admin-table">

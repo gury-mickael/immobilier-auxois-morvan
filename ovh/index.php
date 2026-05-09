@@ -13,8 +13,9 @@ try {
     }
 
     $settings = cms_settings();
+    $blogEnabled = cms_is_blog_public_enabled($settings);
 
-    if ($requestPath === '/blog' || $requestPath === '/blog/') {
+    if ($blogEnabled && ($requestPath === '/blog' || $requestPath === '/blog/')) {
         cms_render_blog_index_page($settings);
         exit;
     }
@@ -55,7 +56,7 @@ try {
       exit;
     }
 
-    if (preg_match('#^/blog/([^/]+)/?$#', $requestPath, $matches) === 1) {
+    if ($blogEnabled && preg_match('#^/blog/([^/]+)/?$#', $requestPath, $matches) === 1) {
         $post = cms_public_blog_post((string) ($matches[1] ?? ''));
 
         if (!$post) {
