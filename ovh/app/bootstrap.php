@@ -25,6 +25,18 @@ function cms_load_env(string $path): array
     return $values;
 }
 
+function cms_apply_global_output_replacements(): void
+{
+    static $started = false;
+
+    if ($started) {
+        return;
+    }
+
+    $started = true;
+    ob_start(static fn (string $buffer): string => str_replace('Roulier', 'Roullier', $buffer));
+}
+
 function cms_normalize_upload_public_base(?string $value): string
 {
     $base = trim((string) ($value ?? '/uploads/cms'));
@@ -81,6 +93,8 @@ function cms_config(): array
 
     return $config;
 }
+
+cms_apply_global_output_replacements();
 
 function cms_bootstrap_session(): void
 {
@@ -232,9 +246,9 @@ function cms_default_settings(): array
 {
     return [
         'site_name' => 'Immobilier Auxois Morvan',
-        'baseline' => 'Mickael Gury et Marion Roulier accompagnent les projets immobiliers en Auxois et dans le Morvan.',
+        'baseline' => 'Mickael Gury et Marion Roullier accompagnent les projets immobiliers en Auxois et dans le Morvan.',
         'mickael_name' => 'Mickael Gury',
-        'marion_name' => 'Marion Roulier',
+        'marion_name' => 'Marion Roullier',
         'mickael_photo' => '',
         'marion_photo' => '',
         'phone' => '',
@@ -963,6 +977,30 @@ function cms_media_public_url(array $item): string
     if ($publicUrl !== '' && !str_contains($publicUrl, '/')) {
         $candidates[] = $uploadBase . '/' . $publicUrl;
         $candidates[] = '/uploads/' . $publicUrl;
+    }
+
+    foreach ([$publicUrl, $fileName] as $sourceName) {
+        $sourceName = trim((string) $sourceName);
+        if ($sourceName === '') {
+            continue;
+        }
+
+        $baseName = basename($sourceName);
+        $legacyNames = [$baseName];
+
+        $withoutDatePrefix = preg_replace('/^\d{4}-\d{2}-/', '', $baseName);
+        if (is_string($withoutDatePrefix) && $withoutDatePrefix !== $baseName) {
+            $legacyNames[] = $withoutDatePrefix;
+        }
+
+        foreach ($legacyNames as $legacyName) {
+            $legacyNames[] = (string) preg_replace('/-\d+x\d+(?=\.[^.]+$)/', '', $legacyName);
+        }
+
+        foreach (array_unique(array_filter($legacyNames)) as $legacyName) {
+            $candidates[] = $uploadBase . '/' . $legacyName;
+            $candidates[] = '/uploads/' . $legacyName;
+        }
     }
 
     $seen = [];

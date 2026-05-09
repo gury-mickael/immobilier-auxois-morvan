@@ -2012,8 +2012,8 @@ function cms_render_homepage(array $page, array $settings, array $snapshot): voi
         'Négociation et signature',
     ];
     $homeTitle = 'Vendre, acheter ou estimer un bien en Auxois-Morvan';
-    $homeDescription = 'Mickael Gury et Marion Roulier vous accompagnent localement pour vendre, acheter ou estimer un bien en Auxois-Morvan, avec le réseau IAD, de l’estimation à la signature.';
-    $homeSubtitle = 'Mickael Gury & Marion Roulier vous accompagnent localement avec le réseau IAD, de l’estimation à la signature.';
+    $homeDescription = 'Mickael Gury et Marion Roullier vous accompagnent localement pour vendre, acheter ou estimer un bien en Auxois-Morvan, avec le réseau IAD, de l’estimation à la signature.';
+    $homeSubtitle = 'Mickael Gury & Marion Roullier vous accompagnent localement avec le réseau IAD, de l’estimation à la signature.';
     $mickaelPhoto = trim((string) ($settings['mickael_photo'] ?? ''));
     $marionPhoto = trim((string) ($settings['marion_photo'] ?? ''));
     $appUrl = rtrim((string) (cms_config()['app_url'] ?? ''), '/');
@@ -2196,7 +2196,7 @@ function cms_render_histoire_page(array $settings): void
 {
     $snapshot = cms_snapshot();
     $title = 'Notre histoire';
-    $description = 'Découvrez le parcours de Mickael Gury et Marion Roulier, conseillers immobiliers locaux en Auxois-Morvan, et leur méthode de travail.';
+    $description = 'Découvrez le parcours de Mickael Gury et Marion Roullier, conseillers immobiliers locaux en Auxois-Morvan, et leur méthode de travail.';
     $mickaelPhoto = trim((string) ($settings['mickael_photo'] ?? ''));
     $marionPhoto = trim((string) ($settings['marion_photo'] ?? ''));
     $heroImage = '/uploads/bligny.jpg';
@@ -2210,7 +2210,7 @@ function cms_render_histoire_page(array $settings): void
           <div class="home-hero-copy">
             <p class="eyebrow">Notre histoire</p>
             <h1>Deux conseillers locaux pour vous accompagner</h1>
-            <p class="hero-text">Mickael Gury et Marion Roulier, ancrés en Auxois-Morvan, vous accompagnent avec une approche humaine, claire et structurée, soutenue par le réseau IAD.</p>
+            <p class="hero-text">Mickael Gury et Marion Roullier, ancrés en Auxois-Morvan, vous accompagnent avec une approche humaine, claire et structurée, soutenue par le réseau IAD.</p>
             <div class="hero-actions">
               <a class="button primary" href="<?= cms_h(cms_url('/contact')) ?>">Nous rencontrer</a>
               <a class="button secondary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Faire estimer mon bien</a>
