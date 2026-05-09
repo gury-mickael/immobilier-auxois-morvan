@@ -699,6 +699,11 @@ function cms_render_public_page(array $page, array $settings): void
         return;
     }
 
+    if (($page['page_key'] ?? null) === 'secteur') {
+      cms_render_sector_page($page, $settings, $snapshot);
+      return;
+    }
+
     cms_render_standard_public_page($page, $settings, $snapshot);
 }
 
@@ -2124,6 +2129,170 @@ function cms_render_homepage(array $page, array $settings, array $snapshot): voi
 
       <section class="section section-tight"><div class="shell"><div class="cta-band cta-band-hero"><div><p class="eyebrow">Projet immobilier</p><h2>Vous avez un projet immobilier ?</h2><div class="richtext"><p>Parlons simplement de votre bien, de votre secteur et de la meilleure stratégie à adopter.</p></div></div><div class="cta-actions"><a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Faire estimer mon bien</a><a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a></div></div></div></section>
     </main>
+    <?php
+    cms_render_public_footer($settings, $snapshot);
+}
+
+function cms_render_sector_page(array $page, array $settings, array $snapshot): void
+{
+    $title = 'Immobilier en Auxois Morvan : où acheter, investir et vivre entre nature et patrimoine';
+    $description = 'Carte interactive, communes phares, tendances immobilières et conseils pour acheter, vendre ou investir en Auxois Morvan.';
+    $heroImage = '/uploads/auxois.jpg';
+    $cities = [
+        ['name' => 'Dijon', 'lat' => 47.3220, 'lng' => 5.0415, 'profile' => 'Métropole régionale, bassin d’emploi majeur, forte tension locative et marché structuré.', 'tag' => 'Métropole & investissement'],
+        ['name' => 'Beaune', 'lat' => 47.0260, 'lng' => 4.8400, 'profile' => 'Cité viticole renommée, tourisme international, charme ancien et investissement patrimonial.', 'tag' => 'Patrimoine viticole'],
+        ['name' => 'Pouilly-en-Auxois', 'lat' => 47.2632, 'lng' => 4.5557, 'profile' => 'Cadre vert, accès autoroutier rapide, marché équilibré et prix encore attractifs.', 'tag' => 'Accès & cadre vert'],
+        ['name' => 'Arnay-le-Duc', 'lat' => 47.1326, 'lng' => 4.4856, 'profile' => 'Cœur historique de l’Auxois, vie locale active et bon rapport qualité/prix.', 'tag' => 'Cœur de secteur'],
+        ['name' => 'Saulieu', 'lat' => 47.2817, 'lng' => 4.2284, 'profile' => 'Porte du Morvan, qualité de vie, potentiel touristique et maisons de caractère.', 'tag' => 'Morvan & tourisme'],
+        ['name' => 'Autun', 'lat' => 46.9510, 'lng' => 4.2980, 'profile' => 'Ville d’art et d’histoire, dynamisme économique, grandes surfaces à prix modérés.', 'tag' => 'Histoire & grands biens'],
+        ['name' => 'Vitteaux', 'lat' => 47.3976, 'lng' => 4.5412, 'profile' => 'Village calme et central, compromis recherché entre campagne et proximité de Dijon.', 'tag' => 'Calme & centralité'],
+        ['name' => 'Semur-en-Auxois', 'lat' => 47.4911, 'lng' => 4.3330, 'profile' => 'Cité médiévale attractive, belles pierres, marché résidentiel et patrimonial.', 'tag' => 'Belles pierres'],
+    ];
+
+    cms_render_public_document_start($title . ' | ' . (string) $settings['site_name'], $description, true);
+    cms_render_public_header($settings, '/secteur');
+    ?>
+    <main class="sector-premium-page">
+      <section class="sector-hero section-hero-inner">
+        <div class="shell sector-hero-grid">
+          <div class="sector-hero-copy">
+            <p class="eyebrow">Acheter · investir · vivre localement</p>
+            <h1><?= cms_h($title) ?></h1>
+            <p class="hero-text">Entre Beaune, Dijon et Autun, l’Auxois Morvan attire des acheteurs en quête d’espace, de patrimoine et de qualité de vie. Voici une lecture claire du territoire pour identifier les communes à suivre et cadrer votre projet.</p>
+            <div class="sector-hero-actions">
+              <a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Estimer un bien du secteur</a>
+              <a class="button secondary" href="#carte-auxois-morvan">Explorer la carte</a>
+            </div>
+          </div>
+          <aside class="sector-hero-media">
+            <img src="<?= cms_h(cms_url($heroImage)) ?>" alt="Paysages de l’Auxois Morvan">
+            <div class="sector-hero-badge"><strong>8</strong><span>communes clés</span></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell sector-intro-grid">
+          <article class="sector-intro-card is-main">
+            <p class="eyebrow">Un territoire en renaissance</p>
+            <h2>L’Auxois Morvan conjugue nature, accessibilité et patrimoine</h2>
+            <p>Le secteur séduit par son cadre préservé, ses prix encore lisibles et sa proximité avec les grands axes. On y trouve des maisons en pierre, des villages vivants, des résidences secondaires et des biens familiaux avec jardin.</p>
+          </article>
+          <article class="sector-intro-card"><strong>Maison familiale</strong><span>avec jardin, dépendances ou potentiel d’accueil.</span></article>
+          <article class="sector-intro-card"><strong>Projet patrimonial</strong><span>belle pierre, maison de caractère, résidence secondaire.</span></article>
+          <article class="sector-intro-card"><strong>Investissement local</strong><span>marché locatif mesuré, demande stable et qualité de vie.</span></article>
+        </div>
+      </section>
+
+      <section id="carte-auxois-morvan" class="section section-tight">
+        <div class="shell">
+          <div class="sector-section-head">
+            <p class="eyebrow">Carte interactive</p>
+            <h2>Visualiser les villes phares du secteur</h2>
+            <p>Déplacez-vous sur la carte, zoomez et cliquez sur une commune pour voir son profil immobilier.</p>
+          </div>
+          <div class="sector-map-layout">
+            <div id="auxois-interactive-map" class="sector-map" aria-label="Carte interactive de l’Auxois Morvan"></div>
+            <aside class="sector-map-panel">
+              <h3>Lecture rapide</h3>
+              <p>Le secteur s’organise autour de pôles complémentaires : villes patrimoniales, communes de services, villages calmes et axes rapides vers Dijon ou Beaune.</p>
+              <ul>
+                <li><strong>Dijon / Beaune</strong> : tension et attractivité.</li>
+                <li><strong>Pouilly / Arnay</strong> : équilibre prix, accès et services.</li>
+                <li><strong>Saulieu / Autun</strong> : qualité de vie et patrimoine.</li>
+              </ul>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell sector-city-section">
+          <div class="sector-section-head is-compact">
+            <p class="eyebrow">Communes à suivre</p>
+            <h2>Où acheter ou investir en Auxois Morvan ?</h2>
+          </div>
+          <div class="sector-city-grid">
+            <?php foreach ($cities as $city): ?>
+              <article class="sector-city-card">
+                <span><?= cms_h($city['tag']) ?></span>
+                <h3><?= cms_h($city['name']) ?></h3>
+                <p><?= cms_h($city['profile']) ?></p>
+              </article>
+            <?php endforeach; ?>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell sector-insights-grid">
+          <article class="sector-panel-card">
+            <p class="eyebrow">Tendances locales</p>
+            <h2>Tendances de l’immobilier en Auxois Morvan</h2>
+            <ul class="sector-check-list">
+              <li>Prix maisons souvent entre <strong>1 400 et 2 000 €/m²</strong> selon la commune et l’état du bien.</li>
+              <li>Appartements autour de <strong>1 800 €/m²</strong> à Beaune ou Dijon, moins dans les communes rurales.</li>
+              <li>Rendement locatif brut estimé entre <strong>4 et 6 %</strong> sur les petites maisons rénovées.</li>
+              <li>Demande croissante pour les biens avec jardin, dépendance ou terrain.</li>
+            </ul>
+          </article>
+          <article class="sector-panel-card is-dark">
+            <p class="eyebrow">Pourquoi investir ici ?</p>
+            <h2>Un secteur lisible, accessible et patrimonial</h2>
+            <ol class="sector-number-list">
+              <li>Cadre de vie préservé entre patrimoine et nature.</li>
+              <li>Accessibilité depuis Dijon, Beaune, Paris ou Lyon.</li>
+              <li>Marché encore abordable pour primo-accédants et investisseurs.</li>
+              <li>Potentiel touristique avec gîtes, maisons secondaires et biens de charme.</li>
+              <li>Rendement stable grâce à la demande locale.</li>
+            </ol>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell sector-advice-band">
+          <div>
+            <p class="eyebrow">Mon avis d’expert</p>
+            <h2>Le bon projet dépend surtout de la commune, de l’état du bien et du rythme de vente recherché.</h2>
+            <p>Pour vendre, le bon positionnement repose sur une lecture fine des références locales. Pour acheter ou investir, l’objectif est d’arbitrer entre prix, emplacement, travaux, potentiel locatif et qualité de vie.</p>
+          </div>
+          <a class="button primary" href="<?= cms_h(cms_url('/contact')) ?>">Parler de mon projet</a>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell"><div class="cta-band"><div><p class="eyebrow">Passer à l’action</p><h2>Voir si nous intervenons sur votre commune</h2><div class="richtext"><p>Contactez-nous pour vérifier votre secteur, cadrer votre projet et obtenir un premier avis clair.</p></div></div><a class="button primary" href="<?= cms_h(cms_url('/contact')) ?>">Nous parler de votre secteur</a></div></div>
+      </section>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const mapNode = document.getElementById('auxois-interactive-map');
+        if (!mapNode || typeof L === 'undefined') {
+          return;
+        }
+
+        const cities = <?= json_encode($cities, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+        const map = L.map(mapNode, { scrollWheelZoom: false }).setView([47.18, 4.55], 9);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 18,
+          attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        const bounds = [];
+        cities.forEach((city) => {
+          bounds.push([city.lat, city.lng]);
+          L.marker([city.lat, city.lng]).addTo(map).bindPopup(`<strong>${city.name}</strong><br>${city.tag}<br><small>${city.profile}</small>`);
+        });
+
+        if (bounds.length > 0) {
+          map.fitBounds(bounds, { padding: [28, 28] });
+        }
+      });
+    </script>
     <?php
     cms_render_public_footer($settings, $snapshot);
 }
