@@ -1765,14 +1765,35 @@ function cms_render_contact_page(array $page, array $settings, array $snapshot):
     cms_render_public_document_start((string) $page['title'] . ' | ' . (string) $settings['site_name'], (string) ($page['meta_description'] ?? $settings['baseline']), (int) ($page['is_indexable'] ?? 1) === 1);
     cms_render_public_header($settings, (string) ($page['slug'] ?? '/contact'));
     ?>
-    <main>
-      <section class="contact-premium-hero">
-        <div class="shell contact-premium-grid">
+    <main class="contact-premium-page">
+      <section class="contact-hero">
+        <div class="shell contact-hero-grid">
+          <div class="contact-hero-copy">
+            <p class="eyebrow">Contact direct</p>
+            <h1>Parlons simplement de votre projet immobilier.</h1>
+            <p class="hero-text">Vendre, acheter, estimer un bien ou préparer une cession : un premier échange permet de comprendre votre situation, votre secteur et la bonne manière d’avancer.</p>
+            <div class="contact-direct-card">
+              <span>Réponse rapide</span>
+              <a href="<?= cms_h('tel:' . preg_replace('/\s+/', '', (string) $settings['phone'])) ?>"><?= cms_h((string) $settings['phone']) ?></a>
+              <a href="<?= cms_h('mailto:' . (string) $settings['email']) ?>"><?= cms_h((string) $settings['email']) ?></a>
+            </div>
+            <div class="contact-advisor-compact-grid">
+              <article class="contact-advisor-compact-card">
+                <?php if ($marionPhoto !== ''): ?><img src="<?= cms_h(cms_url($marionPhoto)) ?>" alt="<?= cms_h((string) $settings['marion_name']) ?>" loading="lazy" decoding="async"><?php else: ?><span><?= cms_h(substr((string) $settings['marion_name'], 0, 1)) ?></span><?php endif; ?>
+                <div><strong><?= cms_h((string) $settings['marion_name']) ?></strong><small>Suivi · écoute · coordination</small></div>
+              </article>
+              <article class="contact-advisor-compact-card">
+                <?php if ($mickaelPhoto !== ''): ?><img src="<?= cms_h(cms_url($mickaelPhoto)) ?>" alt="<?= cms_h((string) $settings['mickael_name']) ?>" loading="lazy" decoding="async"><?php else: ?><span><?= cms_h(substr((string) $settings['mickael_name'], 0, 1)) ?></span><?php endif; ?>
+                <div><strong><?= cms_h((string) $settings['mickael_name']) ?></strong><small>Terrain · stratégie · négociation</small></div>
+              </article>
+            </div>
+          </div>
+
           <form class="contact-premium-form" method="post" action="<?= cms_h(cms_url('/contact')) ?>">
             <input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden-field" aria-hidden="true">
-            <p class="eyebrow">Contact direct</p>
-            <h1>Parlons de votre projet immobilier</h1>
-            <p class="contact-form-lead"><?= cms_h(strip_tags((string) $page['hero_subtitle'])) ?></p>
+            <p class="eyebrow">Votre demande</p>
+            <h2>Expliquez-nous votre projet</h2>
+            <p class="contact-form-lead">Quelques informations suffisent pour vous répondre de manière utile et concrète.</p>
 
             <?php if ($success): ?>
               <div class="contact-alert success">Merci, votre demande a bien été transmise. Nous revenons vers vous rapidement.</div>
@@ -1781,60 +1802,49 @@ function cms_render_contact_page(array $page, array $settings, array $snapshot):
               <div class="contact-alert error"><?= cms_h(implode(' ', $errors)) ?></div>
             <?php endif; ?>
 
-            <div class="contact-fields three">
+            <div class="contact-fields two">
               <label>Votre projet<select name="project"><option value="">Choisir</option><option value="Vendre">Vendre</option><option value="Acheter">Acheter</option><option value="Estimation">Faire estimer</option><option value="Fonds de commerce">Fonds de commerce</option></select></label>
-              <label>Localisation<input name="location" placeholder="Arnay-le-Duc, Autun..."></label>
               <label>Objet<select name="subject" required><option value="">Choisir</option><option value="Premier rendez-vous">Premier rendez-vous</option><option value="Demande d'estimation">Demande d'estimation</option><option value="Recherche de bien">Recherche de bien</option><option value="Autre demande">Autre demande</option></select></label>
             </div>
             <div class="contact-fields two">
               <label>Nom<input name="name" placeholder="Votre nom" required></label>
               <label>Email<input type="email" name="email" placeholder="vous@exemple.fr" required></label>
-              <label>Téléphone<input type="tel" name="phone" placeholder="07.64.86.59.93"></label>
             </div>
-            <label>Message<textarea name="message" placeholder="Décrivez votre projet, votre secteur et votre calendrier." required></textarea></label>
+            <div class="contact-fields two">
+              <label>Téléphone<input type="tel" name="phone" placeholder="06 12 34 56 78"></label>
+              <label>Localisation<input name="location" placeholder="Arnay-le-Duc, Autun..."></label>
+            </div>
+            <label>Message<textarea name="message" placeholder="Décrivez votre bien, votre recherche, votre secteur ou votre calendrier." required></textarea></label>
             <label class="privacy-line"><input type="checkbox" name="privacy" value="1" required><span>J’accepte d’être recontacté au sujet de ma demande.</span></label>
             <button class="button primary contact-submit" type="submit">Envoyer le message</button>
           </form>
-
-          <aside class="contact-premium-side">
-            <div class="contact-side-card featured">
-              <p class="eyebrow">Réponse rapide</p>
-              <h2>Parlez directement à Marion et Mickael</h2>
-              <a class="contact-phone" href="<?= cms_h('tel:' . preg_replace('/\s+/', '', (string) $settings['phone'])) ?>"><?= cms_h((string) $settings['phone']) ?></a>
-              <a class="contact-mail" href="<?= cms_h('mailto:' . (string) $settings['email']) ?>"><?= cms_h((string) $settings['email']) ?></a>
-            </div>
-
-            <div class="team-photo-card">
-              <div>
-                <?php if ($marionPhoto !== ''): ?><img src="<?= cms_h(cms_url($marionPhoto)) ?>" alt="<?= cms_h((string) $settings['marion_name']) ?>"><?php else: ?><span><?= cms_h(substr((string) $settings['marion_name'], 0, 1)) ?></span><?php endif; ?>
-                <strong><?= cms_h((string) $settings['marion_name']) ?></strong>
-              </div>
-              <div>
-                <?php if ($mickaelPhoto !== ''): ?><img src="<?= cms_h(cms_url($mickaelPhoto)) ?>" alt="<?= cms_h((string) $settings['mickael_name']) ?>"><?php else: ?><span><?= cms_h(substr((string) $settings['mickael_name'], 0, 1)) ?></span><?php endif; ?>
-                <strong><?= cms_h((string) $settings['mickael_name']) ?></strong>
-              </div>
-            </div>
-
-            <div class="contact-side-card">
-              <h3>Ce que l’on prépare avec vous</h3>
-              <ul class="accent-list compact-list">
-                <li>Une estimation claire et argumentée</li>
-                <li>Un plan de vente adapté au secteur</li>
-                <li>Une recherche qualifiée si vous achetez</li>
-                <li>Un rendez-vous simple, au téléphone ou sur place</li>
-              </ul>
-            </div>
-
-            <div class="contact-side-card">
-              <h3>Secteur couvert</h3>
-              <div class="contact-tags"><?php foreach ($areas as $area): ?><span><?= cms_h((string) $area) ?></span><?php endforeach; ?></div>
-            </div>
-          </aside>
         </div>
       </section>
 
-      <section class="section section-tight"><div class="shell"><article class="panel-card intro-card richtext"><?= (string) $page['intro_html'] ?></article></div></section>
-      <section class="section section-tight"><div class="shell"><div class="cta-band"><div><p class="eyebrow">Passer à l’action</p><h2><?= cms_h((string) $page['cta_title']) ?></h2><div class="richtext"><?= (string) $page['cta_text'] ?></div></div><a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Demander une estimation</a></div></div></section>
+      <section class="section section-tight">
+        <div class="shell contact-proof-grid">
+          <article class="contact-proof-card is-dark">
+            <p class="eyebrow">Ce que nous clarifions</p>
+            <h2>Un échange court pour poser les bons repères.</h2>
+            <p>Nous prenons le temps de comprendre votre situation avant de proposer une suite : estimation, rendez-vous, conseil secteur, mise en vente ou orientation vers la bonne prestation.</p>
+          </article>
+          <article class="contact-proof-card">
+            <h3>À préparer si vous l’avez</h3>
+            <ul>
+              <li>Commune et type de bien</li>
+              <li>Objectif : vendre, acheter, estimer, transmettre</li>
+              <li>Calendrier souhaité</li>
+              <li>Questions ou contraintes importantes</li>
+            </ul>
+          </article>
+          <article class="contact-proof-card">
+            <h3>Secteur couvert</h3>
+            <div class="contact-tags"><?php foreach ($areas as $area): ?><span><?= cms_h((string) $area) ?></span><?php endforeach; ?></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section-tight"><div class="shell"><div class="cta-band"><div><p class="eyebrow">Estimation en ligne</p><h2>Vous souhaitez d’abord obtenir un premier avis de valeur ?</h2><div class="richtext"><p>Le formulaire d’estimation vous guide étape par étape pour nous transmettre les informations utiles sur votre bien.</p></div></div><a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Demander une estimation</a></div></div></section>
     </main>
     <?php
     cms_render_public_footer($settings, $snapshot);
