@@ -847,48 +847,48 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
     if ($estimateIcons === null) {
         $estimateIcons = [
             // Property type
-            'Maison' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.2 12 4l9 7.2"/><path d="M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/><path d="M10 20v-5h4v5"/></svg>',
-            'Appartement' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="7" height="18" rx="1"/><rect x="13" y="8" width="7" height="13" rx="1"/><path d="M6.5 7h2M6.5 11h2M6.5 15h2M15.5 11h2M15.5 15h2"/></svg>',
-            'Terrain' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 19 5-7 4 5 3-4 6 6"/><circle cx="16" cy="8" r="1.6"/></svg>',
-            'Immeuble' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="7" height="18" rx="1"/><rect x="13" y="8" width="7" height="13" rx="1"/><path d="M6.5 7h2M6.5 11h2M6.5 15h2M15.5 11h2M15.5 15h2"/></svg>',
-            'Autre' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/></svg>',
+            'Maison' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.2 12 4l9 7.2" stroke="var(--icon-accent-2)" stroke-width="1.9"/><path d="M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/><path d="M10 20v-5h4v5" fill="var(--icon-accent)" stroke="var(--icon-accent)" fill-opacity="0.35"/></svg>',
+            'Appartement' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="7" height="18" rx="1"/><rect x="13" y="8" width="7" height="13" rx="1"/><rect x="6" y="6" width="2" height="2" fill="var(--icon-accent)" stroke="none"/><rect x="6" y="10" width="2" height="2" fill="var(--icon-accent)" stroke="none"/><rect x="6" y="14" width="2" height="2" fill="var(--icon-accent)" stroke="none"/><rect x="15" y="11" width="2" height="2" fill="var(--icon-accent-2)" stroke="none"/><rect x="15" y="15" width="2" height="2" fill="var(--icon-accent-2)" stroke="none"/></svg>',
+            'Terrain' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 19 5-7 4 5 3-4 6 6"/><circle cx="17" cy="7" r="2.4" fill="var(--icon-accent)" stroke="var(--icon-accent)"/></svg>',
+            'Immeuble' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="8" height="12" rx="1"/><rect x="13" y="3" width="8" height="18" rx="1"/><rect x="5" y="12" width="1.6" height="1.6" fill="var(--icon-accent)" stroke="none"/><rect x="8" y="12" width="1.6" height="1.6" fill="var(--icon-accent)" stroke="none"/><rect x="5" y="16" width="1.6" height="1.6" fill="var(--icon-accent)" stroke="none"/><rect x="8" y="16" width="1.6" height="1.6" fill="var(--icon-accent)" stroke="none"/><rect x="15" y="6" width="1.6" height="1.6" fill="var(--icon-accent-2)" stroke="none"/><rect x="17.6" y="6" width="1.6" height="1.6" fill="var(--icon-accent-2)" stroke="none"/><rect x="15" y="10" width="1.6" height="1.6" fill="var(--icon-accent-2)" stroke="none"/><rect x="17.6" y="10" width="1.6" height="1.6" fill="var(--icon-accent-2)" stroke="none"/></svg>',
+            'Autre' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="1.6" fill="var(--icon-accent)" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="var(--icon-accent-2)" stroke="none"/><circle cx="18" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>',
             // Rooms
-            '1 ou 2' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12V8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4"/><path d="M3 18v-4h18v4"/><path d="M3 18v2M21 18v2"/></svg>',
-            '3' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="1"/><circle cx="14.5" cy="12" r="0.9" fill="currentColor"/></svg>',
-            '4' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.2 12 4l9 7.2"/><path d="M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/><path d="M10 20v-5h4v5"/></svg>',
-            '5 ou plus' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V11l6-4 6 4v10"/><path d="M15 21v-7h6v7"/><path d="M3 21h18"/></svg>',
-            'Je ne sais pas' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1 1-1.1 1.8v.5"/><path d="M12 17.2v.1"/></svg>',
+            '1 ou 2' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12V8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4"/><path d="M3 18v-4h18v4" fill="var(--icon-accent)" fill-opacity="0.25"/><path d="M3 18v2M21 18v2"/></svg>',
+            '3' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="1"/><path d="M6 9h12M6 15h12" stroke="var(--icon-accent)" stroke-width="1.4"/><circle cx="14.5" cy="12" r="1" fill="var(--icon-accent-2)" stroke="none"/></svg>',
+            '4' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.2 12 4l9 7.2" stroke="var(--icon-accent-2)" stroke-width="1.9"/><path d="M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/><path d="M9 13h2v2H9zM13 13h2v2h-2z" fill="var(--icon-accent)" stroke="none"/><path d="M10 20v-3h4v3"/></svg>',
+            '5 ou plus' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V11l6-4 6 4v10"/><path d="M15 21v-7h6v7" fill="var(--icon-accent)" fill-opacity="0.3"/><path d="M3 21h18"/><circle cx="9" cy="14" r="1.1" fill="var(--icon-accent-2)" stroke="none"/></svg>',
+            'Je ne sais pas' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1 1-1.1 1.8v.5" stroke="var(--icon-accent-2)" stroke-width="1.9"/><circle cx="12" cy="17.4" r="0.9" fill="var(--icon-accent)" stroke="none"/></svg>',
             // Condition
-            'Neuf / rénové récemment' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 4 1.5 4 4 1.5-4 1.5L12 15l-1.5-4L6.5 9.5 10.5 8 12 4Z"/><path d="M19 17 18 19l-2 1 2 1 1 2 1-2 2-1-2-1Z"/></svg>',
-            'Bon état' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.4 2.5 2.4 4.5-5"/></svg>',
-            'Travaux à prévoir' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a3.5 3.5 0 0 0-4.6 4.6l-6.6 6.6 2.1 2.1 6.6-6.6a3.5 3.5 0 0 0 4.6-4.6l-2.2 2.2-1.7-1.7Z"/></svg>',
-            'À rénover entièrement' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m13.5 6.5 4-4 3 3-4 4"/><path d="m13.5 6.5-9 9v3h3l9-9"/><path d="m6.5 13.5 3 3"/></svg>',
+            'Neuf / rénové récemment' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 4 1.5 4 4 1.5-4 1.5L12 15l-1.5-4L6.5 9.5 10.5 8 12 4Z" fill="var(--icon-accent)" stroke="var(--icon-accent)" fill-opacity="0.55"/><path d="M19 17 18 19l-2 1 2 1 1 2 1-2 2-1-2-1Z" fill="var(--icon-accent-2)" stroke="var(--icon-accent-2)" fill-opacity="0.55"/></svg>',
+            'Bon état' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" fill="var(--icon-accent)" stroke="var(--icon-accent)" fill-opacity="0.35"/><path d="m8.5 12.4 2.5 2.4 4.5-5" stroke="currentColor" stroke-width="2.1"/></svg>',
+            'Travaux à prévoir' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a3.5 3.5 0 0 0-4.6 4.6l-6.6 6.6 2.1 2.1 6.6-6.6a3.5 3.5 0 0 0 4.6-4.6l-2.2 2.2-1.7-1.7Z" fill="var(--icon-accent)" stroke="currentColor" fill-opacity="0.4"/><circle cx="6" cy="18" r="0.9" fill="var(--icon-accent-2)" stroke="none"/></svg>',
+            'À rénover entièrement' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m13.5 6.5 4-4 3 3-4 4" stroke="var(--icon-accent-2)" stroke-width="1.9"/><path d="m13.5 6.5-9 9v3h3l9-9" fill="var(--icon-accent)" fill-opacity="0.3"/><path d="m6.5 13.5 3 3"/></svg>',
             // Living surface
-            'Moins de 40 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>',
-            '40 – 70 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20 20 4"/><path d="M4 20h16V8"/></svg>',
-            '70 – 100 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M12 4v16M4 12h8"/></svg>',
-            '100 – 150 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>',
-            'Plus de 150 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
+            'Moins de 40 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1" fill="var(--icon-accent)" fill-opacity="0.35" stroke="currentColor"/></svg>',
+            '40 – 70 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="1" fill="var(--icon-accent)" fill-opacity="0.35" stroke="currentColor"/><path d="M5 12h14M12 5v14" stroke="var(--icon-accent-2)" stroke-width="1.3"/></svg>',
+            '70 – 100 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="1" fill="var(--icon-accent)" fill-opacity="0.3" stroke="currentColor"/><path d="M12 4v16M4 12h16" stroke="var(--icon-accent-2)" stroke-width="1.3"/></svg>',
+            '100 – 150 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1" fill="var(--icon-accent)" stroke="currentColor" fill-opacity="0.5"/><rect x="13" y="4" width="7" height="7" rx="1" fill="var(--icon-accent-2)" stroke="currentColor" fill-opacity="0.5"/><rect x="4" y="13" width="7" height="7" rx="1" fill="var(--icon-accent-2)" stroke="currentColor" fill-opacity="0.5"/><rect x="13" y="13" width="7" height="7" rx="1" fill="var(--icon-accent)" stroke="currentColor" fill-opacity="0.5"/></svg>',
+            'Plus de 150 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="var(--icon-accent-2)" stroke-width="1.9"/><rect x="9" y="9" width="6" height="6" fill="var(--icon-accent)" stroke="currentColor" fill-opacity="0.45"/></svg>',
             // Land surface
-            'Pas de terrain' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m6 6 12 12"/></svg>',
-            'Moins de 500 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1"/></svg>',
-            '500 – 1 000 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="1"/></svg>',
-            '1 000 – 2 000 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18M3 9h18"/></svg>',
-            'Plus de 2 000 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
+            'Pas de terrain' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m6 6 12 12" stroke="var(--icon-accent-2)" stroke-width="2"/></svg>',
+            'Moins de 500 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1" fill="var(--icon-accent)" stroke="currentColor" fill-opacity="0.4"/></svg>',
+            '500 – 1 000 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="1" fill="var(--icon-accent)" stroke="currentColor" fill-opacity="0.4"/></svg>',
+            '1 000 – 2 000 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1" fill="var(--icon-accent)" stroke="currentColor" fill-opacity="0.35"/><path d="M9 3v18M3 9h18" stroke="var(--icon-accent-2)" stroke-width="1.3"/></svg>',
+            'Plus de 2 000 m²' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="var(--icon-accent-2)" stroke-width="1.9"/><rect x="9" y="9" width="6" height="6" fill="var(--icon-accent)" stroke="currentColor" fill-opacity="0.45"/></svg>',
             // Goal
-            'Vendre rapidement' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m13 3-8 11h6l-1 7 8-11h-6l1-7Z"/></svg>',
-            'Vendre au meilleur prix' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m4 17 6-6 4 4 6-7"/><path d="M14 8h6v6"/></svg>',
-            'Simple curiosité' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h6l1 3h11l-2 9H6L3 5Z"/><path d="M3 5 2 2"/></svg>',
-            'Projet d’achat / vente' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h7l3 3"/><path d="M21 17h-7l-3-3"/><path d="m17 13 4 4-4 4M7 11 3 7l4-4"/></svg>',
-            'Succession' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6"/><path d="M5 9h14l-1 11H6L5 9Z"/><path d="M9 13v3M15 13v3"/></svg>',
-            'Séparation' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 12 4-4M3 12l4 4M21 12l-4-4M21 12l-4 4M3 12h7M14 12h7"/></svg>',
-            'Autre situation' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/></svg>',
+            'Vendre rapidement' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m13 3-8 11h6l-1 7 8-11h-6l1-7Z" fill="var(--icon-accent)" stroke="var(--icon-accent-2)" stroke-width="1.7" fill-opacity="0.55"/></svg>',
+            'Vendre au meilleur prix' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m4 17 6-6 4 4 6-7" stroke="var(--icon-accent-2)" stroke-width="2"/><path d="M14 8h6v6" stroke="var(--icon-accent-2)" stroke-width="2"/><circle cx="10" cy="11" r="1.4" fill="var(--icon-accent)" stroke="none"/><circle cx="14" cy="15" r="1.4" fill="var(--icon-accent)" stroke="none"/></svg>',
+            'Simple curiosité' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h6l1 3h11l-2 9H6L3 5Z" fill="var(--icon-accent)" fill-opacity="0.3"/><circle cx="9" cy="20" r="1.2" fill="var(--icon-accent-2)" stroke="none"/><circle cx="17" cy="20" r="1.2" fill="var(--icon-accent-2)" stroke="none"/></svg>',
+            'Projet d’achat / vente' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h7l3 3" stroke="var(--icon-accent)" stroke-width="1.9"/><path d="M21 17h-7l-3-3" stroke="var(--icon-accent-2)" stroke-width="1.9"/><path d="m17 13 4 4-4 4M7 11 3 7l4-4"/></svg>',
+            'Succession' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6" stroke="var(--icon-accent-2)" stroke-width="1.9"/><path d="M5 9h14l-1 11H6L5 9Z" fill="var(--icon-accent)" fill-opacity="0.3"/><path d="M9 13v3M15 13v3"/></svg>',
+            'Séparation' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 12 4-4M3 12l4 4M3 12h7" stroke="var(--icon-accent)" stroke-width="1.9"/><path d="M21 12l-4-4M21 12l-4 4M14 12h7" stroke="var(--icon-accent-2)" stroke-width="1.9"/></svg>',
+            'Autre situation' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="1.6" fill="var(--icon-accent)" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="var(--icon-accent-2)" stroke="none"/><circle cx="18" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>',
             // Timeline
-            'Dès maintenant' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
-            'Dans les 3 mois' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></svg>',
-            'Dans les 6 mois' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/><path d="M12 15v3"/></svg>',
-            'Plus tard' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/><path d="M16 4 19 7"/></svg>',
-            'Je ne sais pas encore' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1 1-1.1 1.8v.5"/><path d="M12 17.2v.1"/></svg>',
+            'Dès maintenant' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" fill="var(--icon-accent)" fill-opacity="0.25"/><path d="M12 7v5l3 2" stroke="var(--icon-accent-2)" stroke-width="2"/></svg>',
+            'Dans les 3 mois' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 11h18" stroke="var(--icon-accent-2)" stroke-width="1.9"/><path d="M8 3v4M16 3v4"/><circle cx="9" cy="15" r="1.2" fill="var(--icon-accent)" stroke="none"/><circle cx="13" cy="15" r="1.2" fill="var(--icon-accent)" stroke="none"/><circle cx="17" cy="15" r="1.2" fill="var(--icon-accent)" stroke="none"/></svg>',
+            'Dans les 6 mois' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 11h18" stroke="var(--icon-accent-2)" stroke-width="1.9"/><path d="M8 3v4M16 3v4"/><circle cx="8" cy="14" r="0.9" fill="var(--icon-accent)" stroke="none"/><circle cx="12" cy="14" r="0.9" fill="var(--icon-accent)" stroke="none"/><circle cx="16" cy="14" r="0.9" fill="var(--icon-accent)" stroke="none"/><circle cx="8" cy="18" r="0.9" fill="var(--icon-accent)" stroke="none"/><circle cx="12" cy="18" r="0.9" fill="var(--icon-accent)" stroke="none"/><circle cx="16" cy="18" r="0.9" fill="var(--icon-accent)" stroke="none"/></svg>',
+            'Plus tard' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" fill="var(--icon-accent)" fill-opacity="0.2"/><path d="M12 7v5l3 2" stroke="var(--icon-accent-2)" stroke-width="2"/><path d="M16 4 19 7"/></svg>',
+            'Je ne sais pas encore' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1 1-1.1 1.8v.5" stroke="var(--icon-accent-2)" stroke-width="1.9"/><circle cx="12" cy="17.4" r="0.9" fill="var(--icon-accent)" stroke="none"/></svg>',
         ];
     }
 
@@ -990,7 +990,7 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
                 <h2>Quel type de bien estimez-vous ?</h2>
                 <p>Choisissez la catégorie de votre bien immobilier.</p>
                 <div class="estimate-choice-grid two-col stacked">
-                  <?php foreach (['Appartement', 'Maison', 'Terrain', 'Immeuble', 'Autre'] as $option) { $renderChoiceCard('property_type', $option, 'is-stacked'); } ?>
+                  <?php foreach (['Appartement', 'Maison', 'Terrain', 'Autre'] as $option) { $renderChoiceCard('property_type', $option, 'is-stacked'); } ?>
                 </div>
               </section>
 
@@ -1104,10 +1104,10 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
                 <label class="privacy-line estimate-consent-line"><input type="checkbox" name="contact_consent" value="1" <?= (int) $formData['contact_consent'] === 1 ? 'checked' : '' ?> required><span>J’accepte d’être recontacté au sujet de ma demande d’estimation.</span></label>
               </section>
 
-              <div class="estimate-actions">
+              <div class="estimate-actions is-first-step">
                 <button id="estimate-next-button" class="primary-button estimate-next-button" type="button" disabled>Suivant</button>
                 <button id="estimate-submit-button" class="primary-button estimate-submit-button" type="submit" hidden>Recevoir mon estimation gratuite</button>
-                <button id="estimate-back-button" class="estimate-back-button" type="button">← Retour</button>
+                <button id="estimate-back-button" class="estimate-back-button" type="button" hidden>← Retour</button>
               </div>
           </form>
 
@@ -1172,6 +1172,7 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
         const backButton = document.getElementById('estimate-back-button');
         const nextButton = document.getElementById('estimate-next-button');
         const submitButton = document.getElementById('estimate-submit-button');
+        const actionBar = form.querySelector('.estimate-actions');
         const stepLabel = document.getElementById('estimate-step-label');
         const stepPercent = document.getElementById('estimate-step-percent');
         const progressBar = document.getElementById('estimate-progress-bar');
@@ -1316,7 +1317,17 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
             && !!consent?.checked;
         };
 
+        const isStepApplicable = (stepNumber) => {
+          if (getValue('property_type') === 'Terrain' && (stepNumber === 2 || stepNumber === 3 || stepNumber === 4)) {
+            return false;
+          }
+          return true;
+        };
+
         const isStepValid = (stepNumber) => {
+          if (!isStepApplicable(stepNumber)) {
+            return true;
+          }
           switch (stepNumber) {
             case 1:
               return getValue('property_type') !== '';
@@ -1366,16 +1377,18 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
           });
 
           const shouldAutoAdvance = autoAdvanceSteps.has(activeStep);
+          const stepIsValid = isStepValid(activeStep);
           const percent = Math.round((activeStep / totalSteps) * 100);
           stepLabel.textContent = `ÉTAPE ${activeStep} SUR ${totalSteps}`;
           stepPercent.textContent = `${percent}%`;
           progressBar.style.width = `${percent}%`;
 
           backButton.hidden = activeStep === 1;
-          nextButton.hidden = activeStep === totalSteps || shouldAutoAdvance;
+          nextButton.hidden = activeStep === totalSteps || (shouldAutoAdvance && stepIsValid);
           submitButton.hidden = activeStep !== totalSteps;
-          nextButton.disabled = !isStepValid(activeStep);
+          nextButton.disabled = !stepIsValid || shouldAutoAdvance;
           submitButton.disabled = !isContactStepValid();
+          actionBar?.classList.toggle('is-first-step', activeStep === 1);
           syncChoiceState();
           updateCommuneSuffix();
         };
@@ -1400,7 +1413,11 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
             if (stepNumber === activeStep && autoAdvanceSteps.has(stepNumber) && isStepValid(stepNumber)) {
               triggerTracking('estimation_step_completed', { step_number: stepNumber });
               autoAdvanceTimer = window.setTimeout(() => {
-                activeStep = Math.min(totalSteps, stepNumber + 1);
+                let nextStep = Math.min(totalSteps, stepNumber + 1);
+                while (nextStep < totalSteps && !isStepApplicable(nextStep)) {
+                  nextStep += 1;
+                }
+                activeStep = nextStep;
                 updateNavigationState();
               }, 140);
             }
@@ -1551,7 +1568,11 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
           }
 
           triggerTracking('estimation_step_completed', { step_number: activeStep });
-          activeStep = Math.min(totalSteps, activeStep + 1);
+          let nextStep = Math.min(totalSteps, activeStep + 1);
+          while (nextStep < totalSteps && !isStepApplicable(nextStep)) {
+            nextStep += 1;
+          }
+          activeStep = nextStep;
           updateNavigationState();
         });
 
@@ -1560,7 +1581,11 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
             window.clearTimeout(autoAdvanceTimer);
           }
 
-          activeStep = Math.max(1, activeStep - 1);
+          let prevStep = Math.max(1, activeStep - 1);
+          while (prevStep > 1 && !isStepApplicable(prevStep)) {
+            prevStep -= 1;
+          }
+          activeStep = prevStep;
           updateNavigationState();
         });
 
@@ -1796,8 +1821,6 @@ function cms_render_estimation_header(array $settings): void
         <a class="estimate-header-brand" href="<?= cms_h(cms_url('/')) ?>" aria-label="Retour à l'accueil Immobilier Auxois Morvan">
           <img src="<?= cms_h(cms_url('/uploads/logo-2.png')) ?>" alt="Immobilier Auxois Morvan" class="estimate-header-logo">
         </a>
-        <span class="estimate-header-divider" aria-hidden="true"></span>
-        <span class="estimate-header-agency"><?= cms_h((string) $settings['site_name']) ?></span>
         <a class="estimate-header-cta" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Estimation gratuite</a>
       </div>
     </header>

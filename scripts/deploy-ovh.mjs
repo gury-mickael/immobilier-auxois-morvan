@@ -68,7 +68,6 @@ if (!commandExists('lftp')) {
 }
 
 if (!skipBuild) {
-  run('npm', ['run', 'ovh:seed']);
   run('npm', ['run', 'ovh:prepare']);
 }
 

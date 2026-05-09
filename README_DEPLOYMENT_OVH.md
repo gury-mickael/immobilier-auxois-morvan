@@ -1,11 +1,8 @@
 # Déploiement OVH mutualisé
 
-Ce dépôt contient désormais deux couches distinctes :
+Ce dépôt contient désormais une seule couche applicative : le mini-CMS PHP + MySQL compatible hébergement OVH mutualisé, sans serveur Node permanent.
 
-- Astro reste la source de travail pour le design, les composants et l'évolution technique locale.
-- ovh contient le mini-CMS PHP + MySQL compatible hébergement OVH mutualisé, sans serveur Node permanent.
-
-Pour une bascule rapide, l'objectif n'est plus de publier Astro côté OVH. Le site en ligne doit servir directement le dossier ovh.
+Le site en ligne sert directement le dossier `ovh` préparé dans `ovh-build`.
 
 ## Architecture retenue
 
@@ -14,7 +11,7 @@ La migration la plus fiable pour OVH mutualisé consiste à faire tourner le bac
 Pourquoi :
 
 - l'offre mutualisée OVH exécute PHP nativement
-- elle ne fournit pas de process Node permanent fiable pour Astro server
+- elle ne nécessite aucun process Node permanent
 - un CMS PHP permet des changements visibles immédiatement sans redéploiement GitHub
 - les mots de passe admin restent hashés en base avec password_hash / password_verify
 
@@ -35,14 +32,7 @@ Pourquoi :
 Dans phpMyAdmin OVH :
 
 1. importe [db/schema.sql](db/schema.sql)
-2. dans le repo local, génère le seed initial depuis le contenu Astro actuel :
-
-```bash
-npm install
-npm run ovh:seed
-```
-
-3. importe ensuite [db/ovh-seed.sql](db/ovh-seed.sql)
+2. importe ensuite [db/ovh-seed.sql](db/ovh-seed.sql)
 
 Cela peuple :
 
@@ -111,8 +101,6 @@ Concrètement, côté OVH tu dois avoir :
 - uploads/cms/
 - .env
 
-Si le site Astro actuel est déjà en ligne sur le même domaine, remplace la racine publiée par le contenu de ovh-build au moment de la bascule.
-
 Important :
 
 - .htaccess protège .env et app/
@@ -141,9 +129,10 @@ Cela crée les tables si besoin et importe les textes/pages seedés depuis le se
 
 Pour le code et le design :
 
-1. tu continues à travailler dans Astro dans Codespaces
-2. quand tu veux faire évoluer le rendu OVH, tu mets à jour les templates PHP dans ovh et les styles de [ovh/assets/site.css](ovh/assets/site.css)
-3. tu redéploies uniquement le dossier ovh
+1. tu travailles directement dans les templates PHP de [ovh](ovh) et les styles de [ovh/assets/site.css](ovh/assets/site.css)
+2. tu testes en local avec `npm run dev`
+3. tu prépares le build avec `npm run ovh:prepare`
+4. tu redéploies le contenu de `ovh-build`
 
 Pour le contenu :
 
@@ -151,16 +140,9 @@ Pour le contenu :
 2. ils modifient textes, images, pages locales, SEO
 3. le site public reflète immédiatement les changements via MySQL
 
-## 7. Limites actuelles de cette première migration
-
-- le rendu public PHP reprend l'identité visuelle et le modèle de contenu, mais pas l'intégralité des composants Astro avancés
-- le blog Astro existant n'a pas encore été rebranché sur le runtime PHP mutualisé
-- la couche PHP est prête pour une mise en ligne rapide, mais demandera encore un second passage si tu veux un rendu pixel-perfect par rapport au front Astro actuel
-
-## 8. Étape suivante recommandée
+## 7. Étape suivante recommandée
 
 Après la première mise en ligne, la suite logique est :
 
-1. brancher le blog sur le front PHP si tu veux l'éditer depuis le CMS aussi
-2. rapprocher encore le rendu PHP de la home Astro actuelle si tu veux un match visuel presque parfait
-3. ajouter un export/sauvegarde automatisé de la base et des uploads pour l'exploitation OVH
+1. synchroniser régulièrement la base et les uploads OVH vers le local si tu veux un contenu strictement identique
+2. ajouter un export/sauvegarde automatisé de la base et des uploads pour l'exploitation OVH

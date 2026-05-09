@@ -1,0 +1,196 @@
+{
+  "siteSettings": {
+    "siteName": "Immobilier Auxois Morvan",
+    "baseline": "Mickael Gury et Marion Roulier accompagnent les projets immobiliers en Auxois et dans le Morvan avec une approche sérieuse, locale et profondément humaine.",
+    "mickaelName": "Mickael Gury",
+    "marionName": "Marion Roulier",
+    "mickaelPhoto": "/uploads/cms/2025-10-photo-IAD-fond-961x1024.jpg",
+    "marionPhoto": "/uploads/cms/2025-10-marion.jpg",
+    "phone": "07.64.86.59.93",
+    "email": "contact@immobilier-auxois-morvan.fr",
+    "mainCity": "Arnay-le-Duc",
+    "coveredAreas": [
+      "Arnay-le-Duc",
+      "Pouilly-en-Auxois",
+      "Autun",
+      "Saulieu",
+      "Beaune",
+      "Dijon",
+      "Vitteaux",
+      "Semur-en-Auxois",
+      "Auxois",
+      "Morvan"
+    ],
+    "facebookUrl": "https://www.facebook.com/immobilier-auxois-morvan",
+    "instagramUrl": "https://www.instagram.com/immobilier.auxois.morvan",
+    "iadUrl": "https://www.iadfrance.fr",
+    "footerText": "Immobilier Auxois Morvan accompagne les projets immobiliers en Auxois et Morvan avec une approche locale, claire et humaine.",
+    "mainCtaLabel": "Contactez-nous",
+    "mainCtaUrl": "/contact"
+  },
+  "localPages": [
+    {
+      "title": "Estimation immobilière à Arnay-le-Duc",
+      "city": "Arnay-le-Duc",
+      "pageType": "estimation-immobiliere",
+      "href": "/estimation-immobiliere-arnay-le-duc",
+      "excerpt": "Entre centre bourg, maisons anciennes, biens familiaux et projets de vie plus ruraux, une estimation à Arnay le Duc doit tenir compte de la demande locale et du...",
+      "image": "/uploads/arnay.jpg"
+    },
+    {
+      "title": "Estimation immobilière à Pouilly-en-Auxois",
+      "city": "Pouilly-en-Auxois",
+      "pageType": "estimation-immobiliere",
+      "href": "/estimation-immobiliere-pouilly-en-auxois",
+      "excerpt": "Entre axe de passage, attractivité résidentielle et diversité de biens, Pouilly en Auxois demande une lecture fine du marché et des profils acquéreurs.",
+      "image": "/uploads/pouilly.jpg"
+    },
+    {
+      "title": "Vendre sa maison à Autun",
+      "city": "Autun",
+      "pageType": "vendre-maison",
+      "href": "/vendre-maison-autun",
+      "excerpt": "À Autun, la lecture du marché dépend fortement du quartier, du type de maison, de l'état du bien et du projet des acquéreurs. Une vente efficace commence par ce...",
+      "image": "/uploads/autun.jpg"
+    }
+  ],
+  "blogPosts": [
+    {
+      "title": "Vendre sa maison en Auxois",
+      "slug": "vendre-sa-maison-en-auxois",
+      "metaTitle": "Vendre sa maison en Auxois",
+      "metaDescription": "Nos conseils pour vendre sa maison en Auxois : estimation, préparation, stratégie de prix et commercialisation locale.",
+      "excerpt": "Préparer une vente en Auxois demande une estimation juste, une présentation soignée et une lecture réaliste des attentes acquéreurs.",
+      "href": "/blog/vendre-sa-maison-en-auxois",
+      "category": "Vendre",
+      "date": "2026-04-12T00:00:00.000Z",
+      "image": "/uploads/maison.jpg",
+      "imageAlt": "Maison en pierre à vendre dans l'Auxois",
+      "bodyHtml": "<p>Vendre une maison en Auxois ne se résume pas à publier une annonce. La qualité du positionnement dès les premiers jours joue souvent un rôle décisif sur la suite du dossier.</p><p>Commencer par une estimation cohérente</p><p>Un prix trop ambitieux peut freiner les premiers contacts et faire perdre de la visibilité au bien. À l'inverse, un prix sous-évalué peut nuire à votre projet patrimonial. Une estimation utile repose sur les références du secteur, la qualité intrinsèque du bien et le type d'acquéreurs visés.</p><p>Préparer les bons arguments</p><p>En Auxois, les projets d'achat sont souvent liés à une recherche de cadre de vie, de surface, de cachet ou de potentiel. Il faut donc présenter clairement les éléments qui comptent vraiment : implantation, environnement, dépendances, travaux, volumes, accès et usages possibles.</p><p>Organiser la commercialisation</p><p>Une diffusion large n'est efficace que si le dossier est bien cadré. Il faut des visuels sobres, un discours précis, une hiérarchie claire des informations et un suivi sérieux des demandes pour qualifier rapidement les acquéreurs les plus cohérents.</p>",
+      "isIndexable": true
+    },
+    {
+      "title": "Bien estimer son bien immobilier",
+      "slug": "bien-estimer-son-bien-immobilier",
+      "metaTitle": "Bien estimer son bien immobilier",
+      "metaDescription": "Comment bien estimer son bien immobilier avant une mise en vente : références, critères déterminants et stratégie de prix.",
+      "excerpt": "Une estimation pertinente doit tenir compte du marché local, des caractéristiques du bien et de l'objectif du vendeur.",
+      "href": "/blog/bien-estimer-son-bien-immobilier",
+      "category": "Estimation",
+      "date": "2026-03-28T00:00:00.000Z",
+      "image": "/uploads/estimer2.jpg",
+      "imageAlt": "Documents d'estimation immobilière et carnet de notes",
+      "bodyHtml": "<p>Une estimation immobilière sérieuse permet de prendre de meilleures décisions. Elle sert autant à préparer une vente qu'à arbitrer un projet de vie, une succession ou une réorganisation patrimoniale.</p><p>Observer le bon marché de référence</p><p>Les comparaisons doivent être faites avec des biens réellement pertinents, dans le même secteur ou sur des marchés comparables. Une moyenne trop large ne suffit pas pour comprendre la vraie valeur d'un bien.</p><p>Intégrer les spécificités du bien</p><p>L'état général, les annexes, l'environnement, la luminosité, les travaux à prévoir, l'agencement ou encore le potentiel d'usage ont un impact direct sur la perception de valeur.</p><p>Relier estimation et stratégie</p><p>Un avis de valeur utile doit déboucher sur une action claire : vendre rapidement, viser un certain calendrier, préparer une valorisation préalable ou ajuster les attentes du projet.</p>",
+      "isIndexable": true
+    },
+    {
+      "title": "Acheter dans le Morvan",
+      "slug": "acheter-dans-le-morvan",
+      "metaTitle": "Acheter dans le Morvan",
+      "metaDescription": "Acheter dans le Morvan : cadre de vie, types de biens, points de vigilance et conseils pour réussir son projet immobilier.",
+      "excerpt": "Le Morvan attire pour son cadre naturel et son authenticité, mais chaque secteur possède ses propres réalités de marché et d'usage.",
+      "href": "/blog/acheter-dans-le-morvan",
+      "category": "Acheter",
+      "date": "2026-02-18T00:00:00.000Z",
+      "image": "/uploads/auxois.jpg",
+      "imageAlt": "Panorama naturel du Morvan",
+      "bodyHtml": "<p>Acheter dans le Morvan, c'est souvent rechercher un cadre de vie singulier. Selon le projet, il peut s'agir d'une résidence principale, d'une maison secondaire ou d'un bien à rénover avec un potentiel plus large.</p><p>Définir le bon secteur</p><p>Le choix ne dépend pas uniquement du prix. Les temps d'accès, les services, la vie locale, les commerces et l'équilibre entre isolement et praticité sont des critères centraux.</p><p>Lire le potentiel du bien</p><p>Dans les secteurs plus ruraux, l'état structurel, les dépendances, les contraintes techniques et la logique d'entretien doivent être examinés avec attention.</p><p>Se faire accompagner</p><p>Un regard local aide à comparer plus vite, à mieux préparer les visites et à éviter les arbitrages trop rapides sur des biens très différents en apparence.</p>",
+      "isIndexable": true
+    },
+    {
+      "title": "Vendre un fonds de commerce",
+      "slug": "vendre-un-fonds-de-commerce",
+      "metaTitle": "Vendre un fonds de commerce",
+      "metaDescription": "Les étapes pour vendre un fonds de commerce : estimation, préparation du dossier, diffusion et sélection des repreneurs.",
+      "excerpt": "Une cession de fonds de commerce se prépare avec méthode pour présenter l'activité de façon claire et qualifier efficacement les repreneurs.",
+      "href": "/blog/vendre-un-fonds-de-commerce",
+      "category": "Fonds de commerce",
+      "date": "2026-01-30T00:00:00.000Z",
+      "image": "/uploads/our-services-2.jpg",
+      "imageAlt": "Commerce de proximité prêt à être cédé",
+      "bodyHtml": "<p>La vente d'un fonds de commerce ne s'improvise pas. Le cédant doit pouvoir présenter une activité lisible, un cadre d'exploitation clair et des repères sérieux pour les candidats à la reprise.</p><p>Préparer la présentation du dossier</p><p>Le dossier doit permettre une première compréhension rapide de l'activité, de son emplacement, de ses forces et des conditions de reprise. Cela fluidifie les échanges et évite les contacts peu qualifiés.</p><p>Définir une diffusion adaptée</p><p>La communication doit être suffisamment large pour toucher des repreneurs pertinents, tout en restant cohérente avec les enjeux de confidentialité et de discrétion du commerce.</p><p>Piloter les candidatures</p><p>Qualifier les profils, organiser les échanges et accompagner les négociations fait gagner du temps et sécurise les étapes clés de la transmission.</p>",
+      "isIndexable": true
+    }
+  ],
+  "testimonials": [
+    {
+      "quote": "Nous avons été accompagnés avec beaucoup de sérieux et de disponibilité. Les conseils sur le secteur ont vraiment fait la différence dans notre décision d'achat.",
+      "author": "Catherine Leblanc",
+      "title": "Achat de maison",
+      "location": "Beaune",
+      "rating": 5
+    },
+    {
+      "quote": "L'estimation était argumentée et la stratégie de vente claire dès le départ. Le suivi a été fluide jusqu'à la signature, avec une vraie qualité de dialogue.",
+      "author": "Jean-Marc Durand",
+      "title": "Vente de maison",
+      "location": "Semur-en-Auxois",
+      "rating": 5
+    },
+    {
+      "quote": "Un accompagnement très professionnel, à la fois humain et précis. Nous avons apprécié la réactivité, la franchise et la bonne connaissance du marché local.",
+      "author": "Sophie Martin",
+      "title": "Vente et achat",
+      "location": "Autun",
+      "rating": 5
+    }
+  ],
+  "services": [
+    {
+      "title": "Vendre",
+      "description": "Positionner votre bien au bon prix, le valoriser et piloter la vente jusqu'à la signature.",
+      "href": "/vendre",
+      "features": [
+        "Estimation juste",
+        "Diffusion ciblée",
+        "Négociation pilotée"
+      ]
+    },
+    {
+      "title": "Acheter",
+      "description": "Comparer les secteurs, affiner la recherche et avancer avec des repères concrets sur le terrain.",
+      "href": "/acheter",
+      "features": [
+        "Lecture du marché local",
+        "Accompagnement des visites",
+        "Aide à la décision"
+      ]
+    },
+    {
+      "title": "Estimation",
+      "description": "Obtenir un avis de valeur argumenté pour préparer une mise en vente ou arbitrer un projet.",
+      "href": "/estimation",
+      "features": [
+        "Analyse locale",
+        "Spécificités du bien",
+        "Conseil utile à la décision"
+      ]
+    },
+    {
+      "title": "Fonds de commerce",
+      "description": "Structurer une transmission, présenter le dossier et qualifier les repreneurs avec discrétion.",
+      "href": "/fonds",
+      "features": [
+        "Valorisation",
+        "Dossier acquéreur",
+        "Accompagnement jusqu'à la vente"
+      ]
+    }
+  ],
+  "areaDescriptions": {
+    "Arnay-le-Duc": "Un marché de proximité où la lecture du cadre de vie et des villages environnants fait la différence.",
+    "Pouilly-en-Auxois": "Un secteur charnière entre mobilité, vie locale et recherche résidentielle dans l'Auxois.",
+    "Autun": "Un bassin de vie structuré, avec des quartiers et profils acquéreurs à bien distinguer.",
+    "Saulieu": "Une ville d'équilibre entre centralité locale, patrimoine et environnement naturel recherché.",
+    "Beaune": "Un marché attractif où l'emplacement, la qualité du bien et le projet acquéreur pèsent fortement.",
+    "Dijon": "Une zone plus large où l'accompagnement local aide à mieux arbitrer les opportunités et les secteurs."
+  },
+  "areaImages": {
+    "Arnay-le-Duc": "/uploads/arnay.jpg",
+    "Pouilly-en-Auxois": "/uploads/pouilly.jpg",
+    "Autun": "/uploads/autun.jpg",
+    "Saulieu": "/uploads/saulieu.jpg",
+    "Beaune": "/uploads/beaune.jpg",
+    "Dijon": "/uploads/dijon.jpg"
+  }
+}

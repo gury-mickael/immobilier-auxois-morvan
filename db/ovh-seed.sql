@@ -5,7 +5,7 @@ INSERT INTO cms_site_settings (
   mickael_photo, marion_photo, covered_areas_json, facebook_url, instagram_url, iad_url, footer_text, main_cta_label, main_cta_url
 ) VALUES (
   1, 'Immobilier Auxois Morvan', 'Mickael Gury et Marion Roulier accompagnent les projets immobiliers en Auxois et dans le Morvan avec une approche sérieuse, locale et profondément humaine.', 'Mickael Gury', 'Marion Roulier',
-  '07.64.86.59.93', 'contact@immobilier-auxois-morvan.fr', 'Arnay-le-Duc', '', '', '["Arnay-le-Duc","Pouilly-en-Auxois","Autun","Saulieu","Beaune","Dijon","Vitteaux","Semur-en-Auxois","Auxois","Morvan"]',
+  '07.64.86.59.93', 'contact@immobilier-auxois-morvan.fr', 'Arnay-le-Duc', '/uploads/cms/2025-10-photo-IAD-fond-961x1024.jpg', '/uploads/cms/2025-10-marion.jpg', '["Arnay-le-Duc","Pouilly-en-Auxois","Autun","Saulieu","Beaune","Dijon","Vitteaux","Semur-en-Auxois","Auxois","Morvan"]',
   'https://www.facebook.com/immobilier-auxois-morvan', 'https://www.instagram.com/immobilier.auxois.morvan', 'https://www.iadfrance.fr', 'Immobilier Auxois Morvan accompagne les projets immobiliers en Auxois et Morvan avec une approche locale, claire et humaine.',
   'Contactez-nous', '/contact'
 ) ON DUPLICATE KEY UPDATE

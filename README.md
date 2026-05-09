@@ -1,26 +1,45 @@
 # Immobilier Auxois Morvan
 
-Site Astro en mode serveur avec CMS maison progressif.
+Site immobilier avec version publique OVH en PHP + MySQL/MariaDB.
 
-Le site public conserve le design et le contenu existants, avec une migration progressive vers une base MySQL/MariaDB. Tant qu'un contenu n'est pas publié en base, le site continue d'utiliser les fichiers actuels.
+Le workflow local utilise la même couche PHP que la mise en ligne OVH, afin de vérifier un rendu aussi proche que possible de la production.
 
 ## Stack actuelle
 
-- Astro 6 en mode serveur via @astrojs/node
-- Tailwind CSS 4
-- MySQL / MariaDB via mysql2
+- Front public OVH en PHP
+- MySQL / MariaDB
+- Docker Compose pour reproduire le runtime PHP localement
 - Auth admin email + mot de passe hashé via bcrypt
 - Uploads images sur le filesystem de l'hébergement
 - Éditeur riche Quill pour l'admin
 
 ## Démarrage local
 
+Mode recommandé, identique au runtime OVH :
+
 ```bash
 npm install
 npm run dev
 ```
 
-Build de production :
+Cela lance MariaDB + PHP via Docker Compose, puis expose :
+
+- site public : http://127.0.0.1:8000
+- admin : http://127.0.0.1:8000/admin/login.php
+
+Pour arrêter les conteneurs :
+
+```bash
+npm run php:stop
+```
+
+Pour repartir d'une base locale vierge :
+
+```bash
+npm run php:db:reset
+```
+
+Préparer le dossier de déploiement PHP :
 
 ```bash
 npm run build
@@ -28,18 +47,21 @@ npm run build
 
 ## Variables d'environnement
 
-Exemple dans [.env.example](.env.example).
+Exemple dans [ovh/.env.example](ovh/.env.example).
 
 Variables attendues :
 
+- APP_ENV
+- APP_URL
 - DB_HOST
 - DB_PORT
+- DB_NAME
 - DB_USER
 - DB_PASSWORD
-- DB_NAME
-- DB_SSL
-- CMS_UPLOAD_DIR
-- CMS_SESSION_TTL
+- SESSION_COOKIE_NAME
+- UPLOAD_DIR
+- UPLOAD_PUBLIC_BASE
+- INSTALL_TOKEN
 
 ## Schéma SQL
 
@@ -99,7 +121,7 @@ Le site public lit progressivement la base :
 - articles de blog publiés en base si ils existent
 - réglages globaux depuis la base si ils existent
 
-Sinon, il retombe automatiquement sur les fichiers dans src/content.
+Sinon, certains blocs publics complémentaires utilisent le snapshot versionné dans [data/content-snapshot.json](data/content-snapshot.json).
 
 ## Déploiement OVH
 
@@ -117,8 +139,9 @@ Objectif de déploiement :
 2. Importer [db/schema.sql](db/schema.sql).
 3. Créer les comptes admin avec [db/admin-users.example.sql](db/admin-users.example.sql).
 4. Renseigner les variables d'environnement serveur à partir de [.env.example](.env.example).
-5. Déployer le build Astro serveur sur l'hébergement Node compatible, ou sur une cible OVH adaptée.
-6. Vérifier les droits d'écriture du dossier défini par CMS_UPLOAD_DIR.
+5. Préparer le build PHP avec `npm run ovh:prepare`.
+6. Uploader le contenu de `ovh-build` vers la racine web OVH.
+7. Vérifier les droits d'écriture du dossier défini par UPLOAD_DIR.
 
 ## État de migration
 

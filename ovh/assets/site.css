@@ -1438,14 +1438,14 @@ section[id] { scroll-margin-top: 6rem; }
    ========================================================== */
 
 .estimate-page {
-    background: var(--color-bg);
+    background: #f0f3ff;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
 .estimate-header {
-    background: var(--color-bg);
+    background: #f0f3ff;
     padding-block: 1.1rem;
 }
 .estimate-header-shell {
@@ -1545,7 +1545,7 @@ section[id] { scroll-margin-top: 6rem; }
 }
 
 .estimate-card {
-    background: var(--color-bg-soft);
+    background: transparent;
     border: 0;
     box-shadow: none;
     border-radius: 1.75rem;
@@ -1617,13 +1617,13 @@ form input[name="website"] {
 .estimate-choice-card {
     appearance: none;
     background: var(--color-panel);
-    border: 0;
+    border: 1px solid transparent;
     border-radius: 1.25rem;
     padding: 1.1rem 1rem;
     cursor: pointer;
     text-align: center;
     color: var(--color-ink-strong);
-    transition: background 220ms ease, transform 220ms ease, color 220ms ease;
+    transition: background 220ms ease, transform 220ms ease, color 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1631,6 +1631,8 @@ form input[name="website"] {
     gap: 0.6rem;
     min-height: 110px;
     box-shadow: none;
+    position: relative;
+    overflow: hidden;
 }
 .estimate-choice-card.is-stacked { min-height: 130px; }
 .estimate-choice-card.align-left {
@@ -1643,6 +1645,8 @@ form input[name="website"] {
 }
 .estimate-choice-card:hover {
     background: var(--color-accent-soft);
+    border-color: rgba(36, 98, 78, 0.18);
+    box-shadow: 0 0.9rem 1.8rem rgba(20, 37, 35, 0.08);
     transform: translateY(-2px);
 }
 .estimate-choice-card:active {
@@ -1653,7 +1657,8 @@ form input[name="website"] {
 .estimate-choice-card.is-selected {
     background: var(--color-accent);
     color: white;
-    box-shadow: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0.9rem 1.8rem rgba(36, 98, 78, 0.22);
     animation: estimate-choice-pop 320ms cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 @keyframes estimate-choice-pop {
@@ -1663,31 +1668,51 @@ form input[name="website"] {
 }
 
 .estimate-choice-icon {
+    --icon-accent: #f4a72b;
+    --icon-accent-2: #e85a4f;
+    position: relative;
+    z-index: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.4rem;
-    height: 2.4rem;
-    color: var(--color-accent);
+    width: 2.8rem;
+    height: 2.8rem;
+    padding: 0.55rem;
+    border-radius: 999px;
+    color: var(--color-accent-strong);
+    background: rgba(36, 98, 78, 0.1);
+    transition: background 220ms ease, color 220ms ease, transform 220ms ease;
     flex-shrink: 0;
+}
+.estimate-choice-card:hover .estimate-choice-icon {
+    background: rgba(36, 98, 78, 0.16);
+    transform: scale(1.04);
 }
 .estimate-choice-icon svg {
     width: 100%;
     height: 100%;
+    stroke-width: 1.6;
 }
 .estimate-choice-card.is-active .estimate-choice-icon,
-.estimate-choice-card[aria-pressed="true"] .estimate-choice-icon {
-    color: white;
+.estimate-choice-card[aria-pressed="true"] .estimate-choice-icon,
+.estimate-choice-card.is-selected .estimate-choice-icon {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.22);
+    --icon-accent: #ffd166;
+    --icon-accent-2: #ffb4a8;
 }
 
 .estimate-choice-label {
+    position: relative;
+    z-index: 1;
     font-size: 0.92rem;
     font-weight: 600;
     line-height: 1.3;
 }
 .estimate-choice-card.align-left .estimate-choice-icon {
-    width: 1.8rem;
-    height: 1.8rem;
+    width: 2.4rem;
+    height: 2.4rem;
+    padding: 0.5rem;
 }
 
 /* === Inputs === */
@@ -1948,6 +1973,9 @@ form input[name="website"] {
 .estimate-actions.single-action {
     justify-content: flex-end;
 }
+.estimate-actions.is-first-step {
+    justify-content: center;
+}
 .estimate-actions [hidden],
 .estimate-pane[hidden],
 [hidden] {
@@ -1960,6 +1988,12 @@ form input[name="website"] {
 .estimate-actions > .estimate-next-button,
 .estimate-actions > .estimate-submit-button {
     margin-left: auto;
+}
+.estimate-actions.is-first-step > .primary-button,
+.estimate-actions.is-first-step > .estimate-next-button,
+.estimate-actions.is-first-step > .estimate-submit-button {
+    min-width: min(100%, 14rem);
+    margin-left: 0;
 }
 
 .estimate-back-button {
@@ -2002,30 +2036,46 @@ form input[name="website"] {
 .primary-button:disabled,
 .estimate-next-button:disabled,
 .estimate-submit-button:disabled {
-    opacity: 0.5;
+    background: #c7ccd8;
+    color: #fff;
+    opacity: 1;
     cursor: not-allowed;
+    box-shadow: none;
 }
 
-/* === Trust block (premium, sans bordure ni ombre) === */
+/* === Trust block (premium) === */
 .estimate-trust {
-    margin-top: 2.5rem;
+    width: min(100%, 46rem);
+    margin: 2.5rem auto 0;
+    padding: 0.5rem 0 0;
+    position: relative;
     background: transparent;
     border: 0;
+    border-radius: 0;
     box-shadow: none;
-    padding: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1.1rem;
     text-align: center;
 }
 
+.estimate-trust::before { content: none; }
+
 .estimate-trust-rating {
+    position: relative;
+    z-index: 1;
     display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
+    justify-content: center;
+    gap: 0.7rem;
+    padding: 0.55rem 0.9rem;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(20, 37, 35, 0.06);
+    border-radius: 999px;
     color: var(--color-ink-strong);
     text-decoration: none;
+    box-shadow: 0 0.7rem 1.8rem rgba(20, 37, 35, 0.06);
 }
 .estimate-trust-rating:hover { color: var(--color-accent-strong); }
 .estimate-trust-stars {
@@ -2041,37 +2091,57 @@ form input[name="website"] {
 
 /* KPI cards (Nestenn-like row) */
 .estimate-kpi-grid {
+    position: relative;
+    z-index: 1;
     width: 100%;
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0.85rem;
+    gap: 0.8rem;
 }
 @media (min-width: 540px) {
     .estimate-kpi-grid { grid-template-columns: repeat(3, 1fr); }
 }
 .estimate-kpi-card {
-    background: var(--color-panel);
-    border: 0;
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(20, 37, 35, 0.07);
     box-shadow: none;
     border-radius: 1.1rem;
-    padding: 1.4rem 1.1rem;
+    padding: 1.35rem 1rem 1.25rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.45rem;
     text-align: center;
+    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+}
+.estimate-kpi-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 0.2rem;
+    background: var(--color-warm);
+    opacity: 0.5;
+}
+.estimate-kpi-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(36, 98, 78, 0.16);
+    box-shadow: none;
 }
 .estimate-kpi-icon {
-    width: 2.4rem;
-    height: 2.4rem;
+    width: 2.25rem;
+    height: 2.25rem;
     display: grid;
     place-items: center;
     color: var(--color-accent-strong);
+    background: rgba(36, 98, 78, 0.1);
+    border-radius: 999px;
 }
-.estimate-kpi-icon svg { width: 1.4rem; height: 1.4rem; }
+.estimate-kpi-icon svg { width: 1.15rem; height: 1.15rem; }
 .estimate-kpi-value {
     font-family: var(--font-display);
-    font-size: 1.65rem;
+    font-size: 1.75rem;
     line-height: 1;
     color: var(--color-accent-strong);
     font-weight: 600;
@@ -2087,37 +2157,70 @@ form input[name="website"] {
 
 /* Trust pills row */
 .estimate-trust-icon {
-    width: 1.4rem;
-    height: 1.4rem;
+    width: 1.55rem;
+    height: 1.55rem;
     display: inline-grid;
     place-items: center;
     color: var(--color-accent-strong);
-    background: transparent;
+    background: rgba(36, 98, 78, 0.09);
+    border-radius: 999px;
     flex-shrink: 0;
 }
-.estimate-trust-icon svg { width: 1.1rem; height: 1.1rem; }
+.estimate-trust-icon svg { width: 0.95rem; height: 0.95rem; }
 .estimate-trust-features {
+    position: relative;
+    z-index: 1;
+    width: 100%;
     list-style: none;
-    margin: 0;
+    margin: 0.05rem 0 0;
     padding: 0;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.85rem 2rem;
+    gap: 0.65rem;
     color: var(--color-muted);
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.14em;
     font-weight: 600;
 }
 .estimate-trust-features li {
     display: inline-flex;
     align-items: center;
-    gap: 0.55rem;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.6rem;
+    padding: 0.45rem 0.72rem;
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(20, 37, 35, 0.06);
+    border-radius: 999px;
+    box-shadow: 0 0.6rem 1.4rem rgba(20, 37, 35, 0.05);
     line-height: 1.2;
 }
 .estimate-trust-features li span:not(.estimate-trust-icon) {
     color: var(--color-muted);
+}
+
+@media (max-width: 539px) {
+    .estimate-trust {
+        padding: 0.85rem;
+        border-radius: 1.35rem;
+    }
+
+    .estimate-trust-rating {
+        width: 100%;
+        flex-wrap: wrap;
+        border-radius: 1rem;
+    }
+
+    .estimate-trust-features {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .estimate-trust-features li {
+        width: 100%;
+    }
 }
 
 .estimate-reassurance-row {

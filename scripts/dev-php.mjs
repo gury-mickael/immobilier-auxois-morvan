@@ -36,8 +36,7 @@ function dockerCompose(args) {
 
 function ensureFiles() {
   if (!fs.existsSync(schemaFile) || !fs.existsSync(seedFile)) {
-    log('Génération du seed et préparation du build…');
-    run('npm', ['run', 'ovh:seed']);
+    log('Préparation du build PHP local…');
     run('npm', ['run', 'ovh:prepare']);
   }
   fs.mkdirSync(stateDir, { recursive: true });

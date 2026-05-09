@@ -29,6 +29,7 @@ services:
         condition: service_healthy
     volumes:
       - ./ovh:/var/www/html
+      - ./data:/var/www/html/data:ro
       - ./public/uploads:/var/www/html/uploads
     ports:
       - "127.0.0.1:8000:8000"
