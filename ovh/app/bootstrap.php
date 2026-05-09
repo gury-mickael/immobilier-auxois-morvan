@@ -1449,7 +1449,7 @@ function cms_mail_headers(?string $replyTo = null): string
 
 function cms_send_estimation_notifications(array $request, array $settings): void
 {
-    $adminEmail = trim((string) ($settings['email'] ?? ''));
+    $adminEmail = 'mickael.gury@iadfrance.fr';
     $fullName = trim($request['first_name'] . ' ' . $request['last_name']);
     $commune = (string) ($request['commune'] ?? '');
 

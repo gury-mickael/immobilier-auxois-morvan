@@ -1095,7 +1095,7 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
                       Téléphone <span class="required-mark" aria-hidden="true">*</span>
                       <span class="estimate-input-with-icon">
                         <span class="estimate-input-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg></span>
-                        <input type="tel" name="phone" value="<?= cms_h((string) $formData['phone']) ?>" autocomplete="tel" placeholder="06 12 34 56 78" required>
+                        <input type="tel" name="phone" value="<?= cms_h((string) $formData['phone']) ?>" autocomplete="tel" inputmode="numeric" maxlength="14" placeholder="06 12 34 56 78" required>
                       </span>
                     </label>
                   </div>
@@ -1217,6 +1217,21 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
             field.value = value;
           }
         };
+
+        const formatPhoneNumber = (value) => value
+          .replace(/\D+/g, '')
+          .slice(0, 10)
+          .replace(/(.{2})/g, '$1 ')
+          .trim();
+
+        const phoneField = getField('phone');
+
+        if (phoneField instanceof HTMLInputElement) {
+          phoneField.value = formatPhoneNumber(phoneField.value);
+          phoneField.addEventListener('input', () => {
+            phoneField.value = formatPhoneNumber(phoneField.value);
+          });
+        }
 
         const computeDistanceKm = (lat1, lng1, lat2, lng2) => {
           const toRadians = (value) => (value * Math.PI) / 180;
