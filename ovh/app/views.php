@@ -2366,27 +2366,35 @@ function cms_render_histoire_page(array $settings): void
       </section>
 
       <section class="section section-tight">
-        <div class="shell history-team-head">
-          <p class="eyebrow">Vos conseillers</p>
-          <h2>Deux profils, une même exigence : être utiles, clairs et présents.</h2>
-        </div>
-        <div class="shell history-team-grid">
-          <article class="history-profile-card">
-            <?php if ($mickaelPhoto !== ''): ?><img src="<?= cms_h(cms_url($mickaelPhoto)) ?>" alt="<?= cms_h((string) $settings['mickael_name']) ?>" loading="lazy" decoding="async"><?php endif; ?>
-            <div>
-              <p class="card-kicker">Terrain · stratégie · négociation</p>
-              <h3><?= cms_h((string) $settings['mickael_name']) ?></h3>
-              <p>Mickael apporte une lecture directe du marché local, un sens de la négociation et une attention particulière au bon positionnement du bien. Son objectif : avancer avec méthode, sans promesse excessive, mais avec une stratégie claire.</p>
-            </div>
+        <div class="shell history-team-layout">
+          <article class="history-team-narrative">
+            <p class="eyebrow">Vos conseillers</p>
+            <h2>Deux profils, une même exigence : être utiles, clairs et présents.</h2>
+            <p>Notre complémentarité se voit surtout dans la manière d’accompagner : une lecture précise du terrain, une relation suivie, des conseils francs et une présence régulière à chaque étape.</p>
+            <ul>
+              <li>Une estimation expliquée, pas seulement annoncée.</li>
+              <li>Une stratégie adaptée au bien, à la commune et au calendrier.</li>
+              <li>Un suivi simple, humain et réactif jusqu’à la signature.</li>
+            </ul>
           </article>
-          <article class="history-profile-card is-reverse">
-            <?php if ($marionPhoto !== ''): ?><img src="<?= cms_h(cms_url($marionPhoto)) ?>" alt="<?= cms_h((string) $settings['marion_name']) ?>" loading="lazy" decoding="async"><?php endif; ?>
-            <div>
-              <p class="card-kicker">Écoute · suivi · qualité d’accompagnement</p>
-              <h3><?= cms_h((string) $settings['marion_name']) ?></h3>
-              <p>Marion veille à la fluidité du parcours : disponibilité, suivi des échanges, coordination des étapes et qualité de la relation. Elle apporte une approche attentive, rassurante et structurée du premier contact à la signature.</p>
-            </div>
-          </article>
+          <div class="history-team-grid" aria-label="Présentation de Mickael Gury et Marion Roullier">
+            <article class="history-profile-card">
+              <?php if ($mickaelPhoto !== ''): ?><img src="<?= cms_h(cms_url($mickaelPhoto)) ?>" alt="<?= cms_h((string) $settings['mickael_name']) ?>" loading="lazy" decoding="async"><?php endif; ?>
+              <div>
+                <p class="card-kicker">Terrain · stratégie · négociation</p>
+                <h3><?= cms_h((string) $settings['mickael_name']) ?></h3>
+                <p>Mickael apporte une lecture directe du marché local et du bon positionnement du bien, avec une stratégie claire et réaliste.</p>
+              </div>
+            </article>
+            <article class="history-profile-card is-reverse">
+              <?php if ($marionPhoto !== ''): ?><img src="<?= cms_h(cms_url($marionPhoto)) ?>" alt="<?= cms_h((string) $settings['marion_name']) ?>" loading="lazy" decoding="async"><?php endif; ?>
+              <div>
+                <p class="card-kicker">Écoute · suivi · accompagnement</p>
+                <h3><?= cms_h((string) $settings['marion_name']) ?></h3>
+                <p>Marion veille à la fluidité du parcours : disponibilité, coordination des étapes et qualité de la relation.</p>
+              </div>
+            </article>
+          </div>
         </div>
       </section>
 

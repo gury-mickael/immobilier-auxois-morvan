@@ -1670,20 +1670,44 @@ section[id] { scroll-margin-top: 6rem; }
     line-height: 1.7;
 }
 
-.history-team-head {
-    margin-bottom: 1.25rem;
+.history-team-layout {
+    display: grid;
+    gap: 1.25rem;
+    align-items: start;
 }
-.history-team-head h2 {
-    max-width: 16em;
-    font-size: clamp(1.8rem, 3.6vw, 3.2rem);
+@media (min-width: 980px) {
+    .history-team-layout { grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); gap: clamp(2rem, 4vw, 3.5rem); }
+}
+.history-team-narrative {
+    padding: clamp(1.35rem, 4vw, 2.35rem);
+    border-radius: 1.45rem;
+    background: var(--color-bg-soft);
+    border: 1px solid rgba(20, 37, 35, 0.07);
+}
+.history-team-narrative h2 {
+    max-width: 13em;
+    margin: 0.35rem 0 0.9rem;
+    font-size: clamp(1.75rem, 3.2vw, 2.9rem);
     line-height: 1.05;
+}
+.history-team-narrative p:not(.eyebrow) {
+    color: var(--color-muted);
+    line-height: 1.75;
+}
+.history-team-narrative ul {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 1.1rem;
+}
+.history-team-narrative li {
+    padding-left: 1rem;
+    border-left: 2px solid var(--color-accent);
+    color: var(--color-ink);
+    line-height: 1.55;
 }
 .history-team-grid {
     display: grid;
     gap: 1rem;
-}
-@media (min-width: 900px) {
-    .history-team-grid { grid-template-columns: 1fr 1fr; }
 }
 .history-profile-card {
     display: grid;
@@ -1695,19 +1719,37 @@ section[id] { scroll-margin-top: 6rem; }
 }
 .history-profile-card img {
     width: 100%;
-    aspect-ratio: 1.08;
+    aspect-ratio: 1.45;
     object-fit: cover;
+    object-position: center top;
 }
 .history-profile-card > div {
-    padding: 0 1.25rem 1.35rem;
+    padding: 0 1.15rem 1.25rem;
 }
 .history-profile-card h3 {
     margin: 0.3rem 0 0.6rem;
-    font-size: clamp(1.45rem, 2.8vw, 2rem);
+    font-size: clamp(1.35rem, 2.2vw, 1.75rem);
 }
 .history-profile-card p:not(.card-kicker) {
     color: var(--color-muted);
-    line-height: 1.7;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+@media (min-width: 680px) {
+    .history-profile-card {
+        grid-template-columns: minmax(8.5rem, 10.5rem) minmax(0, 1fr);
+        gap: 0;
+        align-items: stretch;
+    }
+    .history-profile-card img {
+        height: 100%;
+        aspect-ratio: auto;
+        min-height: 11.5rem;
+    }
+    .history-profile-card > div {
+        padding: 1.1rem 1.2rem;
+        align-self: center;
+    }
 }
 
 .history-method-panel {
