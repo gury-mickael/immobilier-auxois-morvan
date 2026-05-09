@@ -2135,7 +2135,7 @@ function cms_render_homepage(array $page, array $settings, array $snapshot): voi
 
 function cms_render_sector_page(array $page, array $settings, array $snapshot): void
 {
-    $title = 'Immobilier en Auxois Morvan : où acheter, investir et vivre entre nature et patrimoine';
+  $title = 'Auxois Morvan : acheter, investir, vivre';
     $description = 'Carte interactive, communes phares, tendances immobilières et conseils pour acheter, vendre ou investir en Auxois Morvan.';
     $heroImage = '/uploads/auxois.jpg';
     $cities = [
@@ -2158,7 +2158,7 @@ function cms_render_sector_page(array $page, array $settings, array $snapshot): 
           <div class="sector-hero-copy">
             <p class="eyebrow">Acheter · investir · vivre localement</p>
             <h1><?= cms_h($title) ?></h1>
-            <p class="hero-text">Entre Beaune, Dijon et Autun, l’Auxois Morvan attire des acheteurs en quête d’espace, de patrimoine et de qualité de vie. Voici une lecture claire du territoire pour identifier les communes à suivre et cadrer votre projet.</p>
+            <p class="hero-text">Entre Beaune, Dijon et Autun, l’Auxois Morvan attire pour son cadre préservé, ses maisons de caractère et ses prix encore lisibles. Voici une lecture claire du territoire pour cibler les communes à suivre.</p>
             <div class="sector-hero-actions">
               <a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Estimer un bien du secteur</a>
               <a class="button secondary" href="#carte-auxois-morvan">Explorer la carte</a>
@@ -2247,17 +2247,6 @@ function cms_render_sector_page(array $page, array $settings, array $snapshot): 
               <li>Rendement stable grâce à la demande locale.</li>
             </ol>
           </article>
-        </div>
-      </section>
-
-      <section class="section section-tight">
-        <div class="shell sector-advice-band">
-          <div>
-            <p class="eyebrow">Mon avis d’expert</p>
-            <h2>Le bon projet dépend surtout de la commune, de l’état du bien et du rythme de vente recherché.</h2>
-            <p>Pour vendre, le bon positionnement repose sur une lecture fine des références locales. Pour acheter ou investir, l’objectif est d’arbitrer entre prix, emplacement, travaux, potentiel locatif et qualité de vie.</p>
-          </div>
-          <a class="button primary" href="<?= cms_h(cms_url('/contact')) ?>">Parler de mon projet</a>
         </div>
       </section>
 

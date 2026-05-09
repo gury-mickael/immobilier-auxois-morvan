@@ -1351,13 +1351,14 @@ section[id] { scroll-margin-top: 6rem; }
 
 /* === PAGE SECTEUR PREMIUM === */
 .sector-premium-page {
-    background:
-        radial-gradient(circle at 14% 8%, rgba(31, 95, 74, 0.08), transparent 28rem),
-        linear-gradient(180deg, #fbfaf7 0%, #f7f5ef 42%, #fbfaf7 100%);
+    background: var(--color-bg);
+}
+.sector-premium-page .section-tight {
+    padding-block: clamp(1.75rem, 4vw, 3.25rem);
 }
 
 .sector-hero {
-    padding-block: clamp(3rem, 7vw, 6.25rem) clamp(2rem, 4vw, 3rem);
+    padding-block: clamp(2rem, 5vw, 4.25rem) clamp(1.35rem, 3vw, 2.25rem);
 }
 
 .sector-hero-grid {
@@ -1370,13 +1371,13 @@ section[id] { scroll-margin-top: 6rem; }
 }
 
 .sector-hero-copy h1 {
-    max-width: 12.5em;
+    max-width: 9.5em;
     margin: 0.8rem 0 1rem;
-    font-family: var(--font-sans);
-    font-size: clamp(2.4rem, 5.9vw, 5.2rem);
-    line-height: 0.96;
-    letter-spacing: -0.07em;
-    text-transform: uppercase;
+    font-family: var(--font-display);
+    font-size: clamp(2.25rem, 5.2vw, 4.7rem);
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+    text-transform: none;
 }
 
 .sector-hero-actions {
@@ -1414,7 +1415,7 @@ section[id] { scroll-margin-top: 6rem; }
     border-radius: 1.1rem;
     background: rgba(255, 255, 255, 0.92);
     border: 1px solid rgba(20, 37, 35, 0.08);
-    box-shadow: 0 1.2rem 2.5rem rgba(20, 37, 35, 0.12);
+    box-shadow: none;
 }
 .sector-hero-badge strong {
     font-family: var(--font-display);
@@ -1434,13 +1435,13 @@ section[id] { scroll-margin-top: 6rem; }
     display: grid;
     grid-template-columns: 1fr;
     gap: 1rem;
+    align-items: start;
 }
 @media (min-width: 860px) {
     .sector-intro-grid { grid-template-columns: 1.35fr repeat(3, 1fr); }
 }
 .sector-intro-card {
-    min-height: 100%;
-    padding: 1.35rem;
+    padding: clamp(1.1rem, 3vw, 1.35rem);
     border-radius: 1.25rem;
     background: rgba(255, 255, 255, 0.72);
     border: 1px solid rgba(20, 37, 35, 0.07);
@@ -1450,7 +1451,7 @@ section[id] { scroll-margin-top: 6rem; }
 }
 .sector-intro-card h2 {
     margin: 0.4rem 0 0.75rem;
-    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-size: clamp(1.45rem, 2.7vw, 2.05rem);
 }
 .sector-intro-card strong {
     display: block;
@@ -1490,7 +1491,7 @@ section[id] { scroll-margin-top: 6rem; }
 }
 .sector-map .leaflet-popup-content-wrapper {
     border-radius: 0.9rem;
-    box-shadow: 0 0.9rem 2rem rgba(20, 37, 35, 0.14);
+    box-shadow: none;
 }
 .sector-map .leaflet-popup-content { line-height: 1.55; }
 .sector-map-panel {
@@ -1564,6 +1565,9 @@ section[id] { scroll-margin-top: 6rem; }
     margin: 0.35rem 0 1rem;
     font-size: clamp(1.6rem, 3vw, 2.4rem);
 }
+.sector-panel-card.is-dark h2 {
+    color: white;
+}
 .sector-panel-card.is-dark .eyebrow,
 .sector-panel-card.is-dark li { color: rgba(255, 255, 255, 0.78); }
 .sector-check-list,
@@ -1577,30 +1581,6 @@ section[id] { scroll-margin-top: 6rem; }
 .sector-number-list li { padding-left: 0.2rem; }
 .sector-check-list strong { color: var(--color-ink-strong); }
 .sector-number-list { padding-left: 1.1rem; list-style: decimal; }
-
-.sector-advice-band {
-    display: grid;
-    gap: 1.5rem;
-    align-items: center;
-    padding: clamp(1.6rem, 4vw, 2.6rem);
-    border-radius: 1.5rem;
-    background: #10191d;
-    color: white;
-}
-@media (min-width: 860px) {
-    .sector-advice-band { grid-template-columns: 1fr auto; }
-}
-.sector-advice-band h2 {
-    max-width: 18em;
-    color: white;
-    font-size: clamp(1.55rem, 3vw, 2.6rem);
-}
-.sector-advice-band p:not(.eyebrow) {
-    max-width: 58rem;
-    color: rgba(255, 255, 255, 0.72);
-    margin-top: 0.85rem;
-    line-height: 1.7;
-}
 
 @media (max-width: 640px) {
     .sector-hero-media::before { display: none; }
