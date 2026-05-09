@@ -15,6 +15,21 @@ $allEstimationRequests = cms_estimation_requests();
 $estimationRequestsCount = cms_estimation_requests_count();
 $newEstimationRequestsCount = cms_estimation_requests_count('new');
 $recentEstimationRequests = cms_recent_estimation_requests(6);
+$estimationAnalyticsPeriods = cms_estimation_analytics_periods();
+$estimationAnalyticsPeriod = cms_estimation_analytics_period_key($_GET['estimation_period'] ?? '7d');
+$estimationAnalytics = cms_estimation_analytics_stats($estimationAnalyticsPeriod);
+$estimationStepLabels = [
+  1 => 'Type de bien',
+  2 => 'Pièces',
+  3 => 'État',
+  4 => 'Surface habitable',
+  5 => 'Terrain',
+  6 => 'Commune',
+  7 => 'Adresse',
+  8 => 'Objectif',
+  9 => 'Calendrier',
+  10 => 'Coordonnées',
+];
 
 // Stats par statut
 $statusCounts = array_fill_keys(array_keys($estimationStatuses), 0);
@@ -167,6 +182,78 @@ $today = strftime_safe();
       <span class="kpi-trend is-neutral"><?= count($mediaItems) ?> médias</span>
     </div>
   </article>
+</section>
+
+<section class="panel estimation-analytics-panel">
+  <div class="panel-title-row analytics-title-row">
+    <div>
+      <h2>Performance page estimation</h2>
+      <p>Visites et clics du tunnel /estimation-en-ligne</p>
+    </div>
+    <div class="chip-tabs">
+      <?php foreach ($estimationAnalyticsPeriods as $key => $period): ?>
+        <a class="chip-tab<?= $estimationAnalyticsPeriod === $key ? ' is-active' : '' ?>" href="<?= cms_h(cms_url('/admin?estimation_period=' . $key)) ?>"><?= cms_h((string) $period['label']) ?></a>
+      <?php endforeach; ?>
+    </div>
+  </div>
+
+  <div class="analytics-summary-grid">
+    <article class="analytics-mini-card"><span>Visiteurs</span><strong><?= (int) $estimationAnalytics['visitors'] ?></strong><small><?= (int) $estimationAnalytics['page_views'] ?> vues page</small></article>
+    <article class="analytics-mini-card"><span>Clics étapes</span><strong><?= (int) $estimationAnalytics['choice_clicks'] ?></strong><small><?= (int) $estimationAnalytics['step_completions'] ?> étapes validées</small></article>
+    <article class="analytics-mini-card"><span>Demandes reçues</span><strong><?= (int) $estimationAnalytics['leads'] ?></strong><small><?= (int) $estimationAnalytics['form_submits'] ?> envois formulaire</small></article>
+    <article class="analytics-mini-card"><span>Conversion</span><strong><?= (int) $estimationAnalytics['conversion_rate'] ?>%</strong><small>Leads / visiteurs</small></article>
+  </div>
+
+  <div class="analytics-detail-grid">
+    <div class="analytics-block">
+      <h3>Funnel par étape</h3>
+      <?php
+        $funnelByStep = [];
+        foreach ($estimationAnalytics['funnel'] as $row) {
+            $funnelByStep[(int) $row['step_number']] = (int) $row['visitors'];
+        }
+        $maxFunnel = max(1, ...array_values($funnelByStep ?: [1]));
+      ?>
+      <div class="analytics-funnel-list">
+        <?php foreach ($estimationStepLabels as $stepNumber => $label):
+          $visitors = $funnelByStep[$stepNumber] ?? 0;
+          $width = ($visitors / $maxFunnel) * 100;
+          ?>
+          <div class="analytics-funnel-item">
+            <div><span><?= sprintf('%02d', $stepNumber) ?></span><strong><?= cms_h($label) ?></strong><em><?= $visitors ?></em></div>
+            <i><b style="width: <?= sprintf('%.1f', $width) ?>%"></b></i>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+
+    <div class="analytics-block analytics-side-blocks">
+      <div>
+        <h3>Choix les plus cliqués</h3>
+        <?php if ($estimationAnalytics['choices']): ?>
+          <div class="analytics-list">
+            <?php foreach ($estimationAnalytics['choices'] as $choice): ?>
+              <div><span><?= cms_h((string) ($choice['choice_value'] ?? '')) ?></span><strong><?= (int) $choice['total'] ?></strong></div>
+            <?php endforeach; ?>
+          </div>
+        <?php else: ?>
+          <p class="analytics-empty">Pas encore de clic enregistré sur la période.</p>
+        <?php endif; ?>
+      </div>
+      <div>
+        <h3>Sources détectées</h3>
+        <?php if ($estimationAnalytics['sources']): ?>
+          <div class="analytics-list">
+            <?php foreach ($estimationAnalytics['sources'] as $source): ?>
+              <div><span><?= cms_h((string) ($source['source'] ?? '')) ?></span><strong><?= (int) $source['visitors'] ?></strong></div>
+            <?php endforeach; ?>
+          </div>
+        <?php else: ?>
+          <p class="analytics-empty">Aucune visite détectée sur la période.</p>
+        <?php endif; ?>
+      </div>
+    </div>
+  </div>
 </section>
 
 <section class="dashboard-layout">

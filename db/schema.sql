@@ -145,3 +145,28 @@ CREATE TABLE IF NOT EXISTS cms_estimation_requests (
   KEY idx_cms_estimation_requests_created_at (created_at),
   KEY idx_cms_estimation_requests_utm_campaign (utm_campaign)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS cms_estimation_events (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  event_name VARCHAR(100) NOT NULL,
+  visitor_id VARCHAR(80) NOT NULL,
+  session_id VARCHAR(80) DEFAULT NULL,
+  step_number TINYINT UNSIGNED DEFAULT NULL,
+  step_field VARCHAR(100) DEFAULT NULL,
+  choice_value VARCHAR(180) DEFAULT NULL,
+  page_url VARCHAR(255) DEFAULT NULL,
+  referrer VARCHAR(255) DEFAULT NULL,
+  utm_source VARCHAR(190) DEFAULT NULL,
+  utm_medium VARCHAR(190) DEFAULT NULL,
+  utm_campaign VARCHAR(190) DEFAULT NULL,
+  utm_content VARCHAR(190) DEFAULT NULL,
+  ip_hash CHAR(64) DEFAULT NULL,
+  user_agent_hash CHAR(64) DEFAULT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_cms_estimation_events_created_at (created_at),
+  KEY idx_cms_estimation_events_event_name (event_name),
+  KEY idx_cms_estimation_events_visitor (visitor_id),
+  KEY idx_cms_estimation_events_step (step_number),
+  KEY idx_cms_estimation_events_utm_campaign (utm_campaign)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

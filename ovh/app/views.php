@@ -1200,8 +1200,50 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
         let autoAdvanceTimer = null;
         let suppressNextSuggestion = false;
         let suppressNextAddressSuggestion = false;
+        const trackingEndpoint = <?= json_encode(cms_url('/estimation-track'), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+        const viewedSteps = new Set();
+        const createTrackingId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+        const getStoredTrackingId = (storage, key) => {
+          try {
+            let value = storage.getItem(key);
+            if (!value) {
+              value = createTrackingId();
+              storage.setItem(key, value);
+            }
+            return value;
+          } catch (error) {
+            return createTrackingId();
+          }
+        };
+        const visitorId = getStoredTrackingId(window.localStorage, 'iam_estimation_visitor_id');
+        const sessionId = getStoredTrackingId(window.sessionStorage, 'iam_estimation_session_id');
 
         const triggerTracking = (name, payload = {}) => {
+          const trackingParams = new URLSearchParams(window.location.search);
+          const body = JSON.stringify({
+            event_name: name,
+            visitor_id: visitorId,
+            session_id: sessionId,
+            page_url: window.location.pathname + window.location.search,
+            referrer: document.referrer || '',
+            utm_source: trackingParams.get('utm_source') || '',
+            utm_medium: trackingParams.get('utm_medium') || '',
+            utm_campaign: trackingParams.get('utm_campaign') || '',
+            utm_content: trackingParams.get('utm_content') || '',
+            payload
+          });
+
+          if (navigator.sendBeacon) {
+            navigator.sendBeacon(trackingEndpoint, new Blob([body], { type: 'application/json' }));
+          } else {
+            fetch(trackingEndpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body,
+              keepalive: true
+            }).catch(() => {});
+          }
+
           if (typeof window.gtag === 'function') {
             window.gtag('event', name, payload);
           }
@@ -1426,6 +1468,19 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
           actionBar?.classList.toggle('is-first-step', activeStep === 1);
           syncChoiceState();
           updateCommuneSuffix();
+          trackStepView();
+        };
+
+        const trackStepView = () => {
+          if (viewedSteps.has(activeStep)) {
+            return;
+          }
+          viewedSteps.add(activeStep);
+          const pane = panes[activeStep - 1];
+          triggerTracking('estimation_step_viewed', {
+            step_number: activeStep,
+            step_field: pane?.dataset.field || ''
+          });
         };
 
         form.querySelectorAll('[data-choice-field]').forEach((button) => {
@@ -1438,6 +1493,11 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
               return;
             }
 
+            triggerTracking('estimation_choice_clicked', {
+              step_number: stepNumber,
+              step_field: fieldName,
+              choice_value: fieldValue
+            });
             setValue(fieldName, fieldValue);
             updateNavigationState();
 
@@ -1446,7 +1506,7 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
             }
 
             if (stepNumber === activeStep && autoAdvanceSteps.has(stepNumber) && isStepValid(stepNumber)) {
-              triggerTracking('estimation_step_completed', { step_number: stepNumber });
+              triggerTracking('estimation_step_completed', { step_number: stepNumber, step_field: fieldName });
               autoAdvanceTimer = window.setTimeout(() => {
                 let nextStep = Math.min(totalSteps, stepNumber + 1);
                 while (nextStep < totalSteps && !isStepApplicable(nextStep)) {
@@ -1602,7 +1662,8 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
             window.clearTimeout(autoAdvanceTimer);
           }
 
-          triggerTracking('estimation_step_completed', { step_number: activeStep });
+          triggerTracking('estimation_next_clicked', { step_number: activeStep, step_field: panes[activeStep - 1]?.dataset.field || '' });
+          triggerTracking('estimation_step_completed', { step_number: activeStep, step_field: panes[activeStep - 1]?.dataset.field || '' });
           let nextStep = Math.min(totalSteps, activeStep + 1);
           while (nextStep < totalSteps && !isStepApplicable(nextStep)) {
             nextStep += 1;
@@ -1620,6 +1681,7 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
           while (prevStep > 1 && !isStepApplicable(prevStep)) {
             prevStep -= 1;
           }
+          triggerTracking('estimation_back_clicked', { step_number: activeStep, step_field: panes[activeStep - 1]?.dataset.field || '' });
           activeStep = prevStep;
           updateNavigationState();
         });
@@ -1646,6 +1708,7 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
           }
         });
 
+        triggerTracking('estimation_page_view', { city_hint: urlParams.get('ville') || 'generic' });
         triggerTracking('estimation_form_started', { city_hint: urlParams.get('ville') || 'generic' });
         activeStep = firstIncompleteStep();
         updateNavigationState();

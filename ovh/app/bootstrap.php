@@ -1593,6 +1593,215 @@ function cms_handle_estimation_request(array $settings): array
     return ['errors' => [], 'payload' => $payload, 'id' => $requestId, 'ignored' => false];
 }
 
+function cms_ensure_estimation_events_table(): void
+{
+    static $done = false;
+
+    if ($done) {
+        return;
+    }
+
+    cms_db()->exec(
+        "CREATE TABLE IF NOT EXISTS cms_estimation_events (
+          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+          event_name VARCHAR(100) NOT NULL,
+          visitor_id VARCHAR(80) NOT NULL,
+          session_id VARCHAR(80) DEFAULT NULL,
+          step_number TINYINT UNSIGNED DEFAULT NULL,
+          step_field VARCHAR(100) DEFAULT NULL,
+          choice_value VARCHAR(180) DEFAULT NULL,
+          page_url VARCHAR(255) DEFAULT NULL,
+          referrer VARCHAR(255) DEFAULT NULL,
+          utm_source VARCHAR(190) DEFAULT NULL,
+          utm_medium VARCHAR(190) DEFAULT NULL,
+          utm_campaign VARCHAR(190) DEFAULT NULL,
+          utm_content VARCHAR(190) DEFAULT NULL,
+          ip_hash CHAR(64) DEFAULT NULL,
+          user_agent_hash CHAR(64) DEFAULT NULL,
+          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (id),
+          KEY idx_cms_estimation_events_created_at (created_at),
+          KEY idx_cms_estimation_events_event_name (event_name),
+          KEY idx_cms_estimation_events_visitor (visitor_id),
+          KEY idx_cms_estimation_events_step (step_number),
+          KEY idx_cms_estimation_events_utm_campaign (utm_campaign)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+    );
+
+    $done = true;
+}
+
+function cms_estimation_tracking_events(): array
+{
+    return [
+        'estimation_page_view',
+        'estimation_form_started',
+        'estimation_step_viewed',
+        'estimation_choice_clicked',
+        'estimation_step_completed',
+        'estimation_next_clicked',
+        'estimation_back_clicked',
+        'estimation_form_submitted',
+        'estimation_lead_created',
+    ];
+}
+
+function cms_tracking_text(mixed $value, int $maxLength): ?string
+{
+    $text = trim((string) $value);
+    if ($text === '') {
+        return null;
+    }
+
+    return mb_substr($text, 0, $maxLength);
+}
+
+function cms_handle_estimation_tracking_request(): never
+{
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+        http_response_code(405);
+        exit;
+    }
+
+    $raw = (string) file_get_contents('php://input');
+    $payload = json_decode($raw, true);
+    if (!is_array($payload)) {
+        $payload = $_POST;
+    }
+
+    $eventName = cms_tracking_text($payload['event_name'] ?? '', 100);
+    if ($eventName === null || !in_array($eventName, cms_estimation_tracking_events(), true)) {
+        http_response_code(204);
+        exit;
+    }
+
+    $data = isset($payload['payload']) && is_array($payload['payload']) ? $payload['payload'] : [];
+    $visitorId = cms_tracking_text($payload['visitor_id'] ?? '', 80);
+    $userAgent = (string) ($_SERVER['HTTP_USER_AGENT'] ?? '');
+    $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+    $salt = (string) (cms_config()['db_name'] ?? 'immobilier-auxois');
+
+    if ($visitorId === null) {
+        $visitorId = hash('sha256', $ip . '|' . $userAgent . '|' . date('Y-m-d') . '|' . $salt);
+    }
+
+    $stepNumber = isset($data['step_number']) ? (int) $data['step_number'] : null;
+    if ($stepNumber !== null && ($stepNumber < 1 || $stepNumber > 20)) {
+        $stepNumber = null;
+    }
+
+    cms_ensure_estimation_events_table();
+    $statement = cms_db()->prepare(
+        'INSERT INTO cms_estimation_events (
+            event_name, visitor_id, session_id, step_number, step_field, choice_value,
+            page_url, referrer, utm_source, utm_medium, utm_campaign, utm_content,
+            ip_hash, user_agent_hash
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    );
+
+    $statement->execute([
+        $eventName,
+        $visitorId,
+        cms_tracking_text($payload['session_id'] ?? null, 80),
+        $stepNumber,
+        cms_tracking_text($data['step_field'] ?? null, 100),
+        cms_tracking_text($data['choice_value'] ?? null, 180),
+        cms_tracking_text($payload['page_url'] ?? null, 255),
+        cms_tracking_text($payload['referrer'] ?? null, 255),
+        cms_tracking_text($payload['utm_source'] ?? ($data['utm_source'] ?? null), 190),
+        cms_tracking_text($payload['utm_medium'] ?? ($data['utm_medium'] ?? null), 190),
+        cms_tracking_text($payload['utm_campaign'] ?? ($data['utm_campaign'] ?? null), 190),
+        cms_tracking_text($payload['utm_content'] ?? ($data['utm_content'] ?? null), 190),
+        $ip !== '' ? hash('sha256', $ip . '|' . $salt) : null,
+        $userAgent !== '' ? hash('sha256', $userAgent . '|' . $salt) : null,
+    ]);
+
+    http_response_code(204);
+    exit;
+}
+
+function cms_estimation_analytics_periods(): array
+{
+    return [
+        '24h' => ['label' => '24h', 'interval' => '24 HOUR'],
+        '7d' => ['label' => '7j', 'interval' => '7 DAY'],
+        '30d' => ['label' => '30j', 'interval' => '30 DAY'],
+    ];
+}
+
+function cms_estimation_analytics_period_key(?string $value): string
+{
+    $periods = cms_estimation_analytics_periods();
+    return isset($periods[(string) $value]) ? (string) $value : '7d';
+}
+
+function cms_estimation_analytics_stats(string $periodKey): array
+{
+    cms_ensure_estimation_events_table();
+    $periods = cms_estimation_analytics_periods();
+    $period = $periods[$periodKey] ?? $periods['7d'];
+    $interval = $period['interval'];
+    $where = "created_at >= DATE_SUB(NOW(), INTERVAL {$interval})";
+
+    $summary = cms_db()->query(
+        "SELECT
+          COUNT(*) AS total_events,
+          COUNT(DISTINCT visitor_id) AS visitors,
+          SUM(event_name = 'estimation_page_view') AS page_views,
+          SUM(event_name = 'estimation_choice_clicked') AS choice_clicks,
+          SUM(event_name = 'estimation_step_completed') AS step_completions,
+          SUM(event_name = 'estimation_form_submitted') AS form_submits
+        FROM cms_estimation_events
+        WHERE {$where}"
+    )->fetch() ?: [];
+
+    $leadStatement = cms_db()->query("SELECT COUNT(*) AS total FROM cms_estimation_requests WHERE {$where}");
+    $leadCount = (int) (($leadStatement->fetch()['total'] ?? 0));
+
+    $funnelRows = cms_db()->query(
+        "SELECT step_number, COUNT(DISTINCT visitor_id) AS visitors, COUNT(*) AS events
+           FROM cms_estimation_events
+          WHERE {$where} AND event_name = 'estimation_step_viewed' AND step_number IS NOT NULL
+          GROUP BY step_number
+          ORDER BY step_number ASC"
+    )->fetchAll();
+
+    $choiceRows = cms_db()->query(
+        "SELECT step_field, choice_value, COUNT(*) AS total
+           FROM cms_estimation_events
+          WHERE {$where} AND event_name = 'estimation_choice_clicked' AND choice_value IS NOT NULL
+          GROUP BY step_field, choice_value
+          ORDER BY total DESC
+          LIMIT 6"
+    )->fetchAll();
+
+    $sourceRows = cms_db()->query(
+        "SELECT COALESCE(NULLIF(utm_source, ''), 'direct / inconnu') AS source, COUNT(DISTINCT visitor_id) AS visitors
+           FROM cms_estimation_events
+          WHERE {$where} AND event_name = 'estimation_page_view'
+          GROUP BY source
+          ORDER BY visitors DESC
+          LIMIT 4"
+    )->fetchAll();
+
+    $visitors = (int) ($summary['visitors'] ?? 0);
+    $pageViews = (int) ($summary['page_views'] ?? 0);
+
+    return [
+        'period' => $period,
+        'visitors' => $visitors,
+        'page_views' => $pageViews,
+        'choice_clicks' => (int) ($summary['choice_clicks'] ?? 0),
+        'step_completions' => (int) ($summary['step_completions'] ?? 0),
+        'form_submits' => (int) ($summary['form_submits'] ?? 0),
+        'leads' => $leadCount,
+        'conversion_rate' => $visitors > 0 ? round(($leadCount / $visitors) * 100) : 0,
+        'funnel' => $funnelRows,
+        'choices' => $choiceRows,
+        'sources' => $sourceRows,
+    ];
+}
+
 function cms_admin_users(): array
 {
     $statement = cms_db()->query('SELECT id, name, email, role, is_active, created_at, updated_at FROM cms_admin_users ORDER BY id ASC');

@@ -15,6 +15,10 @@ try {
     $settings = cms_settings();
     $blogEnabled = cms_is_blog_public_enabled($settings);
 
+    if ($requestPath === '/estimation-track') {
+      cms_handle_estimation_tracking_request();
+    }
+
     if ($blogEnabled && ($requestPath === '/blog' || $requestPath === '/blog/')) {
         cms_render_blog_index_page($settings);
         exit;
