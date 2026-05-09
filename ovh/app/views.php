@@ -2519,85 +2519,164 @@ function cms_render_avis_page(array $settings): void
 function cms_render_prestations_page(array $settings): void
 {
     $snapshot = cms_snapshot();
-    $services = $snapshot['services'] ?? [];
-    $title = 'Nos prestations';
-    $description = 'Vendre, acheter, estimer un bien ou transmettre un fonds de commerce en Auxois-Morvan : découvrez nos prestations immobilières.';
+    $title = 'Prestations immobilières';
+    $description = 'Vente, achat, estimation et fonds de commerce en Auxois-Morvan : un accompagnement immobilier clair, local et structuré.';
+    $serviceSections = [
+        [
+            'number' => '01',
+            'kicker' => 'Vendre',
+            'title' => 'Vente immobilière',
+            'image' => '/uploads/maison-Maconge-20.jpg',
+            'alt' => 'Maison en pierre à vendre en Auxois-Morvan',
+            'href' => '/vendre',
+            'text' => 'Vendre un bien demande plus qu’une annonce. Nous construisons une stratégie de mise en marché : estimation argumentée, présentation soignée, diffusion adaptée, qualification des acquéreurs et négociation suivie.',
+            'points' => ['Avis de valeur expliqué', 'Positionnement prix réaliste', 'Diffusion locale et réseau IAD', 'Suivi jusqu’à la signature'],
+        ],
+        [
+            'number' => '02',
+            'kicker' => 'Acheter',
+            'title' => 'Recherche et achat immobilier',
+            'image' => '/uploads/IMG_20240820_194156.jpg',
+            'alt' => 'Terrasse et maison en Auxois-Morvan',
+            'href' => '/acheter',
+            'text' => 'Pour acheter sereinement, il faut comparer les secteurs, lire les prix avec recul et anticiper les contraintes du bien. Nous vous aidons à clarifier vos critères et à décider avec des repères concrets.',
+            'points' => ['Lecture du marché local', 'Analyse des atouts et limites', 'Conseil avant l’offre', 'Accompagnement des étapes clés'],
+        ],
+        [
+            'number' => '03',
+            'kicker' => 'Estimer',
+            'title' => 'Estimation et avis de valeur',
+            'image' => '/uploads/estimer.jpg',
+            'alt' => 'Analyse et estimation immobilière locale',
+            'href' => '/estimation',
+            'text' => 'Une estimation utile ne se limite pas à une moyenne au mètre carré. Elle tient compte de la commune, du bâti, des travaux, de la rareté, des accès et de la demande réelle dans votre secteur.',
+            'points' => ['Analyse du bien sur place', 'Comparables pertinents', 'Fourchette de valeur lisible', 'Conseil pour vendre au bon moment'],
+        ],
+        [
+            'number' => '04',
+            'kicker' => 'Transmettre',
+            'title' => 'Fonds de commerce',
+            'image' => '/uploads/post-images-03-scaled-1.jpg',
+            'alt' => 'Commerce local et transmission professionnelle',
+            'href' => '/fonds',
+            'text' => 'La cession d’un fonds de commerce exige méthode et discrétion. Nous aidons à présenter l’activité, structurer les informations utiles et qualifier les repreneurs pour fluidifier les échanges.',
+            'points' => ['Dossier de présentation', 'Valorisation cohérente', 'Contacts qualifiés', 'Accompagnement confidentiel'],
+        ],
+    ];
+    $methodSteps = [
+        ['title' => 'Comprendre', 'text' => 'Votre situation, votre calendrier, vos priorités et le niveau d’accompagnement attendu.'],
+        ['title' => 'Analyser', 'text' => 'Le bien, son environnement, la concurrence, les points forts et les éventuels freins.'],
+        ['title' => 'Structurer', 'text' => 'Une stratégie claire : prix, présentation, diffusion, qualification et calendrier.'],
+        ['title' => 'Suivre', 'text' => 'Des échanges réguliers, des décisions expliquées et une présence jusqu’à la signature.'],
+    ];
 
     cms_render_public_document_start($title . ' | ' . (string) $settings['site_name'], $description, true);
     cms_render_public_header($settings, '/prestations');
     ?>
-    <main>
-      <section class="section section-hero section-hero-inner">
-        <div class="shell home-hero-grid">
-          <div class="home-hero-copy">
-            <p class="eyebrow">Nos services</p>
-            <h1>Nos prestations</h1>
-            <p class="hero-text">Une présence utile pour vendre, acheter, estimer un bien ou transmettre un fonds de commerce, avec une méthode claire et un suivi humain.</p>
+    <main class="prestations-premium-page">
+      <section class="prestations-hero">
+        <div class="shell prestations-hero-grid">
+          <div class="prestations-hero-copy">
+            <p class="eyebrow">Prestations immobilières</p>
+            <h1>Un accompagnement clair, local et structuré.</h1>
+            <p class="hero-text">Vente, achat, estimation ou transmission d’un fonds de commerce : chaque projet mérite une lecture précise du terrain, une stratégie lisible et un suivi humain jusqu’à la décision.</p>
             <div class="hero-actions">
               <a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Faire estimer mon bien</a>
               <a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a>
             </div>
           </div>
-          <div class="home-hero-side">
-            <div class="hero-media"><img src="<?= cms_h(cms_url('/uploads/arnay.jpg')) ?>" alt="Auxois-Morvan"></div>
-          </div>
+          <aside class="prestations-hero-media">
+            <img src="<?= cms_h(cms_url('/uploads/auxois.jpg')) ?>" alt="Paysage immobilier en Auxois-Morvan">
+            <div class="prestations-hero-card"><strong>4</strong><span>domaines d’accompagnement</span></div>
+          </aside>
         </div>
       </section>
 
       <section class="section section-tight">
-        <div class="shell">
-          <p class="eyebrow">Services</p>
-          <h2 class="section-title">Ce que nous faisons pour vous</h2>
-          <p class="section-subtitle">Quatre domaines d'expertise pour répondre concrètement à votre projet immobilier ou commercial.</p>
-          <div class="services-grid">
-            <?php foreach ($services as $service): ?>
-              <a class="service-card" href="<?= cms_h(cms_url((string) $service['href'])) ?>">
-                <p class="card-kicker">Service</p>
-                <h3><?= cms_h((string) $service['title']) ?></h3>
-                <p><?= cms_h((string) $service['description']) ?></p>
-                <ul class="accent-list compact-list">
-                  <?php foreach (array_slice(($service['features'] ?? []), 0, 4) as $feature): ?>
-                    <li><?= cms_h((string) $feature) ?></li>
+        <div class="shell prestations-intro-grid">
+          <article>
+            <span>01</span>
+            <strong>Conseil local</strong>
+            <p>Une approche adaptée aux communes, aux biens anciens, aux secteurs ruraux et aux bassins de vie de l’Auxois-Morvan.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <strong>Méthode claire</strong>
+            <p>Des étapes expliquées, un cadre de travail posé et des recommandations compréhensibles.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <strong>Suivi humain</strong>
+            <p>Un accompagnement régulier, réactif et concret, du premier échange jusqu’à la signature.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell prestations-section-head">
+          <p class="eyebrow">Nos expertises</p>
+          <h2>Quatre prestations pour avancer avec les bons repères.</h2>
+          <p>Chaque service répond à une situation précise. L’objectif reste le même : vous aider à prendre une décision immobilière solide, sans discours flou ni promesse artificielle.</p>
+        </div>
+        <div class="shell prestations-service-list">
+          <?php foreach ($serviceSections as $index => $service): ?>
+            <article class="prestations-service-row<?= $index % 2 === 1 ? ' is-reverse' : '' ?>">
+              <a class="prestations-service-image" href="<?= cms_h(cms_url($service['href'])) ?>">
+                <img src="<?= cms_h(cms_url($service['image'])) ?>" alt="<?= cms_h($service['alt']) ?>" loading="lazy" decoding="async">
+              </a>
+              <div class="prestations-service-content">
+                <span class="prestations-number"><?= cms_h($service['number']) ?></span>
+                <p class="eyebrow"><?= cms_h($service['kicker']) ?></p>
+                <h3><?= cms_h($service['title']) ?></h3>
+                <p><?= cms_h($service['text']) ?></p>
+                <ul>
+                  <?php foreach ($service['points'] as $point): ?>
+                    <li><?= cms_h($point) ?></li>
                   <?php endforeach; ?>
                 </ul>
-                <span class="card-link">En savoir plus →</span>
-              </a>
+                <a class="card-link" href="<?= cms_h(cms_url($service['href'])) ?>">Découvrir cette prestation →</a>
+              </div>
+            </article>
+          <?php endforeach; ?>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell prestations-method-panel">
+          <div class="prestations-method-copy">
+            <p class="eyebrow">Notre façon de travailler</p>
+            <h2>Un cadre simple pour garder le contrôle du projet.</h2>
+            <p>Nous privilégions la clarté : comprendre votre besoin, analyser le bien et le marché, structurer une stratégie puis suivre les étapes avec sérieux.</p>
+          </div>
+          <div class="prestations-method-grid">
+            <?php foreach ($methodSteps as $index => $step): ?>
+              <article>
+                <span><?= cms_h(str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT)) ?></span>
+                <strong><?= cms_h($step['title']) ?></strong>
+                <p><?= cms_h($step['text']) ?></p>
+              </article>
             <?php endforeach; ?>
           </div>
         </div>
       </section>
 
       <section class="section section-tight">
-        <div class="shell">
-          <div class="panel-card iad-panel">
-            <div>
-              <p class="eyebrow">Réseau</p>
-              <h2>La proximité locale, avec la puissance du réseau IAD</h2>
-              <div class="richtext panel-copy"><p>Vous bénéficiez d'un accompagnement de proximité, tout en profitant de la visibilité et des outils du réseau IAD. Un interlocuteur local, avec une diffusion solide et un suivi régulier jusqu'à la signature.</p></div>
-            </div>
-            <div class="iad-points-grid">
-              <article class="tile-card"><strong>01</strong><span>Diffusion large des biens</span></article>
-              <article class="tile-card"><strong>02</strong><span>Suivi humain et régulier</span></article>
-              <article class="tile-card"><strong>03</strong><span>Accompagnement jusqu'à la signature</span></article>
-            </div>
+        <div class="shell prestations-iad-layout">
+          <article class="prestations-iad-card">
+            <p class="eyebrow">Réseau IAD</p>
+            <h2>La force d’un réseau, avec un interlocuteur vraiment local.</h2>
+            <p>Vous bénéficiez d’une présence de terrain en Auxois-Morvan et des outils du réseau IAD : visibilité, diffusion, suivi des contacts et accompagnement administratif.</p>
+          </article>
+          <div class="prestations-iad-points">
+            <article><strong>Diffusion</strong><span>Une exposition élargie sans perdre la lecture locale du projet.</span></article>
+            <article><strong>Qualification</strong><span>Des contacts suivis, relancés et filtrés pour gagner en efficacité.</span></article>
+            <article><strong>Sécurité</strong><span>Un accompagnement régulier dans les étapes sensibles de la transaction.</span></article>
           </div>
         </div>
       </section>
 
       <section class="section section-tight">
-        <div class="shell">
-          <div class="cta-band cta-band-hero">
-            <div>
-              <p class="eyebrow">Échangeons</p>
-              <h2>Un projet immobilier en tête ?</h2>
-              <div class="richtext"><p>Parlons-en simplement. Nous vous orienterons vers la prestation la plus adaptée à votre situation.</p></div>
-            </div>
-            <div class="cta-actions">
-              <a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Faire estimer mon bien</a>
-              <a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a>
-            </div>
-          </div>
-        </div>
+        <div class="shell"><div class="cta-band cta-band-hero"><div><p class="eyebrow">Échangeons</p><h2>Quelle prestation correspond à votre projet ?</h2><div class="richtext"><p>Un premier échange suffit souvent à clarifier la bonne approche : estimation, vente, achat, conseil local ou transmission.</p></div></div><div class="cta-actions"><a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Faire estimer mon bien</a><a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a></div></div></div>
       </section>
     </main>
     <?php
