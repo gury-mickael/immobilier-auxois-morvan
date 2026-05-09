@@ -1862,6 +1862,7 @@ function cms_render_public_footer(array $settings, array $snapshot): void
     $areas = array_slice($snapshot['siteSettings']['coveredAreas'] ?? cms_json_list($settings['covered_areas_json'] ?? '[]'), 0, 6);
     $mobileAreas = array_slice($areas, 0, 4);
     $services = $snapshot['services'] ?? [];
+  $facebookUrl = 'https://www.facebook.com/profile.php?id=61589488680956';
     ?>
     <footer class="site-footer">
       <div class="shell footer-shell">
@@ -1910,8 +1911,7 @@ function cms_render_public_footer(array $settings, array $snapshot): void
             <img src="<?= cms_h(cms_url('/uploads/logo-2.png')) ?>" alt="Immobilier Auxois Morvan" class="footer-logo">
             <p class="footer-copy"><?= cms_h((string) $settings['footer_text']) ?></p>
             <div class="footer-socials">
-              <?php if (!empty($settings['facebook_url'])): ?><a href="<?= cms_h((string) $settings['facebook_url']) ?>">Facebook</a><?php endif; ?>
-              <?php if (!empty($settings['instagram_url'])): ?><a href="<?= cms_h((string) $settings['instagram_url']) ?>">Instagram</a><?php endif; ?>
+              <a href="<?= cms_h($facebookUrl) ?>" target="_blank" rel="noopener noreferrer">Facebook</a>
               <?php if (!empty($settings['iad_url'])): ?><a href="<?= cms_h((string) $settings['iad_url']) ?>">IAD</a><?php endif; ?>
             </div>
           </div>
@@ -1927,27 +1927,20 @@ function cms_render_public_footer(array $settings, array $snapshot): void
               <a href="<?= cms_h(cms_url('/contact')) ?>">Contact</a>
             </div>
             <div>
-              <h3>Prestations</h3>
+              <h3>Services & secteur</h3>
               <?php foreach ($services as $service): ?>
                 <a href="<?= cms_h(cms_url((string) $service['href'])) ?>"><?= cms_h((string) $service['title']) ?></a>
               <?php endforeach; ?>
-            </div>
-            <div>
-              <h3>Secteur</h3>
-              <?php foreach ($areas as $area): ?>
+              <?php foreach (array_slice($areas, 0, 4) as $area): ?>
                 <span><?= cms_h((string) $area) ?></span>
               <?php endforeach; ?>
               <a href="<?= cms_h(cms_url('/secteur')) ?>">Voir tout le secteur</a>
             </div>
             <div>
-              <h3>Conseillers</h3>
+              <h3>Contact</h3>
               <span><?= cms_h((string) $settings['marion_name']) ?></span>
               <span><?= cms_h((string) $settings['mickael_name']) ?></span>
               <span><?= cms_h((string) $settings['main_city']) ?></span>
-              <a href="<?= cms_h(cms_url('/contact')) ?>">Voir la page contact</a>
-            </div>
-            <div>
-              <h3>Contact</h3>
               <a href="<?= cms_h('tel:' . preg_replace('/\s+/', '', (string) $settings['phone'])) ?>"><?= cms_h((string) $settings['phone']) ?></a>
               <a href="<?= cms_h('mailto:' . (string) $settings['email']) ?>"><?= cms_h((string) $settings['email']) ?></a>
               <a class="footer-button" href="<?= cms_h(cms_url('/contact')) ?>">Nous écrire</a>

@@ -1000,6 +1000,14 @@ function cms_media_public_url(array $item): string
         foreach (array_unique(array_filter($legacyNames)) as $legacyName) {
             $candidates[] = $uploadBase . '/' . $legacyName;
             $candidates[] = '/uploads/' . $legacyName;
+
+            foreach (['uploads/cms', 'uploads'] as $legacyDirectory) {
+                foreach (glob(cms_config()['root'] . '/' . $legacyDirectory . '/*' . $legacyName) ?: [] as $match) {
+                    if (is_file($match)) {
+                        $candidates[] = '/' . ltrim(substr($match, strlen(cms_config()['root'])), '/');
+                    }
+                }
+            }
         }
     }
 
