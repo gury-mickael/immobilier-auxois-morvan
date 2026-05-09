@@ -1875,20 +1875,7 @@ function cms_render_public_footer(array $settings, array $snapshot): void
             <p class="eyebrow">Contact</p>
             <a href="<?= cms_h('tel:' . preg_replace('/\s+/', '', (string) $settings['phone'])) ?>"><?= cms_h((string) $settings['phone']) ?></a>
             <a href="<?= cms_h('mailto:' . (string) $settings['email']) ?>"><?= cms_h((string) $settings['email']) ?></a>
-            <a class="footer-button" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a>
           </div>
-          <details class="footer-accordion">
-            <summary>Navigation</summary>
-            <div class="footer-accordion-content">
-              <a href="<?= cms_h(cms_url('/')) ?>">Accueil</a>
-              <a href="<?= cms_h(cms_url('/histoire')) ?>">Histoire</a>
-              <a href="<?= cms_h(cms_url('/prestations')) ?>">Prestations</a>
-              <a href="<?= cms_h(cms_url('/secteur')) ?>">Secteur</a>
-              <a href="<?= cms_h(cms_url('/avis')) ?>">Avis clients</a>
-              <a href="<?= cms_h(cms_url('/blog')) ?>">Blog</a>
-              <a href="<?= cms_h(cms_url('/contact')) ?>">Contact</a>
-            </div>
-          </details>
           <details class="footer-accordion">
             <summary>Prestations</summary>
             <div class="footer-accordion-content">
@@ -1917,20 +1904,13 @@ function cms_render_public_footer(array $settings, array $snapshot): void
           </div>
           <div class="footer-columns">
             <div>
-              <h3>Navigation</h3>
-              <a href="<?= cms_h(cms_url('/')) ?>">Accueil</a>
-              <a href="<?= cms_h(cms_url('/histoire')) ?>">Histoire</a>
-              <a href="<?= cms_h(cms_url('/prestations')) ?>">Prestations</a>
-              <a href="<?= cms_h(cms_url('/secteur')) ?>">Secteur</a>
-              <a href="<?= cms_h(cms_url('/avis')) ?>">Avis clients</a>
-              <a href="<?= cms_h(cms_url('/blog')) ?>">Blog</a>
-              <a href="<?= cms_h(cms_url('/contact')) ?>">Contact</a>
-            </div>
-            <div>
-              <h3>Services & secteur</h3>
+              <h3>Services</h3>
               <?php foreach ($services as $service): ?>
                 <a href="<?= cms_h(cms_url((string) $service['href'])) ?>"><?= cms_h((string) $service['title']) ?></a>
               <?php endforeach; ?>
+            </div>
+            <div>
+              <h3>Secteur</h3>
               <?php foreach (array_slice($areas, 0, 4) as $area): ?>
                 <span><?= cms_h((string) $area) ?></span>
               <?php endforeach; ?>
@@ -1943,7 +1923,6 @@ function cms_render_public_footer(array $settings, array $snapshot): void
               <span><?= cms_h((string) $settings['main_city']) ?></span>
               <a href="<?= cms_h('tel:' . preg_replace('/\s+/', '', (string) $settings['phone'])) ?>"><?= cms_h((string) $settings['phone']) ?></a>
               <a href="<?= cms_h('mailto:' . (string) $settings['email']) ?>"><?= cms_h((string) $settings['email']) ?></a>
-              <a class="footer-button" href="<?= cms_h(cms_url('/contact')) ?>">Nous écrire</a>
             </div>
           </div>
         </div>
