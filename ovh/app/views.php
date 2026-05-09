@@ -2455,61 +2455,117 @@ function cms_render_avis_page(array $settings): void
     $testimonials = $snapshot['testimonials'] ?? [];
     $title = 'Avis clients';
     $description = 'Découvrez les retours de propriétaires et acheteurs accompagnés par Immobilier Auxois-Morvan en Auxois, Morvan et Côte-d\'Or.';
+    $reviewCount = count($testimonials);
+    $ratingSum = 0;
+    $fiveStarCount = 0;
+    foreach ($testimonials as $testimonial) {
+        $rating = (int) ($testimonial['rating'] ?? 5);
+        $ratingSum += $rating;
+        if ($rating >= 5) {
+            $fiveStarCount += 1;
+        }
+    }
+    $averageRating = $reviewCount > 0 ? number_format($ratingSum / $reviewCount, 1, ',', ' ') : '5,0';
+    $cleanQuote = static function (string $quote): string {
+        return (string) (preg_replace('/^Avis Immodvisor\s*:\s*/u', '', $quote) ?? $quote);
+    };
+    $featured = $testimonials[0] ?? null;
 
     cms_render_public_document_start($title . ' | ' . (string) $settings['site_name'], $description, true);
     cms_render_public_header($settings, '/avis');
     ?>
-    <main>
-      <section class="section section-hero section-hero-inner">
-        <div class="shell home-hero-grid">
-          <div class="home-hero-copy">
-            <p class="eyebrow">Ils nous ont fait confiance</p>
-            <h1>Avis clients</h1>
-            <p class="hero-text">Des retours fondés sur la qualité du suivi, la clarté des échanges et la réussite du projet immobilier.</p>
+    <main class="avis-premium-page">
+      <section class="avis-hero">
+        <div class="shell avis-hero-grid">
+          <div class="avis-hero-copy">
+            <p class="eyebrow">Avis clients</p>
+            <h1>Des retours concrets, une confiance qui se construit.</h1>
+            <p class="hero-text">Les avis clients racontent ce qui compte vraiment dans un projet immobilier : la disponibilité, la clarté des conseils, la réactivité et le sentiment d’être accompagné avec sérieux.</p>
             <div class="hero-actions">
               <a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Faire estimer mon bien</a>
               <a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a>
             </div>
           </div>
-          <div class="home-hero-side">
-            <div class="hero-media"><img src="<?= cms_h(cms_url('/uploads/pouilly.jpg')) ?>" alt="Auxois-Morvan"></div>
-          </div>
+          <aside class="avis-hero-panel">
+            <div class="avis-rating-badge">
+              <span><?= cms_h($averageRating) ?>/5</span>
+              <div class="dots-row"><?php for ($i = 0; $i < 5; $i += 1): ?><span></span><?php endfor; ?></div>
+              <p>Note moyenne des avis intégrés</p>
+            </div>
+            <img src="<?= cms_h(cms_url('/uploads/pouilly.jpg')) ?>" alt="Paysage de l'Auxois-Morvan" loading="lazy" decoding="async">
+          </aside>
         </div>
       </section>
 
       <section class="section section-tight">
-        <div class="shell">
+        <div class="shell avis-kpi-grid">
+          <article><strong><?= cms_h((string) $reviewCount) ?></strong><span>avis clients intégrés depuis Immodvisor</span></article>
+          <article><strong><?= cms_h((string) $fiveStarCount) ?></strong><span>retours avec la meilleure note</span></article>
+          <article><strong>4</strong><span>qualités qui reviennent : écoute, sérieux, suivi, réactivité</span></article>
+        </div>
+      </section>
+
+      <?php if ($featured !== null): ?>
+        <section class="section section-tight">
+          <div class="shell avis-featured-layout">
+            <article class="avis-featured-card">
+              <p class="eyebrow">Avis mis en avant</p>
+              <div class="dots-row"><?php for ($i = 0; $i < (int) ($featured['rating'] ?? 5); $i += 1): ?><span></span><?php endfor; ?></div>
+              <blockquote>“<?= cms_h($cleanQuote((string) ($featured['quote'] ?? ''))) ?>”</blockquote>
+              <footer><strong><?= cms_h((string) ($featured['author'] ?? 'Client')) ?></strong><span><?= cms_h(implode(' — ', array_filter([(string) ($featured['title'] ?? ''), (string) ($featured['location'] ?? '')]))) ?></span></footer>
+            </article>
+            <article class="avis-proof-card">
+              <p class="eyebrow">Ce que les avis soulignent</p>
+              <h2>Une qualité d’accompagnement visible dans les retours clients.</h2>
+              <ul>
+                <li>Des échanges réguliers et une vraie disponibilité.</li>
+                <li>Une capacité à sécuriser les étapes, même à distance.</li>
+                <li>Une approche humaine dans des contextes parfois sensibles.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+      <?php endif; ?>
+
+      <section class="section section-tight">
+        <div class="shell avis-section-head">
           <p class="eyebrow">Témoignages</p>
-          <h2 class="section-title">Ce qu'ils disent de notre accompagnement</h2>
-          <div class="cards-grid three-cols">
-            <?php foreach ($testimonials as $testimonial): ?>
-              <article class="testimonial-card">
+          <h2>Des expériences de vente et d’achat racontées par nos clients.</h2>
+          <p>Ces avis reflètent des situations variées : vente rapide, succession, accompagnement à distance, achat ou projet mené dans les délais.</p>
+        </div>
+        <div class="shell avis-testimonial-grid">
+          <?php foreach ($testimonials as $testimonial): ?>
+            <article class="avis-testimonial-card">
+              <div class="avis-card-head">
                 <div class="dots-row"><?php for ($i = 0; $i < (int) ($testimonial['rating'] ?? 5); $i += 1): ?><span></span><?php endfor; ?></div>
-                <p class="testimonial-quote">“<?= cms_h((string) $testimonial['quote']) ?>”</p>
-                <div class="testimonial-meta">
-                  <strong><?= cms_h((string) $testimonial['author']) ?></strong>
-                  <span><?= cms_h(implode(' — ', array_filter([(string) ($testimonial['title'] ?? ''), (string) ($testimonial['location'] ?? '')]))) ?></span>
-                </div>
-              </article>
-            <?php endforeach; ?>
+                <span><?= cms_h((string) ($testimonial['title'] ?? 'Avis client')) ?></span>
+              </div>
+              <p>“<?= cms_h($cleanQuote((string) ($testimonial['quote'] ?? ''))) ?>”</p>
+              <footer>
+                <strong><?= cms_h((string) ($testimonial['author'] ?? 'Client')) ?></strong>
+                <span><?= cms_h((string) ($testimonial['location'] ?? '')) ?></span>
+              </footer>
+            </article>
+          <?php endforeach; ?>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell avis-method-band">
+          <div>
+            <p class="eyebrow">Notre engagement</p>
+            <h2>Faire simple, rester présents, expliquer chaque étape.</h2>
+          </div>
+          <div class="avis-method-list">
+            <article><strong>Clarté</strong><span>Des conseils argumentés et des décisions expliquées.</span></article>
+            <article><strong>Réactivité</strong><span>Des réponses rapides et un suivi régulier des échanges.</span></article>
+            <article><strong>Fiabilité</strong><span>Un cadre sérieux du premier contact à la signature.</span></article>
           </div>
         </div>
       </section>
 
       <section class="section section-tight">
-        <div class="shell">
-          <div class="cta-band cta-band-hero">
-            <div>
-              <p class="eyebrow">À votre tour</p>
-              <h2>Et si on parlait de votre projet ?</h2>
-              <div class="richtext"><p>Vendre, acheter, estimer : prenons le temps d'un échange simple pour identifier la meilleure stratégie.</p></div>
-            </div>
-            <div class="cta-actions">
-              <a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Faire estimer mon bien</a>
-              <a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a>
-            </div>
-          </div>
-        </div>
+        <div class="shell"><div class="cta-band cta-band-hero"><div><p class="eyebrow">À votre tour</p><h2>Et si votre projet devenait le prochain avis positif ?</h2><div class="richtext"><p>Vente, achat ou estimation : prenons le temps d’un échange simple pour définir la meilleure stratégie.</p></div></div><div class="cta-actions"><a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Faire estimer mon bien</a><a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a></div></div></div>
       </section>
     </main>
     <?php
