@@ -2326,88 +2326,115 @@ function cms_render_histoire_page(array $settings): void
 {
     $snapshot = cms_snapshot();
     $title = 'Notre histoire';
-    $description = 'Découvrez le parcours de Mickael Gury et Marion Roullier, conseillers immobiliers locaux en Auxois-Morvan, et leur méthode de travail.';
+    $description = 'Deux conseillers immobiliers ancrés en Auxois-Morvan : proximité, estimation, valorisation et accompagnement humain jusqu’à la signature.';
     $mickaelPhoto = trim((string) ($settings['mickael_photo'] ?? ''));
     $marionPhoto = trim((string) ($settings['marion_photo'] ?? ''));
-    $heroImage = '/uploads/bligny.jpg';
+    $heroImage = '/uploads/arnay.jpg';
+    $methodSteps = [
+        ['number' => '01', 'title' => 'Écouter avant de conseiller', 'text' => 'Comprendre votre histoire, votre calendrier, vos contraintes et ce que vous attendez réellement de la vente ou de l’achat.'],
+        ['number' => '02', 'title' => 'Lire le marché localement', 'text' => 'Comparer avec les références utiles du secteur, l’état du bien, la demande réelle et les spécificités du village ou de la ville.'],
+        ['number' => '03', 'title' => 'Valoriser avec méthode', 'text' => 'Préparer le bien, le présenter clairement, sélectionner les bons supports et qualifier les contacts avec sérieux.'],
+        ['number' => '04', 'title' => 'Rester présents jusqu’au bout', 'text' => 'Suivre les échanges, sécuriser les étapes administratives et garder un dialogue simple jusqu’à la signature.'],
+    ];
 
     cms_render_public_document_start($title . ' | ' . (string) $settings['site_name'], $description, true);
     cms_render_public_header($settings, '/histoire');
     ?>
-    <main>
-      <section class="section section-hero section-hero-inner">
-        <div class="shell home-hero-grid">
-          <div class="home-hero-copy">
+    <main class="history-premium-page">
+      <section class="history-hero">
+        <div class="shell history-hero-grid">
+          <div class="history-hero-copy">
             <p class="eyebrow">Notre histoire</p>
-            <h1>Deux conseillers locaux pour vous accompagner</h1>
-            <p class="hero-text">Mickael Gury et Marion Roullier, ancrés en Auxois-Morvan, vous accompagnent avec une approche humaine, claire et structurée, soutenue par le réseau IAD.</p>
-            <div class="hero-actions">
-              <a class="button primary" href="<?= cms_h(cms_url('/contact')) ?>">Nous rencontrer</a>
-              <a class="button secondary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Faire estimer mon bien</a>
-            </div>
-          </div>
-          <div class="home-hero-side">
-            <div class="hero-media"><img src="<?= cms_h(cms_url($heroImage)) ?>" alt="Auxois-Morvan"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section section-tight">
-        <div class="shell">
-          <p class="eyebrow">Présence locale</p>
-          <h2 class="section-title">Vos conseillers</h2>
-          <p class="section-subtitle">Une connaissance fine du terrain, une lecture honnête du marché local et un suivi régulier, du premier échange à la signature.</p>
-          <div class="cards-grid two-cols">
-            <article class="soft-card">
-              <?php if ($mickaelPhoto !== ''): ?><img src="<?= cms_h(cms_url($mickaelPhoto)) ?>" alt="<?= cms_h((string) $settings['mickael_name']) ?>" loading="lazy" decoding="async"><?php endif; ?>
-              <div>
-                <p class="card-kicker">Conseiller</p>
-                <h3><?= cms_h((string) $settings['mickael_name']) ?></h3>
-                <p>Conseiller immobilier local, Mickael accompagne vendeurs et acheteurs en Auxois-Morvan avec rigueur, écoute et un sens du terrain.</p>
-              </div>
-            </article>
-            <article class="soft-card">
-              <?php if ($marionPhoto !== ''): ?><img src="<?= cms_h(cms_url($marionPhoto)) ?>" alt="<?= cms_h((string) $settings['marion_name']) ?>" loading="lazy" decoding="async"><?php endif; ?>
-              <div>
-                <p class="card-kicker">Conseillère</p>
-                <h3><?= cms_h((string) $settings['marion_name']) ?></h3>
-                <p>Conseillère immobilier locale, Marion porte une attention particulière à la qualité de l’accompagnement, du cadrage initial à l’acte authentique.</p>
-              </div>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="section section-tight">
-        <div class="shell">
-          <div class="panel-card panel-muted">
-            <p class="eyebrow">Notre méthode</p>
-            <h2>Une approche locale, humaine et structurée</h2>
-            <p class="panel-copy">Nous croyons à une immobilier de proximité : être disponibles, transparents et précis. Pour chaque projet, nous prenons le temps de comprendre les enjeux, d’analyser le marché local et de définir une stratégie claire.</p>
-            <ul class="accent-list">
-              <li>Une lecture honnête du marché et des prix</li>
-              <li>Un plan d’action sur-mesure pour chaque bien</li>
-              <li>Un suivi régulier, sans rupture de communication</li>
-              <li>La force du réseau IAD pour une diffusion large</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <section class="section section-tight">
-        <div class="shell">
-          <div class="cta-band cta-band-hero">
-            <div>
-              <p class="eyebrow">Faisons connaissance</p>
-              <h2>Parlons de votre projet</h2>
-              <div class="richtext"><p>Un échange simple et sans engagement pour comprendre votre situation et identifier ensemble la meilleure démarche.</p></div>
-            </div>
-            <div class="cta-actions">
-              <a class="button primary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a>
+            <h1>Une présence locale, deux regards complémentaires</h1>
+            <p class="hero-text">Notre rôle n’est pas seulement de vendre un bien. C’est de comprendre une situation, d’éclairer une décision et de défendre une stratégie juste, avec une connaissance concrète de l’Auxois, du Morvan et des villages qui les relient.</p>
+            <div class="history-hero-actions">
+              <a class="button primary" href="<?= cms_h(cms_url('/contact')) ?>">Faire connaissance</a>
               <a class="button secondary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Estimer un bien</a>
             </div>
           </div>
+          <aside class="history-hero-media">
+            <img src="<?= cms_h(cms_url($heroImage)) ?>" alt="Village et patrimoine en Auxois-Morvan">
+            <div class="history-hero-note"><strong>Local</strong><span>Auxois · Morvan · Côte-d’Or</span></div>
+          </aside>
         </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell history-intro-band">
+          <p>Nous accompagnons des projets de vente, d’achat, d’estimation et de transmission avec une conviction simple : un bon conseil immobilier commence toujours par une lecture honnête du terrain et une relation de confiance.</p>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell history-team-head">
+          <p class="eyebrow">Vos conseillers</p>
+          <h2>Deux profils, une même exigence : être utiles, clairs et présents.</h2>
+        </div>
+        <div class="shell history-team-grid">
+          <article class="history-profile-card">
+            <?php if ($mickaelPhoto !== ''): ?><img src="<?= cms_h(cms_url($mickaelPhoto)) ?>" alt="<?= cms_h((string) $settings['mickael_name']) ?>" loading="lazy" decoding="async"><?php endif; ?>
+            <div>
+              <p class="card-kicker">Terrain · stratégie · négociation</p>
+              <h3><?= cms_h((string) $settings['mickael_name']) ?></h3>
+              <p>Mickael apporte une lecture directe du marché local, un sens de la négociation et une attention particulière au bon positionnement du bien. Son objectif : avancer avec méthode, sans promesse excessive, mais avec une stratégie claire.</p>
+            </div>
+          </article>
+          <article class="history-profile-card is-reverse">
+            <?php if ($marionPhoto !== ''): ?><img src="<?= cms_h(cms_url($marionPhoto)) ?>" alt="<?= cms_h((string) $settings['marion_name']) ?>" loading="lazy" decoding="async"><?php endif; ?>
+            <div>
+              <p class="card-kicker">Écoute · suivi · qualité d’accompagnement</p>
+              <h3><?= cms_h((string) $settings['marion_name']) ?></h3>
+              <p>Marion veille à la fluidité du parcours : disponibilité, suivi des échanges, coordination des étapes et qualité de la relation. Elle apporte une approche attentive, rassurante et structurée du premier contact à la signature.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell history-method-panel">
+          <div class="history-method-copy">
+            <p class="eyebrow">Notre méthode</p>
+            <h2>Une méthode simple, mais jamais automatique.</h2>
+            <p>Chaque maison, chaque vendeur et chaque commune ont leur réalité. Nous construisons l’accompagnement autour de quatre temps forts, pour éviter les approximations et garder un cap lisible.</p>
+          </div>
+          <div class="history-method-grid">
+            <?php foreach ($methodSteps as $step): ?>
+              <article class="history-step-card">
+                <span><?= cms_h($step['number']) ?></span>
+                <h3><?= cms_h($step['title']) ?></h3>
+                <p><?= cms_h($step['text']) ?></p>
+              </article>
+            <?php endforeach; ?>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell history-proof-grid">
+          <article class="history-local-card">
+            <p class="eyebrow">Ancrage local</p>
+            <h2>Une connaissance du secteur qui change la qualité du conseil.</h2>
+            <p>Une estimation en Auxois-Morvan ne se limite pas à une moyenne au mètre carré. Elle dépend de la commune, de la qualité du bâti, des travaux, des accès, de la rareté du bien et du type d’acquéreur susceptible de se projeter.</p>
+            <ul>
+              <li>Maisons anciennes et propriétés familiales</li>
+              <li>Résidences secondaires et biens de caractère</li>
+              <li>Villages, bourgs actifs et secteurs ruraux</li>
+            </ul>
+          </article>
+          <article class="history-image-card"><img src="<?= cms_h(cms_url('/uploads/maison-Maconge-20.jpg')) ?>" alt="Maison en pierre en Auxois-Morvan" loading="lazy" decoding="async"></article>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell history-values-grid">
+          <article><strong>Clarté</strong><span>Dire ce qui est réaliste, expliquer les choix, éviter les discours flous.</span></article>
+          <article><strong>Présence</strong><span>Rester disponibles, répondre, relancer et accompagner les étapes sensibles.</span></article>
+          <article><strong>Exigence</strong><span>Soigner la présentation, qualifier les contacts et défendre le bon positionnement.</span></article>
+        </div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="shell"><div class="cta-band"><div><p class="eyebrow">Faisons connaissance</p><h2>Parlons simplement de votre projet immobilier.</h2><div class="richtext"><p>Un premier échange permet de comprendre votre situation, votre commune, votre calendrier et la meilleure manière d’avancer.</p></div></div><a class="button primary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a></div></div>
       </section>
     </main>
     <?php
