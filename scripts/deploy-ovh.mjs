@@ -47,6 +47,15 @@ function quoteLftp(value) {
   return String(value).replaceAll('\\', '\\\\').replaceAll('"', '\\"');
 }
 
+function remoteJoin(...parts) {
+  return parts
+    .map((part) => String(part).trim())
+    .filter(Boolean)
+    .join('/')
+    .replace(/\/+/g, '/')
+    .replace(/^\.\//, '');
+}
+
 const env = { ...process.env, ...parseEnvFile(envPath) };
 const protocol = env.OVH_DEPLOY_PROTOCOL || 'sftp';
 const host = env.OVH_DEPLOY_HOST;
@@ -56,6 +65,11 @@ const port = env.OVH_DEPLOY_PORT || (protocol === 'sftp' ? '22' : '21');
 const remoteDir = env.OVH_DEPLOY_REMOTE_DIR || '/';
 const localDir = env.OVH_DEPLOY_LOCAL_DIR || 'ovh-build';
 const skipBuild = process.argv.includes('--no-build');
+const remoteBase = remoteDir === '.' ? '' : remoteDir.replace(/\/+$/, '');
+const remoteChmodDirectories = ['assets', 'uploads', 'admin', 'app', 'data', 'install']
+  .map((directory) => remoteJoin(remoteBase, directory));
+const remoteChmodFiles = ['.htaccess', 'index.php', 'router.php', 'favicon.ico', 'favicon.svg']
+  .map((file) => remoteJoin(remoteBase, file));
 
 for (const [key, value] of Object.entries({ OVH_DEPLOY_HOST: host, OVH_DEPLOY_USER: user, OVH_DEPLOY_PASSWORD: password })) {
   if (!value) {
@@ -84,6 +98,8 @@ const commands = [
   `open -u "${quoteLftp(user)}","${quoteLftp(password)}" "${quoteLftp(targetUrl)}"`,
   remoteDir === '.' || remoteDir === 'www' ? '' : `mkdir -p "${quoteLftp(remoteDir)}"`,
   `mirror -R --only-newer --verbose --parallel=3 --exclude-glob .env --exclude-glob .env.example.txt --exclude-glob "uploads/cms/*" "${quoteLftp(localPath)}" "${quoteLftp(remoteDir)}"`,
+  ...remoteChmodDirectories.map((directory) => `chmod -R 755 "${quoteLftp(directory)}"`),
+  ...remoteChmodFiles.map((file) => `chmod 644 "${quoteLftp(file)}"`),
   'bye',
 ].filter(Boolean).join('; ');
 
