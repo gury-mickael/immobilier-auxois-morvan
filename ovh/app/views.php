@@ -196,6 +196,11 @@ function cms_render_admin_start(string $title, string $currentNav): void
               </span>
             </a>
           </div>
+          <details class="admin-menu-details" open>
+            <summary class="admin-menu-summary">
+              <span>Menu admin</span>
+              <span class="admin-menu-current"><?= cms_h($title) ?></span>
+            </summary>
           <nav class="admin-nav" aria-label="Navigation principale">
             <?php foreach ($navigationGroups as $groupLabel => $items): ?>
               <div class="admin-nav-group">
@@ -230,6 +235,7 @@ function cms_render_admin_start(string $title, string $currentNav): void
               Se déconnecter
             </a>
           </div>
+          </details>
         </aside>
         <main class="admin-main">
           <?php if ($flash): ?>
@@ -242,6 +248,24 @@ function cms_render_admin_end(): void
 {
     ?>
         </main>
+        <script>
+          (() => {
+            const menu = document.querySelector('.admin-menu-details');
+            if (!menu) return;
+
+            const media = window.matchMedia('(max-width: 1080px)');
+            const syncMenu = () => {
+              menu.open = !media.matches;
+            };
+
+            syncMenu();
+            if (typeof media.addEventListener === 'function') {
+              media.addEventListener('change', syncMenu);
+            } else if (typeof media.addListener === 'function') {
+              media.addListener(syncMenu);
+            }
+          })();
+        </script>
       </body>
     </html>
     <?php
