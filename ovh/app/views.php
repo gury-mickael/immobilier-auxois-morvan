@@ -3470,10 +3470,17 @@ function cms_render_viager_seo_page(array $settings, array $snapshot): void
             </div>
           </div>
           <aside class="viager-hero-card" aria-label="Réassurances">
-            <span>Étude gratuite</span>
-            <span>Confidentiel</span>
-            <span>Conseiller local</span>
-            <span>Sans engagement</span>
+            <div class="viager-hero-card-head">
+              <p>Votre première étude</p>
+              <strong>Un avis local, clair et confidentiel.</strong>
+            </div>
+            <div class="viager-hero-card-list">
+              <span>Étude gratuite</span>
+              <span>Confidentiel</span>
+              <span>Conseiller local</span>
+              <span>Sans engagement</span>
+            </div>
+            <div class="viager-hero-card-note">Réponse sous 24h après réception de votre demande.</div>
           </aside>
         </div>
       </section>
