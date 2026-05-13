@@ -2531,6 +2531,16 @@ section[id] { scroll-margin-top: 6rem; }
 .viager-final-cta p { color: rgba(255, 255, 255, 0.78); }
 .viager-final-cta span { display: inline-flex; margin-top: 0.9rem; color: var(--color-warm); font-weight: 800; }
 
+.viager-final-cta .button.primary {
+    background: white;
+    color: var(--color-primary);
+}
+
+.viager-final-cta .button.primary:hover {
+    background: var(--color-warm);
+    color: var(--color-primary);
+}
+
 .viager-sticky-cta {
     display: none;
 }

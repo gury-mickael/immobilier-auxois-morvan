@@ -3461,11 +3461,11 @@ function cms_render_viager_seo_page(array $settings, array $snapshot): void
         <div class="shell viager-seo-hero-grid">
           <div class="viager-seo-hero-copy">
             <p class="eyebrow">Viager local &amp; confidentiel</p>
-            <h1>Vendre en viager autour de Mimeure</h1>
-            <h2>Vendre en viager autour de Mimeure, Arnay-le-Duc, Beaune et Autun</h2>
+            <h1>Vendre en viager en Auxois Morvan</h1>
+            <h2>Autour d’Arnay-le-Duc, Pouilly-en-Auxois, Beaune et Autun</h2>
             <p class="hero-text">Vous souhaitez rester chez vous tout en obtenant un capital ou un revenu complémentaire ? Nous vous aidons à étudier, gratuitement et en toute confidentialité, si le viager est adapté à votre situation.</p>
             <div class="viager-seo-actions">
-              <a class="button primary" href="<?= cms_h($ctaUrl) ?>">Demander mon étude viager gratuite</a>
+              <a class="button primary" href="<?= cms_h($ctaUrl) ?>">Demander une étude viager gratuite</a>
               <a class="button secondary" href="#comprendre-viager">Comprendre le viager</a>
             </div>
           </div>
@@ -3585,7 +3585,7 @@ function cms_render_viager_seo_page(array $settings, array $snapshot): void
         <div class="shell">
           <div class="viager-final-cta">
             <div><p class="eyebrow">Étude offerte</p><h2>Vous souhaitez savoir si le viager est adapté à votre situation ?</h2><p>Décrivez votre bien et votre projet en quelques étapes. Nous vous recontactons sous 24h pour échanger sur les solutions possibles, gratuitement et sans engagement.</p><span>Gratuit · Confidentiel · Local · Sans engagement</span></div>
-            <div class="viager-final-actions"><a class="button primary" href="<?= cms_h($ctaUrl) ?>">Demander mon étude viager gratuite</a><a class="button secondary" href="<?= cms_h(cms_url('/')) ?>">Retour à l’accueil</a></div>
+            <div class="viager-final-actions"><a class="button primary" href="<?= cms_h($ctaUrl) ?>">Demander une étude viager gratuite</a></div>
           </div>
         </div>
       </section>
