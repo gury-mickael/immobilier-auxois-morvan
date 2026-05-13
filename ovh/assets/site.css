@@ -3356,6 +3356,34 @@ section[id] { scroll-margin-top: 6rem; }
     font-size: 0.98rem;
     line-height: 1.65;
 }
+
+.viager-page .estimate-app-shell {
+    padding-block-start: 0.85rem;
+}
+
+.viager-landing-intro {
+    margin-bottom: 0.95rem;
+    gap: 0;
+}
+
+.viager-seo-title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.viager-landing-intro p:not(.eyebrow) {
+    max-width: 100%;
+    color: var(--color-ink);
+    font-size: clamp(0.86rem, 1.8vw, 0.95rem);
+    line-height: 1.45;
+}
 @media (max-width: 539px) {
     .estimate-landing-intro {
         margin-bottom: 1rem;
@@ -3363,6 +3391,16 @@ section[id] { scroll-margin-top: 6rem; }
     .estimate-landing-intro p:not(.eyebrow) {
         font-size: 0.92rem;
         line-height: 1.55;
+    }
+    .viager-page .estimate-app-shell {
+        padding-block-start: 0.45rem;
+    }
+    .viager-landing-intro {
+        margin-bottom: 0.75rem;
+    }
+    .viager-landing-intro p:not(.eyebrow) {
+        font-size: clamp(0.72rem, 3.25vw, 0.82rem);
+        line-height: 1.35;
     }
 }
 

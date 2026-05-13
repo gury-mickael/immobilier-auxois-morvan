@@ -2890,9 +2890,8 @@ function cms_render_viager_tunnel_page(array $settings, array $formData = [], ar
     <main class="estimate-page viager-page">
       <section class="estimate-section">
         <div class="shell estimate-app-shell">
-          <div class="estimate-landing-intro">
-            <p class="eyebrow">Viager local &amp; confidentiel</p>
-            <h1>Vendre en viager autour de Mimeure</h1>
+          <div class="estimate-landing-intro viager-landing-intro">
+            <h1 class="viager-seo-title">Vendre en viager autour de Mimeure</h1>
             <p>Recevez une première étude gratuite et confidentielle pour savoir si le viager est adapté à votre situation.</p>
           </div>
 
