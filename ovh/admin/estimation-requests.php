@@ -7,6 +7,7 @@ require dirname(__DIR__) . '/app/bootstrap.php';
 cms_require_admin();
 $filters = [
     'search' => trim((string) ($_GET['search'] ?? '')),
+  'request_type' => trim((string) ($_GET['request_type'] ?? '')),
     'status' => trim((string) ($_GET['status'] ?? '')),
     'commune' => trim((string) ($_GET['commune'] ?? '')),
     'utm_campaign' => trim((string) ($_GET['utm_campaign'] ?? '')),
@@ -37,6 +38,14 @@ cms_render_admin_start('Demandes d’estimation', '/admin/estimation-requests');
         <?php foreach ($statuses as $value => $label): ?>
           <option value="<?= cms_h($value) ?>" <?= $filters['status'] === $value ? 'selected' : '' ?>><?= cms_h($label) ?></option>
         <?php endforeach; ?>
+      </select>
+    </label>
+    <label>
+      Type de demande
+      <select name="request_type">
+        <option value="">Toutes</option>
+        <option value="estimation" <?= $filters['request_type'] === 'estimation' ? 'selected' : '' ?>>Estimation</option>
+        <option value="viager" <?= $filters['request_type'] === 'viager' ? 'selected' : '' ?>>Viager</option>
       </select>
     </label>
     <label>
@@ -76,6 +85,9 @@ cms_render_admin_start('Demandes d’estimation', '/admin/estimation-requests');
             <td><?= cms_h(date('d/m/Y H:i', strtotime((string) $request['created_at']))) ?></td>
             <td>
               <strong><?= cms_h(trim((string) $request['first_name'] . ' ' . (string) $request['last_name'])) ?></strong>
+              <?php if ((string) ($request['request_type'] ?? 'estimation') === 'viager'): ?>
+                <span class="status-badge">Viager</span>
+              <?php endif; ?>
               <div class="lead"><?= cms_h((string) $request['phone']) ?> · <?= cms_h((string) $request['email']) ?></div>
             </td>
             <td>

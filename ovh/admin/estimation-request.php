@@ -34,16 +34,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $request = cms_estimation_request($id) ?? $request;
+$isViager = (string) ($request['request_type'] ?? 'estimation') === 'viager';
 $details = [
+  'Type de demande' => $isViager ? 'Viager' : 'Estimation',
     'Type de bien' => $request['property_type'],
     'Nombre de pièces' => $request['room_count'],
-    'État général' => $request['property_condition'],
+  'État général' => $request['property_condition'] ?: '—',
     'Surface habitable' => $request['living_surface'],
-    'Surface terrain' => $request['land_surface'],
+  'Surface terrain' => $request['land_surface'] ?: '—',
+  'Souhait logement' => ($request['occupancy_intent'] ?? '') !== '' ? $request['occupancy_intent'] : '—',
     'Commune' => $request['commune'],
     'Code postal' => $request['postal_code'] ?: '—',
     'Adresse / secteur' => $request['address_details'],
     'Objectif' => $request['goal'],
+  'Situation' => ($request['owner_situation'] ?? '') !== '' ? $request['owner_situation'] : '—',
     'Délai envisagé' => $request['project_timeline'],
     'Source' => $request['source'],
     'UTM source' => $request['utm_source'] ?: '—',
@@ -60,7 +64,7 @@ cms_render_admin_start('Détail estimation', '/admin/estimation-requests');
   <div class="panel-head compact">
     <div>
       <p class="eyebrow">Lead estimation</p>
-      <h1><?= cms_h(trim((string) $request['first_name'] . ' ' . (string) $request['last_name'])) ?></h1>
+      <h1><?= cms_h(trim((string) $request['first_name'] . ' ' . (string) $request['last_name'])) ?><?php if ($isViager): ?> · Viager<?php endif; ?></h1>
       <p class="lead">Créée le <?= cms_h(date('d/m/Y à H:i', strtotime((string) $request['created_at']))) ?></p>
     </div>
     <a class="secondary-button" href="<?= cms_h(cms_url('/admin/estimation-requests')) ?>">Retour à la liste</a>

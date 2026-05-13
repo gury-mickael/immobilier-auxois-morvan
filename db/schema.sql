@@ -34,6 +34,15 @@ CREATE TABLE IF NOT EXISTS cms_pages (
   local_page_type VARCHAR(150) DEFAULT NULL,
   local_advantages_json LONGTEXT DEFAULT NULL,
   nearby_cities_json LONGTEXT DEFAULT NULL,
+  seo_intent VARCHAR(80) DEFAULT NULL,
+  seo_status VARCHAR(40) NOT NULL DEFAULT 'draft',
+  seo_focus_keyword VARCHAR(190) DEFAULT NULL,
+  seo_secondary_keywords LONGTEXT DEFAULT NULL,
+  seo_template VARCHAR(80) DEFAULT NULL,
+  seo_notes LONGTEXT DEFAULT NULL,
+  seo_faq_json LONGTEXT DEFAULT NULL,
+  seo_internal_links_json LONGTEXT DEFAULT NULL,
+  seo_is_primary TINYINT(1) NOT NULL DEFAULT 0,
   status ENUM('draft', 'published') NOT NULL DEFAULT 'draft',
   published_at DATETIME DEFAULT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -113,15 +122,18 @@ CREATE TABLE IF NOT EXISTS cms_contact_requests (
 
 CREATE TABLE IF NOT EXISTS cms_estimation_requests (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  request_type VARCHAR(50) NOT NULL DEFAULT 'estimation',
   property_type VARCHAR(100) NOT NULL,
   room_count VARCHAR(100) NOT NULL,
   property_condition VARCHAR(100) NOT NULL,
   living_surface VARCHAR(100) NOT NULL,
   land_surface VARCHAR(100) NOT NULL,
+  occupancy_intent VARCHAR(150) DEFAULT NULL,
   commune VARCHAR(150) NOT NULL,
   postal_code VARCHAR(20) DEFAULT NULL,
   address_details TEXT NOT NULL,
   goal VARCHAR(150) NOT NULL,
+  owner_situation VARCHAR(150) DEFAULT NULL,
   project_timeline VARCHAR(100) NOT NULL,
   first_name VARCHAR(150) NOT NULL,
   last_name VARCHAR(150) NOT NULL,
@@ -140,6 +152,7 @@ CREATE TABLE IF NOT EXISTS cms_estimation_requests (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
+  KEY idx_cms_estimation_requests_type (request_type),
   KEY idx_cms_estimation_requests_status (status),
   KEY idx_cms_estimation_requests_commune (commune),
   KEY idx_cms_estimation_requests_created_at (created_at),
@@ -169,4 +182,69 @@ CREATE TABLE IF NOT EXISTS cms_estimation_events (
   KEY idx_cms_estimation_events_visitor (visitor_id),
   KEY idx_cms_estimation_events_step (step_number),
   KEY idx_cms_estimation_events_utm_campaign (utm_campaign)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS cms_seo_keywords (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  keyword VARCHAR(255) NOT NULL,
+  city VARCHAR(150) DEFAULT NULL,
+  intent VARCHAR(80) NOT NULL DEFAULT 'local',
+  target_url VARCHAR(255) DEFAULT NULL,
+  target_page_id INT UNSIGNED DEFAULT NULL,
+  priority TINYINT UNSIGNED NOT NULL DEFAULT 2,
+  status ENUM('active','paused','to-create','to-optimize') NOT NULL DEFAULT 'active',
+  action_status VARCHAR(60) DEFAULT NULL,
+  notes LONGTEXT DEFAULT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uniq_cms_seo_keywords_keyword (keyword),
+  KEY idx_cms_seo_keywords_city (city),
+  KEY idx_cms_seo_keywords_target_page (target_page_id),
+  KEY idx_cms_seo_keywords_action_status (action_status),
+  KEY idx_cms_seo_keywords_status (status),
+  KEY idx_cms_seo_keywords_priority (priority)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS cms_seo_measurements (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  keyword_id INT UNSIGNED NOT NULL,
+  source ENUM('manual','csv','search_console') NOT NULL DEFAULT 'manual',
+  period_start DATE NOT NULL,
+  period_end DATE NOT NULL,
+  clicks INT UNSIGNED NOT NULL DEFAULT 0,
+  impressions INT UNSIGNED NOT NULL DEFAULT 0,
+  ctr DECIMAL(8,4) NOT NULL DEFAULT 0,
+  position DECIMAL(8,2) DEFAULT NULL,
+  best_page VARCHAR(255) DEFAULT NULL,
+  raw_json LONGTEXT DEFAULT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_cms_seo_measurements_keyword_date (keyword_id, period_end),
+  KEY idx_cms_seo_measurements_source (source),
+  CONSTRAINT fk_cms_seo_measurements_keyword
+    FOREIGN KEY (keyword_id) REFERENCES cms_seo_keywords(id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS cms_seo_oauth_tokens (
+  provider VARCHAR(60) NOT NULL,
+  access_token LONGTEXT DEFAULT NULL,
+  refresh_token LONGTEXT DEFAULT NULL,
+  token_type VARCHAR(40) DEFAULT NULL,
+  scope LONGTEXT DEFAULT NULL,
+  expires_at DATETIME DEFAULT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (provider)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS cms_seo_ai_analyses (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  analysis_type VARCHAR(60) NOT NULL DEFAULT 'overview',
+  model VARCHAR(80) DEFAULT NULL,
+  result_json LONGTEXT NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_cms_seo_ai_analyses_type_date (analysis_type, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

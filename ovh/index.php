@@ -15,6 +15,14 @@ try {
     $settings = cms_settings();
     $blogEnabled = cms_is_blog_public_enabled($settings);
 
+    if ($requestPath === '/sitemap.xml') {
+      cms_render_sitemap_xml($settings);
+    }
+
+    if ($requestPath === '/robots.txt') {
+      cms_render_robots_txt($settings);
+    }
+
     if ($requestPath === '/estimation-track') {
       cms_handle_estimation_tracking_request();
     }
@@ -44,6 +52,11 @@ try {
       exit;
     }
 
+    if ($requestPath === '/etude-viager-gratuite/confirmation' || $requestPath === '/viager/confirmation') {
+      cms_render_viager_confirmation_page($settings);
+      exit;
+    }
+
     if ($requestPath === '/estimation-en-ligne' || $requestPath === '/estimation-en-ligne/' || $requestPath === '/estimation-immobiliere-auxois-morvan' || $requestPath === '/estimation-immobiliere-auxois-morvan/') {
       $formState = ['errors' => [], 'payload' => []];
 
@@ -57,6 +70,22 @@ try {
       }
 
       cms_render_estimation_tunnel_page($settings, (array) ($formState['payload'] ?? []), (array) ($formState['errors'] ?? []));
+      exit;
+    }
+
+    if ($requestPath === '/etude-viager-gratuite' || $requestPath === '/etude-viager-gratuite/' || $requestPath === '/viager' || $requestPath === '/viager/') {
+      $formState = ['errors' => [], 'payload' => []];
+
+      if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        cms_require_csrf();
+        $formState = cms_handle_estimation_request($settings);
+
+        if (($formState['errors'] ?? []) === []) {
+          cms_redirect('/etude-viager-gratuite/confirmation');
+        }
+      }
+
+      cms_render_viager_tunnel_page($settings, (array) ($formState['payload'] ?? []), (array) ($formState['errors'] ?? []));
       exit;
     }
 

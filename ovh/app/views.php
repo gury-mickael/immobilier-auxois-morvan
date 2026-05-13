@@ -2,6 +2,135 @@
 
 declare(strict_types=1);
 
+function cms_public_image_path(string $src): string
+{
+  $src = trim($src);
+
+  if ($src === '' || preg_match('#^(https?:)?//#i', $src) === 1 || str_starts_with($src, 'data:')) {
+    return '';
+  }
+
+  $path = parse_url($src, PHP_URL_PATH);
+  if (!is_string($path) || $path === '') {
+    return '';
+  }
+
+  $path = '/' . ltrim($path, '/');
+
+  return str_starts_with($path, '/uploads/') ? $path : '';
+}
+
+function cms_image_url(string $src): string
+{
+  return preg_match('#^(https?:)?//#i', $src) === 1 || str_starts_with($src, 'data:') ? $src : cms_url($src);
+}
+
+function cms_optimized_image_srcset(string $src): string
+{
+  $path = cms_public_image_path($src);
+  if ($path === '') {
+    return '';
+  }
+
+  $extension = strtolower((string) pathinfo($path, PATHINFO_EXTENSION));
+  if (!in_array($extension, ['jpg', 'jpeg', 'png', 'webp'], true)) {
+    return '';
+  }
+
+  $directory = trim((string) dirname($path), '/');
+  if ($directory === '.' || $directory === '') {
+    return '';
+  }
+
+  $relativeDirectory = preg_replace('#^uploads/?#', '', $directory) ?? '';
+  $optimizedDirectory = '/uploads/optimized' . ($relativeDirectory !== '' ? '/' . $relativeDirectory : '');
+  $name = (string) pathinfo($path, PATHINFO_FILENAME);
+  $root = rtrim((string) cms_config()['root'], '/');
+  $variants = [];
+
+  foreach (glob($root . $optimizedDirectory . '/' . $name . '-*.webp') ?: [] as $file) {
+    if (preg_match('/-(\d+)\.webp$/', $file, $matches) !== 1) {
+      continue;
+    }
+
+    $variants[(int) $matches[1]] = cms_url($optimizedDirectory . '/' . basename($file)) . ' ' . (int) $matches[1] . 'w';
+  }
+
+  ksort($variants);
+
+  return implode(', ', array_values($variants));
+}
+
+function cms_image_dimensions(string $src): array
+{
+  $path = cms_public_image_path($src);
+  if ($path === '') {
+    return [];
+  }
+
+  $imagePath = rtrim((string) cms_config()['root'], '/') . $path;
+  if (!is_file($imagePath)) {
+    return [];
+  }
+
+  $dimensions = @getimagesize($imagePath);
+  if (!is_array($dimensions) || empty($dimensions[0]) || empty($dimensions[1])) {
+    return [];
+  }
+
+  return ['width' => (string) $dimensions[0], 'height' => (string) $dimensions[1]];
+}
+
+function cms_html_attributes(array $attributes): string
+{
+  $html = '';
+
+  foreach ($attributes as $name => $value) {
+    if ($value === false || $value === null) {
+      continue;
+    }
+
+    if ($value === true) {
+      $html .= ' ' . cms_h((string) $name);
+      continue;
+    }
+
+    $html .= ' ' . cms_h((string) $name) . '="' . cms_h((string) $value) . '"';
+  }
+
+  return $html;
+}
+
+function cms_render_image(string $src, string $alt = '', array $attributes = []): void
+{
+  $src = trim($src);
+  if ($src === '') {
+    return;
+  }
+
+  $sizes = (string) ($attributes['sizes'] ?? '100vw');
+  $srcset = cms_optimized_image_srcset($src);
+  unset($attributes['sizes']);
+
+  $attributes = array_merge([
+    'src' => cms_image_url($src),
+    'alt' => $alt,
+    'loading' => 'lazy',
+    'decoding' => 'async',
+  ], cms_image_dimensions($src), $attributes);
+
+  if ($sizes !== '') {
+    $attributes['sizes'] = $sizes;
+  }
+
+  if ($srcset !== '') {
+    ?><picture><source type="image/webp" srcset="<?= cms_h($srcset) ?>" sizes="<?= cms_h($sizes) ?>"><img<?= cms_html_attributes($attributes) ?>></picture><?php
+    return;
+  }
+
+  ?><img<?= cms_html_attributes($attributes) ?>><?php
+}
+
 function cms_render_admin_start(string $title, string $currentNav): void
 {
     $admin = cms_current_admin();
@@ -18,6 +147,9 @@ function cms_render_admin_start(string $title, string $currentNav): void
         ],
         'Conversion' => [
             '/admin/estimation-requests' => ['label' => 'Estimations', 'icon' => 'M3 17v3h18v-3M7 13l3-3 3 3 5-5M5 17V9m4 8V13m4 4V11m4 6V8'],
+        ],
+        'Acquisition' => [
+          '/admin/seo' => ['label' => 'SEO local', 'icon' => 'M4 19V5m0 14h16M8 15l3-3 3 2 4-6M18 8h2v2'],
         ],
         'Système' => [
             '/admin/settings' => ['label' => 'Réglages', 'icon' => 'M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm8.94 3a8.94 8.94 0 0 0-.13-1.5l2.05-1.6-2-3.46-2.42.97a8.94 8.94 0 0 0-2.6-1.5L15.5 2h-7l-.34 2.91a8.94 8.94 0 0 0-2.6 1.5l-2.42-.97-2 3.46 2.05 1.6c-.08.49-.13.99-.13 1.5s.05 1.01.13 1.5L1.14 15.1l2 3.46 2.42-.97a8.94 8.94 0 0 0 2.6 1.5L8.5 22h7l.34-2.91a8.94 8.94 0 0 0 2.6-1.5l2.42.97 2-3.46-2.05-1.6c.08-.49.13-.99.13-1.5Z'],
@@ -44,10 +176,8 @@ function cms_render_admin_start(string $title, string $currentNav): void
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="robots" content="noindex,nofollow">
         <title><?= cms_h($title) ?></title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-        <link rel="stylesheet" href="<?= cms_h(cms_url('/assets/admin.css')) ?>">
+        <link rel="preload" href="<?= cms_h(cms_url('/assets/fonts/inter-latin.woff2')) ?>" as="font" type="font/woff2" crossorigin>
+        <link rel="stylesheet" href="<?= cms_h(cms_url('/assets/admin.css')) ?>?v=<?= cms_h((string) (@filemtime(__DIR__ . '/../assets/admin.css') ?: time())) ?>">
       </head>
       <body class="admin-shell">
         <aside class="admin-sidebar">
@@ -310,51 +440,359 @@ function cms_render_media_picker_assets(array $mediaItems): void
     <?php
 }
 
-function cms_render_page_form(array $page, string $mode, string $actionLabel): void
+function cms_render_page_form(array $page, string $mode, string $actionLabel, ?string $seoAiAdvice = null): void
 {
     $sections = cms_page_sections($page);
     $advantages = implode("\n", cms_json_list($page['local_advantages_json'] ?? '[]'));
     $nearbyCities = implode("\n", cms_json_list($page['nearby_cities_json'] ?? '[]'));
+  $seoFaq = implode("\n", array_map(static fn (array $faq): string => (string) ($faq['question'] ?? '') . ' | ' . (string) ($faq['answer'] ?? ''), cms_json_objects((string) ($page['seo_faq_json'] ?? '[]'))));
+  $seoLinks = implode("\n", array_map(static fn (array $link): string => (string) ($link['label'] ?? '') . ' | ' . (string) ($link['url'] ?? ''), cms_json_objects((string) ($page['seo_internal_links_json'] ?? '[]'))));
+  $seoScore = cms_seo_page_score($page);
+  $seoKeywordsToIntegrate = $mode === 'local' && !empty($page['id']) ? cms_seo_keywords_for_page($page) : [];
+  $seoPrimaryConflicts = $mode === 'local' ? cms_seo_primary_page_conflicts($page) : [];
+    $seoAiApplyFields = $mode === 'local' ? [
+      ['key' => 'title', 'label' => 'Title SEO', 'target' => 'title', 'tab' => 'seo', 'large' => false, 'priority' => true, 'explain' => 'Un titre SEO doit combiner le mot-clé principal, la ville et une promesse claire.'],
+      ['key' => 'meta', 'label' => 'Meta description', 'target' => 'meta_description', 'tab' => 'seo', 'large' => false, 'priority' => true, 'explain' => 'La description doit donner envie de cliquer tout en restant locale et concrète.'],
+      ['key' => 'h1', 'label' => 'H1', 'target' => 'h1', 'tab' => 'seo', 'large' => false, 'priority' => true, 'explain' => 'Le H1 doit confirmer immédiatement le sujet et la commune travaillée.'],
+      ['key' => 'intro', 'label' => 'Introduction', 'target' => 'intro_html', 'tab' => 'content', 'large' => true, 'priority' => true, 'explain' => 'L’introduction doit expliquer le besoin, la ville et la valeur de votre accompagnement.'],
+      ['key' => 'content', 'label' => 'Contenu principal', 'target' => 'section_text', 'tab' => 'local', 'large' => true, 'priority' => false, 'explain' => 'Le contenu principal doit apporter des éléments locaux utiles et rassurants.'],
+      ['key' => 'cta', 'label' => 'CTA final', 'target' => 'cta_text', 'tab' => 'faq', 'large' => true, 'priority' => false, 'explain' => 'Le CTA doit transformer la lecture en action simple et adaptée au projet immobilier.'],
+      ['key' => 'cta_button', 'label' => 'Texte du bouton CTA', 'target' => 'cta_button_label', 'tab' => 'faq', 'large' => false, 'priority' => false, 'explain' => 'Le bouton doit être court, explicite et orienté action.'],
+      ['key' => 'faq', 'label' => 'FAQ', 'target' => 'seo_faq', 'tab' => 'faq', 'large' => true, 'priority' => true, 'explain' => 'La FAQ répond aux questions locales et renforce la longue traîne SEO.'],
+      ['key' => 'local_sections', 'label' => 'Sections locales', 'target' => 'local_sections', 'tab' => 'local', 'large' => true, 'priority' => false, 'explain' => 'Une section locale doit citer des critères concrets du secteur, sans rester générique.'],
+    ] : [];
+    $localPageTypes = $mode === 'local' ? cms_local_page_types() : [];
+    $localPageType = (string) ($page['local_page_type'] ?? '');
+    $localPageTypeLabel = $localPageTypes[$localPageType] ?? ($localPageType !== '' ? $localPageType : 'Page locale');
+    $status = (string) ($page['status'] ?? 'draft');
+    $statusLabel = $status === 'published' ? 'Publiée' : 'Brouillon';
+    $seoAiChecklistItems = [];
+    if ($seoAiAdvice !== null && trim($seoAiAdvice) !== '') {
+      foreach (preg_split('/\R+/', trim($seoAiAdvice)) ?: [] as $line) {
+        $item = trim(preg_replace('/^[-*•\d.)\s]+/', '', trim($line)) ?? '');
+        if ($item === '' || mb_strlen($item) < 18 || preg_match('/^(verdict|pourquoi|actions? prioritaires?)\b/i', $item)) {
+          continue;
+        }
+
+        $seoAiChecklistItems[] = $item;
+        if (count($seoAiChecklistItems) >= 6) {
+          break;
+        }
+      }
+    }
+    $seoNowItems = $seoAiChecklistItems;
+    foreach ($seoScore['checks'] as $check) {
+      if (empty($check['ok'])) {
+        $seoNowItems[] = (string) $check['label'];
+      }
+    }
+    foreach (array_slice($seoKeywordsToIntegrate, 0, 3) as $keywordSuggestion) {
+      $seoNowItems[] = 'Intégrer le mot-clé “' . (string) ($keywordSuggestion['keyword'] ?? '') . '” dans le contenu.';
+    }
+    $seoNowItems = array_slice(array_values(array_unique(array_filter($seoNowItems))), 0, 5);
     $mediaItems = cms_media_items();
     ?>
-    <form method="post" class="admin-form-stack">
+    <form method="post" class="admin-form-stack seo-editor-form" novalidate>
       <input type="hidden" name="_csrf" value="<?= cms_h(cms_csrf_token()) ?>">
       <input type="hidden" name="section_count" id="section-count" value="<?= count($sections) ?>">
 
-      <section class="panel">
+      <header class="seo-edit-sticky-header">
+        <div class="seo-edit-header-main">
+          <a class="seo-edit-back" href="<?= $mode === 'local' ? '/admin/local-pages' : '/admin/pages' ?>">← Retour à la liste</a>
+          <div>
+            <p class="eyebrow">SEO local</p>
+            <h1><?= cms_h((string) ($page['title'] ?: $actionLabel)) ?></h1>
+          </div>
+          <div class="seo-edit-meta-row">
+            <?php if ($mode === 'local'): ?>
+              <span class="status-badge"><?= cms_h((string) ($page['city'] ?: 'Ville à compléter')) ?></span>
+              <span class="status-badge"><?= cms_h($localPageTypeLabel) ?></span>
+            <?php endif; ?>
+            <span class="status-badge status-<?= cms_h($status) ?>"><?= cms_h($statusLabel) ?></span>
+            <span class="seo-score-mini score-<?= cms_h($seoScore['score'] >= 75 ? 'ready' : ($seoScore['score'] >= 55 ? 'ok' : 'low')) ?>"><?= (int) $seoScore['score'] ?>/100 · <?= cms_h((string) $seoScore['label']) ?></span>
+          </div>
+        </div>
+        <div class="seo-edit-header-actions">
+          <button class="primary-button" type="submit">Enregistrer</button>
+          <a class="secondary-button" href="<?= cms_h(cms_url((string) ($page['slug'] ?: '/'))) ?>" target="_blank" rel="noreferrer">Voir la page</a>
+          <?php if ($mode === 'local'): ?>
+            <button class="secondary-button" type="submit" name="action" value="seo_ai_advice" <?= cms_openai_configured() ? '' : 'disabled' ?>>Conseil IA SEO</button>
+          <?php endif; ?>
+        </div>
+      </header>
+
+      <nav class="seo-edit-tabs" role="tablist" aria-label="Navigation édition SEO">
+        <button type="button" class="seo-edit-tab is-active" data-admin-tab="essential">Essentiel</button>
+        <button type="button" class="seo-edit-tab" data-admin-tab="content">Contenu</button>
+        <button type="button" class="seo-edit-tab" data-admin-tab="seo">SEO</button>
+        <button type="button" class="seo-edit-tab" data-admin-tab="local">Sections locales</button>
+        <button type="button" class="seo-edit-tab" data-admin-tab="faq">FAQ & CTA</button>
+        <button type="button" class="seo-edit-tab" data-admin-tab="advanced">Avancé</button>
+      </nav>
+
+      <aside class="seo-edit-sidebar">
+        <section class="panel seo-sidebar-card">
+          <p class="eyebrow">Ce que vous pouvez appliquer maintenant</p>
+          <?php if ($mode === 'local' && $seoAiApplyFields !== []): ?>
+            <div class="seo-apply-now-list" data-ai-sidebar-actions>
+              <?php foreach (array_slice($seoAiApplyFields, 0, 5) as $field): ?>
+                <article class="seo-apply-now-item" data-ai-sidebar-item="<?= cms_h($field['key']) ?>">
+                  <strong><?= cms_h($field['label']) ?> proposé</strong>
+                  <span data-ai-sidebar-excerpt="<?= cms_h($field['key']) ?>">Suggestion à générer</span>
+                  <div class="seo-apply-now-actions"><button class="ghost-button" type="button" data-ai-view="<?= cms_h($field['key']) ?>">Voir</button><button class="secondary-button" type="button" data-ai-quick-apply="<?= cms_h($field['key']) ?>">Appliquer</button></div>
+                </article>
+              <?php endforeach; ?>
+            </div>
+          <?php else: ?>
+            <p>La base SEO est propre. Relisez le contenu, puis enregistrez vos ajustements.</p>
+          <?php endif; ?>
+        </section>
+        <section class="panel seo-sidebar-card seo-preview-card seo-live-preview">
+          <p class="eyebrow">Aperçu Google</p>
+          <strong data-seo-preview-title><?= cms_h((string) $page['title']) ?></strong>
+          <span data-seo-preview-url><?= cms_h(cms_absolute_url((string) ($page['slug'] ?: '/'))) ?></span>
+          <p data-seo-preview-description><?= cms_h((string) $page['meta_description']) ?></p>
+        </section>
+        <section class="panel seo-sidebar-card">
+          <p class="eyebrow">Checklist rapide</p>
+          <div class="seo-checklist compact">
+            <?php foreach ($seoScore['checks'] as $check): ?>
+              <span class="seo-check <?= !empty($check['ok']) ? 'is-ok' : 'is-missing' ?>"><?= !empty($check['ok']) ? 'OK' : 'À améliorer' ?> · <?= cms_h((string) $check['label']) ?></span>
+            <?php endforeach; ?>
+          </div>
+        </section>
+        <section class="panel seo-sidebar-card">
+          <p class="eyebrow">Actions rapides</p>
+          <div class="admin-actions vertical-actions">
+            <button class="primary-button" type="submit">Enregistrer</button>
+            <?php if ($mode === 'local'): ?>
+              <button class="secondary-button" type="submit" name="action" value="seo_ai_test" <?= cms_openai_configured() ? '' : 'disabled' ?>>Tester IA</button>
+              <button class="ghost-button" type="button" data-admin-tab-jump="seo">Voir recommandations</button>
+            <?php endif; ?>
+          </div>
+        </section>
+      </aside>
+
+      <section class="panel seo-tab-panel is-active" data-admin-tab-panel="essential seo advanced">
         <div class="panel-head">
           <div>
-            <p class="eyebrow">SEO</p>
+            <p class="eyebrow">SEO local</p>
             <h1><?= cms_h($actionLabel) ?></h1>
           </div>
-          <div class="status-badge status-<?= cms_h((string) $page['status']) ?>"><?= cms_h((string) $page['status']) ?></div>
+          <div class="seo-edit-head-actions">
+            <?php if ($mode === 'local'): ?>
+              <button class="ghost-button" type="submit" name="action" value="seo_ai_test" <?= cms_openai_configured() ? '' : 'disabled' ?>>Tester IA</button>
+              <button class="secondary-button" type="submit" name="action" value="seo_ai_advice" <?= cms_openai_configured() ? '' : 'disabled' ?>>Conseil IA SEO</button>
+            <?php endif; ?>
+            <div class="seo-score-pill score-<?= cms_h($seoScore['score'] >= 75 ? 'ready' : ($seoScore['score'] >= 55 ? 'ok' : 'low')) ?>"><strong><?= (int) $seoScore['score'] ?>/100</strong><span><?= cms_h((string) $seoScore['label']) ?></span></div>
+          </div>
         </div>
-        <div class="grid two-cols">
+        <div class="grid two-cols seo-edit-grid">
           <label>
             Titre SEO
-            <input name="title" value="<?= cms_h((string) $page['title']) ?>" required>
+            <input name="title" value="<?= cms_h((string) $page['title']) ?>" required data-seo-title-source>
           </label>
           <label>
             Slug / URL
-            <input name="slug" value="<?= cms_h((string) $page['slug']) ?>" required>
+            <input name="slug" value="<?= cms_h((string) $page['slug']) ?>" required data-seo-slug-source>
           </label>
           <label class="full">
             Meta description
-            <textarea name="meta_description" rows="3" required><?= cms_h((string) $page['meta_description']) ?></textarea>
+            <textarea name="meta_description" rows="3" required data-seo-description-source><?= cms_h((string) $page['meta_description']) ?></textarea>
           </label>
           <label>
             H1
-            <input name="h1" value="<?= cms_h((string) $page['h1']) ?>" required>
+            <input name="h1" value="<?= cms_h((string) $page['h1']) ?>" required data-seo-h1-source>
           </label>
+          <label>
+            Statut public
+            <select name="status">
+              <option value="draft" <?= ($page['status'] ?? 'draft') === 'draft' ? 'selected' : '' ?>>Brouillon</option>
+              <option value="published" <?= ($page['status'] ?? 'draft') === 'published' ? 'selected' : '' ?>>Publié</option>
+            </select>
+          </label>
+          <?php if ($mode === 'local'): ?>
+            <label>
+              Intention SEO
+              <select name="seo_intent">
+                <?php foreach (cms_seo_page_intents() as $value => $label): ?>
+                  <option value="<?= cms_h($value) ?>" <?= (string) ($page['seo_intent'] ?? '') === $value ? 'selected' : '' ?>><?= cms_h($label) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </label>
+            <label>
+              Statut SEO
+              <select name="seo_status">
+                <?php foreach (cms_seo_page_statuses() as $value => $label): ?>
+                  <option value="<?= cms_h($value) ?>" <?= (string) ($page['seo_status'] ?? 'draft') === $value ? 'selected' : '' ?>><?= cms_h($label) ?></option>
+                <?php endforeach; ?>
+              </select>
+            </label>
+            <label>
+              Mot clé principal
+              <input name="seo_focus_keyword" value="<?= cms_h((string) ($page['seo_focus_keyword'] ?? '')) ?>" placeholder="estimation immobilière Arnay-le-Duc">
+            </label>
+            <label>
+              Modèle utilisé
+              <input name="seo_template" value="<?= cms_h((string) ($page['seo_template'] ?? '')) ?>" placeholder="estimation-locale">
+            </label>
+            <label class="full">
+              Mots clés secondaires
+              <textarea name="seo_secondary_keywords" rows="3" placeholder="Une ligne = un mot clé secondaire"><?= cms_h((string) ($page['seo_secondary_keywords'] ?? '')) ?></textarea>
+            </label>
+            <label class="toggle-field full">
+              <span>Page principale pour cette commune et cette intention</span>
+              <input type="checkbox" name="seo_is_primary" value="1" <?= !empty($page['seo_is_primary']) ? 'checked' : '' ?>>
+            </label>
+          <?php endif; ?>
           <label class="toggle-field">
             <span>Indexable</span>
             <input type="checkbox" name="is_indexable" value="1" <?= (int) ($page['is_indexable'] ?? 1) === 1 ? 'checked' : '' ?>>
           </label>
         </div>
+        <?php if ($mode === 'local'): ?>
+          <div class="seo-preview-card">
+            <p class="eyebrow">Aperçu Google</p>
+            <strong data-seo-preview-title><?= cms_h((string) $page['title']) ?></strong>
+            <span data-seo-preview-url><?= cms_h(cms_absolute_url((string) ($page['slug'] ?: '/'))) ?></span>
+            <p data-seo-preview-description><?= cms_h((string) $page['meta_description']) ?></p>
+          </div>
+          <div class="seo-live-indicators">
+            <span class="seo-check" data-seo-indicator="title">Titre SEO</span>
+            <span class="seo-check" data-seo-indicator="description">Meta description</span>
+            <span class="seo-check" data-seo-indicator="slug">Slug</span>
+            <span class="seo-check" data-seo-indicator="h1">H1</span>
+          </div>
+          <div class="seo-checklist">
+            <?php foreach ($seoScore['checks'] as $check): ?>
+              <span class="seo-check <?= !empty($check['ok']) ? 'is-ok' : 'is-missing' ?>"><?= !empty($check['ok']) ? '✓' : '!' ?> <?= cms_h((string) $check['label']) ?></span>
+            <?php endforeach; ?>
+          </div>
+          <?php if (!cms_openai_configured()): ?>
+            <div class="seo-editor-alert"><strong>IA SEO non connectée :</strong> ajoutez OPENAI_API_KEY et OPENAI_MODEL dans le .env OVH pour activer le bouton “Conseil IA SEO”.</div>
+          <?php endif; ?>
+          <?php if ($mode === 'local'): ?>
+            <section class="seo-ai-apply-panel" id="seo-ai-apply-panel" aria-labelledby="seo-ai-apply-title">
+              <div class="panel-title-row seo-ai-apply-head">
+                <div>
+                  <p class="eyebrow">Assistant d’édition</p>
+                  <h2 id="seo-ai-apply-title">Suggestions IA à appliquer</h2>
+                  <p>Comparez le contenu actuel et la proposition, puis appliquez uniquement ce que vous validez.</p>
+                </div>
+                <div class="admin-actions seo-ai-generator-actions">
+                  <button class="primary-button" type="button" data-ai-generate-all>Générer les suggestions IA</button>
+                  <button class="secondary-button" type="button" data-ai-generate-missing>Générer seulement les champs manquants</button>
+                </div>
+              </div>
+              <div class="seo-ai-save-warning" id="seo-ai-save-warning" hidden>Modifications en attente d’enregistrement.</div>
+              <div class="seo-ai-priority-box">
+                <div>
+                  <h3>À appliquer en priorité</h3>
+                  <p>Les cartes prioritaires s’ouvrent par défaut. Rien n’est remplacé sans action de votre part.</p>
+                </div>
+                <ol class="seo-ai-priority-list" data-ai-priority-list>
+                  <?php foreach (array_values(array_filter($seoAiApplyFields, static fn (array $field): bool => (bool) $field['priority'])) as $index => $field): ?>
+                    <li data-ai-priority="<?= cms_h($field['key']) ?>"><span><?= cms_h($field['label']) ?> à vérifier</span><button class="ghost-button" type="button" data-ai-view="<?= cms_h($field['key']) ?>">Voir la suggestion</button></li>
+                  <?php endforeach; ?>
+                </ol>
+              </div>
+              <div class="admin-actions seo-ai-bulk-actions">
+                <button class="secondary-button" type="button" data-ai-apply-selected>Appliquer les suggestions sélectionnées</button>
+                <span class="seo-ai-action-feedback" id="seo-ai-action-feedback" role="status" aria-live="polite" hidden></span>
+              </div>
+              <div class="seo-ai-apply-card-list">
+                <?php foreach ($seoAiApplyFields as $index => $field): ?>
+                  <details class="seo-ai-apply-card" data-ai-card="<?= cms_h($field['key']) ?>" data-ai-target="<?= cms_h($field['target']) ?>" data-ai-large="<?= $field['large'] ? '1' : '0' ?>" data-ai-tab="<?= cms_h($field['tab']) ?>" <?= $index < 3 ? 'open' : '' ?>>
+                    <summary>
+                      <label class="seo-ai-select-field" onclick="event.stopPropagation();"><input type="checkbox" data-ai-select="<?= cms_h($field['key']) ?>"> <span class="sr-only">Sélectionner <?= cms_h($field['label']) ?></span></label>
+                      <div>
+                        <h3><?= cms_h($field['label']) ?></h3>
+                        <p data-ai-card-summary="<?= cms_h($field['key']) ?>">Contenu actuel ↓ suggestion IA ↓ appliquer</p>
+                      </div>
+                      <div class="seo-ai-card-badges"><span class="seo-ai-status-badge" data-ai-status="<?= cms_h($field['key']) ?>">Suggestion disponible</span><span class="secondary-button as-label">Détail</span></div>
+                    </summary>
+                    <div class="seo-ai-card-body">
+                      <div class="seo-ai-compare-grid">
+                        <section class="seo-ai-value-box is-current">
+                          <strong>Actuel</strong>
+                          <div class="seo-ai-value" data-ai-current="<?= cms_h($field['key']) ?>">Aucun contenu actuellement</div>
+                        </section>
+                        <section class="seo-ai-value-box is-suggestion">
+                          <strong>Suggestion IA</strong>
+                          <div class="seo-ai-value" data-ai-suggestion="<?= cms_h($field['key']) ?>">Aucune suggestion générée pour le moment</div>
+                        </section>
+                      </div>
+                      <p class="seo-ai-why"><strong>Pourquoi :</strong> <?= cms_h($field['explain']) ?></p>
+                      <?php if ($field['large']): ?>
+                        <details class="seo-ai-diff" data-ai-diff-wrapper="<?= cms_h($field['key']) ?>">
+                          <summary>Voir les différences</summary>
+                          <div class="seo-ai-diff-grid"><div><strong>Version actuelle</strong><div data-ai-diff-current="<?= cms_h($field['key']) ?>"></div></div><div><strong>Version proposée</strong><div data-ai-diff-suggestion="<?= cms_h($field['key']) ?>"></div></div></div>
+                        </details>
+                      <?php endif; ?>
+                      <div class="seo-ai-edit-box" data-ai-edit-box="<?= cms_h($field['key']) ?>" hidden>
+                        <label>Modifier la suggestion avant d’appliquer<textarea rows="6" data-ai-edit-value="<?= cms_h($field['key']) ?>"></textarea></label>
+                        <button class="primary-button" type="button" data-ai-apply-edited="<?= cms_h($field['key']) ?>">Appliquer ma version</button>
+                      </div>
+                      <div class="admin-actions seo-ai-card-actions">
+                        <button class="primary-button" type="button" data-ai-apply="<?= cms_h($field['key']) ?>">Appliquer</button>
+                        <button class="ghost-button" type="button" data-ai-copy="<?= cms_h($field['key']) ?>">Copier</button>
+                        <button class="ghost-button" type="button" data-ai-regenerate="<?= cms_h($field['key']) ?>">Régénérer</button>
+                        <button class="secondary-button" type="button" data-ai-edit="<?= cms_h($field['key']) ?>">Modifier avant d’appliquer</button>
+                      </div>
+                      <div class="seo-ai-card-feedback" data-ai-card-feedback="<?= cms_h($field['key']) ?>" hidden></div>
+                    </div>
+                  </details>
+                <?php endforeach; ?>
+              </div>
+            </section>
+          <?php endif; ?>
+          <?php if ($seoAiAdvice !== null && trim($seoAiAdvice) !== ''): ?>
+            <div class="seo-ai-advice">
+              <div class="panel-title-row"><div><h2>Checklist IA actionnable</h2><p>Traitez les recommandations une par une, puis enregistrez la page.</p></div><button class="secondary-button" type="button" onclick="navigator.clipboard && navigator.clipboard.writeText(document.getElementById('seo-ai-advice-raw').value)">Copier les recommandations</button></div>
+              <textarea id="seo-ai-advice-raw" hidden><?= cms_h($seoAiAdvice) ?></textarea>
+              <div class="seo-ai-task-list">
+                <?php foreach (($seoAiChecklistItems !== [] ? $seoAiChecklistItems : ['Relire les recommandations IA complètes ci-dessous.']) as $index => $item): ?>
+                  <article class="seo-ai-task" data-seo-ai-task>
+                    <span class="seo-ai-task-check" aria-hidden="true"></span>
+                    <div><strong><?= cms_h($item) ?></strong><span><?= $index < 2 ? 'Important' : ($index < 4 ? 'Moyen' : 'Optionnel') ?></span></div>
+                    <div class="seo-ai-task-actions"><button class="ghost-button" type="button" data-ai-task-action="apply">Marquer comme fait</button><button class="ghost-button" type="button" data-ai-task-action="ignore">Ignorer</button><button class="secondary-button" type="button" data-ai-task-action="manual">Modifier manuellement</button></div>
+                  </article>
+                <?php endforeach; ?>
+              </div>
+              <details class="seo-ai-raw-details"><summary>Voir le diagnostic IA complet</summary><div class="seo-ai-advice-content"><?= nl2br(cms_h($seoAiAdvice)) ?></div></details>
+              <div class="admin-actions seo-ai-action-row"><button class="ghost-button seo-ai-apply-button" type="button" data-seo-ai-apply="title">Appliquer le meta title proposé</button><button class="ghost-button seo-ai-apply-button" type="button" data-seo-ai-apply="meta">Appliquer la meta description proposée</button><button class="ghost-button seo-ai-apply-button" type="button" data-seo-ai-apply="faq">Ajouter les FAQ proposées</button><button class="ghost-button seo-ai-apply-button" type="button" data-seo-ai-apply="done">Marquer comme traité</button></div>
+              <div class="seo-ai-action-feedback" data-seo-ai-legacy-feedback role="status" aria-live="polite" hidden></div>
+            </div>
+          <?php endif; ?>
+          <?php if ($seoPrimaryConflicts !== []): ?>
+            <div class="seo-editor-alert is-warning"><strong>Risque de doublon SEO :</strong> une autre page principale existe déjà pour cette commune et cette intention. Gardez une seule page principale et différenciez les angles secondaires.</div>
+          <?php endif; ?>
+          <?php if ($seoKeywordsToIntegrate !== []): ?>
+            <div class="seo-keyword-suggestions">
+              <div class="panel-title-row"><div><h2>Mots-clés à intégrer</h2><p>Requêtes Search Console associées à cette page cible. À utiliser dans le contenu, la FAQ et le maillage interne.</p></div></div>
+              <div class="table-wrap seo-compact-table-wrap">
+                <table class="admin-table seo-compact-table">
+                  <thead><tr><th>Mot clé</th><th>Opportunité</th><th>Perf.</th><th>Action</th></tr></thead>
+                  <tbody>
+                    <?php foreach ($seoKeywordsToIntegrate as $keywordSuggestion): ?>
+                      <?php $keywordSeo = $keywordSuggestion['_seo']; ?>
+                      <tr>
+                        <td data-label="Mot clé"><strong><?= cms_h((string) $keywordSuggestion['keyword']) ?></strong><small><?= cms_h((string) $keywordSeo['intent_label']) ?> · <?= cms_h((string) ($keywordSeo['city'] ?? 'Secteur')) ?></small></td>
+                        <td data-label="Opportunité"><span class="seo-next-action is-<?= cms_h((string) $keywordSeo['opportunity']['tone']) ?>"><?= cms_h((string) $keywordSeo['opportunity']['label']) ?></span></td>
+                        <td data-label="Perf."><?= (int) ($keywordSuggestion['clicks'] ?? 0) ?> clics<br><small><?= (int) ($keywordSuggestion['impressions'] ?? 0) ?> impr. · pos. <?= $keywordSuggestion['position'] !== null ? number_format((float) $keywordSuggestion['position'], 1, ',', ' ') : '—' ?></small></td>
+                        <td data-label="Action"><span class="seo-next-action is-<?= cms_h((string) $keywordSeo['action']['tone']) ?>"><?= cms_h((string) $keywordSeo['action']['label']) ?></span><small><?= cms_h((string) $keywordSeo['action']['detail']) ?></small></td>
+                      </tr>
+                    <?php endforeach; ?>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          <?php endif; ?>
+        <?php endif; ?>
       </section>
 
       <?php if ($mode === 'local'): ?>
-        <section class="panel">
+        <section class="panel seo-tab-panel" data-admin-tab-panel="local essential">
           <div class="grid two-cols">
             <label>
               Ville
@@ -362,7 +800,11 @@ function cms_render_page_form(array $page, string $mode, string $actionLabel): v
             </label>
             <label>
               Type de page locale
-              <input name="local_page_type" value="<?= cms_h((string) $page['local_page_type']) ?>" placeholder="estimation-immobiliere" required>
+              <select name="local_page_type" required>
+                <?php foreach (cms_local_page_types() as $value => $label): ?>
+                  <option value="<?= cms_h($value) ?>" <?= (string) ($page['local_page_type'] ?? '') === $value ? 'selected' : '' ?>><?= cms_h($label) ?></option>
+                <?php endforeach; ?>
+              </select>
             </label>
             <label>
               Atouts locaux
@@ -376,7 +818,32 @@ function cms_render_page_form(array $page, string $mode, string $actionLabel): v
         </section>
       <?php endif; ?>
 
-      <section class="panel">
+        <?php if ($mode === 'local'): ?>
+          <section class="panel seo-tab-panel" data-admin-tab-panel="seo faq">
+            <div class="panel-head compact">
+              <div>
+                <p class="eyebrow">FAQ & maillage</p>
+                <h2>Blocs SEO complémentaires</h2>
+              </div>
+            </div>
+            <div class="grid two-cols">
+              <label>
+                FAQ locale
+                <textarea name="seo_faq" rows="7" placeholder="Question | Réponse"><?= cms_h($seoFaq) ?></textarea>
+              </label>
+              <label>
+                Liens internes
+                <textarea name="seo_internal_links" rows="7" placeholder="Libellé | /url"><?= cms_h($seoLinks) ?></textarea>
+              </label>
+              <label class="full">
+                Notes d’optimisation
+                <textarea name="seo_notes" rows="4" placeholder="Angles à renforcer, risque de duplication, prochaine action..."><?= cms_h((string) ($page['seo_notes'] ?? '')) ?></textarea>
+              </label>
+            </div>
+          </section>
+        <?php endif; ?>
+
+      <section class="panel seo-tab-panel" data-admin-tab-panel="content essential">
         <div class="grid two-cols">
           <label>
             Titre hero
@@ -394,7 +861,7 @@ function cms_render_page_form(array $page, string $mode, string $actionLabel): v
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel seo-tab-panel" data-admin-tab-panel="content">
         <div class="panel-head compact">
           <div>
             <p class="eyebrow">Contenu</p>
@@ -405,7 +872,7 @@ function cms_render_page_form(array $page, string $mode, string $actionLabel): v
         <textarea hidden id="intro_html" name="intro_html"><?= cms_h((string) $page['intro_html']) ?></textarea>
       </section>
 
-      <section class="panel">
+      <section class="panel seo-tab-panel" data-admin-tab-panel="local">
         <div class="panel-head compact">
           <div>
             <p class="eyebrow">Blocs</p>
@@ -421,7 +888,7 @@ function cms_render_page_form(array $page, string $mode, string $actionLabel): v
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel seo-tab-panel" data-admin-tab-panel="faq advanced">
         <div class="grid two-cols">
           <label>
             Titre CTA
@@ -434,13 +901,6 @@ function cms_render_page_form(array $page, string $mode, string $actionLabel): v
           <label>
             URL CTA
             <input name="cta_button_url" value="<?= cms_h((string) $page['cta_button_url']) ?>" required>
-          </label>
-          <label>
-            Statut
-            <select name="status">
-              <option value="draft" <?= ($page['status'] ?? 'draft') === 'draft' ? 'selected' : '' ?>>Brouillon</option>
-              <option value="published" <?= ($page['status'] ?? 'draft') === 'published' ? 'selected' : '' ?>>Publié</option>
-            </select>
           </label>
           <label class="full">
             Texte CTA
@@ -481,6 +941,8 @@ function cms_render_page_form(array $page, string $mode, string $actionLabel): v
 
           const quill = new Quill(container, { theme: 'snow', modules: { toolbar } });
           quill.root.innerHTML = textarea.value || '<p></p>';
+          container.__quill = quill;
+          textarea.__quill = quill;
           quill.on('text-change', () => {
             textarea.value = quill.root.innerHTML;
           });
@@ -513,10 +975,592 @@ function cms_render_page_form(array $page, string $mode, string $actionLabel): v
         if (!trigger) {
           return;
         }
+        event.preventDefault();
         const section = trigger.closest('.section-editor');
         if (section && container.children.length > 1) {
           section.remove();
         }
+      });
+
+      const activateAdminTab = (tabName) => {
+        document.querySelectorAll('[data-admin-tab]').forEach((tab) => {
+          tab.classList.toggle('is-active', tab.dataset.adminTab === tabName);
+        });
+        document.querySelectorAll('[data-admin-tab-panel]').forEach((panel) => {
+          const tabs = (panel.dataset.adminTabPanel || '').split(/\s+/);
+          panel.classList.toggle('is-active', tabs.includes(tabName));
+        });
+      };
+
+      document.querySelectorAll('[data-admin-tab]').forEach((tab) => {
+        tab.addEventListener('click', () => activateAdminTab(tab.dataset.adminTab));
+      });
+      document.querySelectorAll('[data-admin-tab-jump]').forEach((trigger) => {
+        trigger.addEventListener('click', () => activateAdminTab(trigger.dataset.adminTabJump));
+      });
+      activateAdminTab('essential');
+
+      const titleSource = document.querySelector('[data-seo-title-source]');
+      const slugSource = document.querySelector('[data-seo-slug-source]');
+      const descriptionSource = document.querySelector('[data-seo-description-source]');
+      const h1Source = document.querySelector('[data-seo-h1-source]');
+      const setIndicator = (name, label, tone) => {
+        document.querySelectorAll(`[data-seo-indicator="${name}"]`).forEach((indicator) => {
+          indicator.className = `seo-check ${tone === 'ok' ? 'is-ok' : 'is-missing'}`;
+          indicator.textContent = label;
+        });
+      };
+      const updateSeoPreview = () => {
+        const title = titleSource?.value.trim() || 'Titre SEO à compléter';
+        const slug = (slugSource?.value.trim() || '/').replace(/^\/+/, '');
+        const description = descriptionSource?.value.trim() || 'Meta description à compléter.';
+        document.querySelectorAll('[data-seo-preview-title]').forEach((node) => { node.textContent = title; });
+        document.querySelectorAll('[data-seo-preview-url]').forEach((node) => { node.textContent = `https://immobilier-auxois-morvan.fr/${slug}`; });
+        document.querySelectorAll('[data-seo-preview-description]').forEach((node) => { node.textContent = description; });
+
+        setIndicator('title', title.length < 35 ? 'Titre SEO · À améliorer' : (title.length > 70 ? 'Titre SEO · Trop long' : 'Titre SEO · OK'), title.length >= 35 && title.length <= 70 ? 'ok' : 'warning');
+        setIndicator('description', description.length < 110 ? 'Meta description · Trop courte' : (description.length > 165 ? 'Meta description · Trop longue' : 'Meta description · OK'), description.length >= 110 && description.length <= 165 ? 'ok' : 'warning');
+        setIndicator('slug', slug.length >= 8 && !slug.includes(' ') ? 'Slug · OK' : 'Slug · À améliorer', slug.length >= 8 && !slug.includes(' ') ? 'ok' : 'warning');
+        setIndicator('h1', h1Source?.value.trim() ? 'H1 · OK' : 'H1 · Manquant', h1Source?.value.trim() ? 'ok' : 'warning');
+      };
+      [titleSource, slugSource, descriptionSource, h1Source].forEach((field) => field?.addEventListener('input', updateSeoPreview));
+      updateSeoPreview();
+
+      const aiSuggestions = new Map();
+      const htmlToText = (value) => {
+        const node = document.createElement('div');
+        node.innerHTML = value || '';
+        return (node.textContent || '').replace(/\s+/g, ' ').trim();
+      };
+      const escapeHtml = (value) => String(value || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+      const asParagraph = (value) => {
+        const trimmed = String(value || '').trim();
+        return trimmed.startsWith('<') ? trimmed : `<p>${escapeHtml(trimmed).replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>')}</p>`;
+      };
+      const truncate = (value, length = 120) => {
+        const text = htmlToText(value) || String(value || '').replace(/\s+/g, ' ').trim();
+        return text.length > length ? `${text.slice(0, length - 1)}…` : text;
+      };
+      const cleanEmptyValue = (value) => {
+        const text = htmlToText(value);
+        return text === '' || text === ' ' ? '' : String(value || '').trim();
+      };
+      const getFirstSectionText = () => document.querySelector('textarea[name="section_text[]"]');
+      const getFirstSectionTitle = () => document.querySelector('input[name="section_title[]"]');
+      const getFieldNode = (target) => {
+        if (target === 'intro_html') return document.getElementById('intro_html');
+        if (target === 'section_text') return getFirstSectionText();
+        if (target === 'cta_text') return document.getElementById('cta_text');
+        if (target === 'local_sections') return getFirstSectionText();
+        return document.querySelector(`[name="${target}"]`);
+      };
+      const getFieldValue = (key) => {
+        const card = document.querySelector(`[data-ai-card="${key}"]`);
+        const target = card?.dataset.aiTarget || key;
+        if (target === 'local_sections') {
+          const title = getFirstSectionTitle()?.value || '';
+          const text = getFirstSectionText()?.value || '';
+          return `${title}${title && text ? '\n' : ''}${htmlToText(text)}`.trim();
+        }
+        return getFieldNode(target)?.value || '';
+      };
+      const setRichFieldValue = (field, value) => {
+        if (!field) return;
+        field.value = value;
+        if (field.__quill) {
+          field.__quill.root.innerHTML = value || '<p></p>';
+        } else {
+          const editor = document.querySelector(`.rich-editor[data-target="${field.id}"]`);
+          if (editor?.__quill) editor.__quill.root.innerHTML = value || '<p></p>';
+        }
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+      };
+      const setFieldValue = (key, value) => {
+        const card = document.querySelector(`[data-ai-card="${key}"]`);
+        const target = card?.dataset.aiTarget || key;
+        if (target === 'local_sections') {
+          const sectionTitle = getFirstSectionTitle();
+          const sectionText = getFirstSectionText();
+          const city = getContext().city;
+          if (sectionTitle && !sectionTitle.value.trim()) {
+            sectionTitle.value = `Repères locaux à ${city}`;
+            sectionTitle.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          setRichFieldValue(sectionText, asParagraph(value));
+          return sectionText;
+        }
+        const field = getFieldNode(target);
+        if (!field) return null;
+        if (['intro_html', 'section_text', 'cta_text'].includes(target)) {
+          setRichFieldValue(field, asParagraph(value));
+        } else {
+          field.value = value;
+          field.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        return field;
+      };
+      const getContext = () => {
+        const city = (document.querySelector('[name="city"]')?.value || 'Auxois-Morvan').trim() || 'Auxois-Morvan';
+        const pageType = document.querySelector('[name="local_page_type"]')?.value || 'marche-local';
+        const focus = (document.querySelector('[name="seo_focus_keyword"]')?.value || '').trim();
+        const title = titleSource?.value.trim() || '';
+        const keyword = focus || (pageType === 'vendre-maison' ? `vendre maison ${city}` : (pageType === 'viager' ? `viager ${city}` : (pageType === 'estimation-immobiliere' ? `estimation immobilière ${city}` : `immobilier ${city}`)));
+        return { city, pageType, focus, title, keyword };
+      };
+      const templateFamily = () => {
+        const { pageType } = getContext();
+        if (pageType === 'estimation-immobiliere') return 'estimation';
+        if (pageType === 'vendre-maison') return 'vente';
+        if (pageType === 'viager') return 'viager';
+        return 'general';
+      };
+      const fallbackSuggestion = (key, variant = 0) => {
+        const { city, keyword, title } = getContext();
+        const family = templateFamily();
+        const suffix = variant > 0 ? ' Votre conseiller local.' : '';
+        const packs = {
+          estimation: {
+            title: `Estimation immobilière à ${city} | Avis de valeur local`,
+            meta: `Vous souhaitez connaître la valeur de votre maison ou appartement à ${city} ? Obtenez une estimation immobilière locale, personnalisée et adaptée au marché de l’Auxois.`,
+            h1: `Estimation immobilière à ${city}`,
+            intro: `Vous envisagez de vendre une maison ou un appartement à ${city} ? Avant de fixer un prix de vente, il est essentiel de connaître la valeur réelle de votre bien sur le marché local. En tant que conseiller immobilier du secteur, je vous accompagne avec une estimation personnalisée, basée sur les caractéristiques de votre bien, les ventes récentes et la réalité du marché immobilier local.`,
+            content: `À ${city}, le prix d’un bien dépend autant de ses caractéristiques que de son emplacement précis, de son état, des extérieurs, des dépendances et de la demande actuelle. L’objectif est de construire un avis de valeur argumenté, utile pour décider d’un prix de mise en vente cohérent et défendre ce prix auprès des acquéreurs.`,
+            cta: `Vous souhaitez connaître la valeur de votre bien à ${city} ? Contactez-moi pour obtenir une estimation personnalisée et échanger sur votre projet de vente.`,
+            cta_button: 'Demander mon estimation',
+            faq: `Comment obtenir une estimation immobilière à ${city} ? | Une estimation fiable commence par l’analyse du bien, de son emplacement, de son état, des références comparables et de la demande locale.\nUne estimation en ligne suffit-elle à ${city} ? | Elle donne un premier repère, mais un avis de valeur local permet d’ajuster le prix selon les caractéristiques réelles du bien.\nPourquoi faire estimer avant de vendre ? | Cela évite un prix trop haut qui bloque les visites ou trop bas qui fragilise votre projet de vente.`,
+            local_sections: `À ${city}, une estimation doit tenir compte des maisons anciennes, des extérieurs, des travaux éventuels, des accès, des services proches et du niveau de demande des acquéreurs. Cette lecture locale permet de positionner le bien avec plus de précision qu’une simple moyenne de prix.`
+          },
+          vente: {
+            title: `Vendre sa maison à ${city} | Estimation et accompagnement`,
+            meta: `Vous préparez la vente d’une maison à ${city} ? Bénéficiez d’une estimation locale, d’une stratégie de prix claire et d’un accompagnement jusqu’à la signature.`,
+            h1: `Vendre sa maison à ${city}`,
+            intro: `Vendre une maison à ${city} demande une préparation précise : estimation, valorisation, diffusion, qualification des acheteurs et suivi des offres. Je vous accompagne pour présenter votre bien avec clarté et construire une stratégie adaptée au marché local.`,
+            content: `La réussite d’une vente repose sur un prix cohérent, des arguments solides et une présentation qui rassure les acheteurs. À ${city}, il faut tenir compte des surfaces, des extérieurs, des travaux, de l’environnement et du calendrier de vente pour éviter les visites inutiles et défendre le prix demandé.`,
+            cta: `Vous souhaitez vendre votre maison à ${city} ? Parlons de votre projet, de votre calendrier et du prix de vente le plus cohérent.`,
+            cta_button: 'Préparer ma vente',
+            faq: `Comment vendre une maison à ${city} au bon prix ? | Le prix doit croiser les références locales, l’état du bien, les extérieurs, les travaux et la demande active.\nFaut-il estimer avant de publier une annonce ? | Oui, l’estimation évite de perdre du temps avec un prix mal positionné.\nComment attirer des acheteurs qualifiés ? | Une annonce claire, un prix cohérent et un suivi sérieux des contacts limitent les visites peu pertinentes.`,
+            local_sections: `Pour vendre efficacement à ${city}, la section locale doit expliquer les attentes des acheteurs, les atouts du secteur, la place de l’estimation et les étapes d’accompagnement : préparation, diffusion, visites, négociation et signature.`
+          },
+          viager: {
+            title: `Vendre en viager à ${city} | Bouquet, rente et conseil local`,
+            meta: `Projet de vente en viager à ${city} ? Comprenez le bouquet, la rente, la sécurité de l’opération et l’accompagnement local adapté à votre patrimoine.`,
+            h1: `Vendre en viager à ${city}`,
+            intro: `Le viager à ${city} peut être une solution patrimoniale intéressante pour sécuriser un revenu, anticiper l’avenir et transmettre dans de bonnes conditions. Chaque projet demande une étude précise du bien, du bouquet, de la rente et du cadre juridique.`,
+            content: `Une vente en viager doit être expliquée avec pédagogie : valeur du bien, bouquet, rente, occupation, sécurité du vendeur et profil des acquéreurs. À ${city}, l’accompagnement local permet d’évaluer la cohérence du projet et de présenter l’opération avec sérieux.`,
+            cta: `Vous envisagez un viager à ${city} ? Échangeons sur votre situation et les solutions possibles pour votre projet patrimonial.`,
+            cta_button: 'Étudier mon projet viager',
+            faq: `Comment vendre en viager à ${city} ? | Il faut évaluer le bien, définir le bouquet, la rente, les conditions d’occupation et sécuriser le cadre de vente.\nLe viager est-il adapté à tous les biens ? | Non, il dépend du bien, de la situation du vendeur et de l’attractivité pour les acquéreurs.\nPourquoi se faire accompagner localement ? | Un interlocuteur local aide à valoriser le bien et à expliquer clairement l’opération.`,
+            local_sections: `À ${city}, une section viager doit expliquer simplement le fonctionnement du bouquet, de la rente, de l’occupation et de la sécurité du vendeur, avec un vocabulaire rassurant et patrimonial.`
+          },
+          general: {
+            title: `Immobilier à ${city} | Achat, vente et estimation locale`,
+            meta: `Découvrez les repères utiles pour l’immobilier à ${city} : achat, vente, estimation, marché local, quartiers et communes proches.`,
+            h1: `Immobilier à ${city}`,
+            intro: `Le marché immobilier à ${city} varie selon l’emplacement, le type de bien, l’état général, les extérieurs et la demande locale. Cette page vous aide à mieux comprendre les repères utiles avant un achat, une vente ou une estimation.`,
+            content: `Pour analyser l’immobilier local, il faut regarder les biens réellement comparables, les délais de vente, les attentes des acquéreurs, les communes proches et les facteurs qui influencent la valeur. Cette approche permet de prendre une décision plus sereine pour vendre, acheter ou estimer.`,
+            cta: `Un projet immobilier à ${city} ? Contactez-moi pour obtenir une lecture locale et des conseils adaptés à votre situation.`,
+            cta_button: 'Parler de mon projet',
+            faq: `Comment évolue l’immobilier à ${city} ? | Le marché dépend de l’offre, de la demande, des typologies de biens, des accès et de l’état général des logements.\nQuels critères influencent le prix à ${city} ? | L’emplacement, les surfaces, les extérieurs, les travaux et les références comparables sont déterminants.\nPeut-on obtenir une estimation locale ? | Oui, une estimation personnalisée permet d’aller au-delà des moyennes automatiques.`,
+            local_sections: `À ${city}, la section locale peut présenter les typologies de biens, les communes proches, les critères de valeur, la demande des acheteurs et les points à vérifier avant de vendre ou d’acheter.`
+          }
+        };
+        const suggestion = packs[family]?.[key] || packs.general[key] || title || keyword;
+        return variant > 0 && ['title', 'h1', 'cta_button'].includes(key) === false ? `${suggestion}${suffix}` : suggestion;
+      };
+      const parseAdviceSuggestion = (key) => {
+        const raw = document.getElementById('seo-ai-advice-raw')?.value || '';
+        if (!raw.trim()) return '';
+        const labels = {
+          title: ['Title SEO', 'Titre SEO', 'Meta title'],
+          meta: ['Meta description', 'Description SEO'],
+          h1: ['H1'],
+          intro: ['Introduction'],
+          content: ['Contenu principal', 'Contenu'],
+          cta: ['CTA final', 'Texte CTA', 'CTA'],
+          cta_button: ['Texte du bouton CTA', 'Bouton CTA'],
+          faq: ['FAQ', 'Questions fréquentes'],
+          local_sections: ['Section locale', 'Sections locales']
+        }[key] || [];
+        const lines = raw.split(/\r?\n/).map((line) => line.replace(/^[\-*•\d.)\s]+/, '').trim()).filter(Boolean);
+        for (let index = 0; index < lines.length; index += 1) {
+          const line = lines[index];
+          const matched = labels.some((label) => line.toLowerCase().startsWith(label.toLowerCase()) || line.toLowerCase().includes(`${label.toLowerCase()} :`));
+          if (!matched) continue;
+          const inline = line.replace(new RegExp(`^(?:${labels.map((label) => label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\s*[:：-]?\\s*`, 'i'), '').trim();
+          if (inline && !labels.includes(inline)) return inline.replace(/^['“”"]|['“”"]$/g, '');
+          const next = lines[index + 1] || '';
+          if (next) return next.replace(/^['“”"]|['“”"]$/g, '');
+        }
+        return '';
+      };
+      const classifyField = (key) => {
+        const current = cleanEmptyValue(getFieldValue(key));
+        const text = htmlToText(current) || current;
+        const suggestion = aiSuggestions.get(key) || '';
+        if (!current) return 'Manquant';
+        if (suggestion) return 'Suggestion prête';
+        if (['meta', 'intro', 'content', 'faq'].includes(key) && text.length < (key === 'meta' ? 110 : 180)) return 'Trop court';
+        if (['title', 'h1'].includes(key) && text.length < 25) return 'À améliorer';
+        return 'Correct';
+      };
+      const renderAiCard = (key) => {
+        const current = cleanEmptyValue(getFieldValue(key));
+        const suggestion = aiSuggestions.get(key) || '';
+        const currentText = current ? (htmlToText(current) || current) : 'Aucun contenu actuellement';
+        const suggestionText = suggestion ? (htmlToText(suggestion) || suggestion) : 'Aucune suggestion générée pour le moment';
+        document.querySelectorAll(`[data-ai-current="${key}"], [data-ai-diff-current="${key}"]`).forEach((node) => { node.textContent = currentText; });
+        document.querySelectorAll(`[data-ai-suggestion="${key}"], [data-ai-diff-suggestion="${key}"]`).forEach((node) => { node.textContent = suggestionText; });
+        document.querySelectorAll(`[data-ai-status="${key}"]`).forEach((node) => { node.textContent = classifyField(key); });
+        document.querySelectorAll(`[data-ai-sidebar-excerpt="${key}"]`).forEach((node) => { node.textContent = suggestion ? truncate(suggestion, 86) : 'Suggestion à générer'; });
+        const applyButton = document.querySelector(`[data-ai-apply="${key}"]`);
+        if (applyButton) applyButton.textContent = current ? 'Remplacer' : 'Appliquer';
+        const regenButton = document.querySelector(`[data-ai-regenerate="${key}"]`);
+        if (regenButton) regenButton.textContent = suggestion ? 'Régénérer' : 'Générer une suggestion';
+        const summary = document.querySelector(`[data-ai-card-summary="${key}"]`);
+        if (summary) summary.textContent = suggestion ? `Proposition prête : ${truncate(suggestion, 96)}` : 'Contenu actuel ↓ suggestion IA ↓ appliquer';
+      };
+      const renderPriorityList = () => {
+        document.querySelectorAll('[data-ai-priority]').forEach((item) => {
+          const key = item.dataset.aiPriority;
+          const label = item.querySelector('span');
+          if (label) label.textContent = `${document.querySelector(`[data-ai-card="${key}"] h3`)?.textContent || 'Champ'} · ${classifyField(key)}`;
+        });
+      };
+      const generateSuggestion = (key, forceVariant = 0) => {
+        const fromAdvice = forceVariant === 0 ? parseAdviceSuggestion(key) : '';
+        aiSuggestions.set(key, fromAdvice || fallbackSuggestion(key, forceVariant));
+        renderAiCard(key);
+        renderPriorityList();
+      };
+      const generateAllSuggestions = (missingOnly = false) => {
+        document.querySelectorAll('[data-ai-card]').forEach((card) => {
+          const key = card.dataset.aiCard;
+          if (!key) return;
+          if (missingOnly && cleanEmptyValue(getFieldValue(key))) return;
+          generateSuggestion(key);
+        });
+      };
+      const showAiCardFeedback = (key, message, tone = 'success') => {
+        const feedback = document.querySelector(`[data-ai-card-feedback="${key}"]`);
+        if (feedback) {
+          feedback.hidden = false;
+          feedback.className = `seo-ai-card-feedback is-${tone}`;
+          feedback.textContent = message;
+        }
+        if (aiFeedback) {
+          aiFeedback.hidden = false;
+          aiFeedback.className = `seo-ai-action-feedback is-${tone}`;
+          aiFeedback.textContent = message;
+        }
+      };
+      const markDirty = () => {
+        const warning = document.getElementById('seo-ai-save-warning');
+        if (warning) warning.hidden = false;
+      };
+      const applyAiSuggestion = (key, customValue = null, options = {}) => {
+        if (!aiSuggestions.has(key)) generateSuggestion(key);
+        const suggestion = customValue ?? aiSuggestions.get(key) ?? '';
+        if (!suggestion.trim()) {
+          showAiCardFeedback(key, 'Aucune suggestion générée pour le moment.', 'warning');
+          return false;
+        }
+        const current = cleanEmptyValue(getFieldValue(key));
+        const isLarge = document.querySelector(`[data-ai-card="${key}"]`)?.dataset.aiLarge === '1';
+        if (!options.skipConfirm && isLarge && current && !window.confirm('Ce champ contient déjà du texte. Voulez-vous le remplacer par la suggestion IA ?')) {
+          return false;
+        }
+        const field = setFieldValue(key, suggestion);
+        if (field) highlightField(field);
+        markDirty();
+        const status = document.querySelector(`[data-ai-status="${key}"]`);
+        if (status) status.textContent = 'Appliqué — à enregistrer';
+        showAiCardFeedback(key, 'Suggestion appliquée. Pensez à enregistrer la page.');
+        renderAiCard(key);
+        updateSeoPreview();
+        return true;
+      };
+      document.querySelectorAll('[data-ai-view]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const key = button.dataset.aiView;
+          const card = document.querySelector(`[data-ai-card="${key}"]`);
+          if (!card) return;
+          card.open = true;
+          activateAdminTab(card.dataset.aiTab || 'seo');
+          window.setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
+        });
+      });
+      document.querySelectorAll('[data-ai-regenerate]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const key = button.dataset.aiRegenerate;
+          const count = Number(button.dataset.aiRegenerateCount || '0') + 1;
+          button.dataset.aiRegenerateCount = String(count);
+          generateSuggestion(key, count);
+          showAiCardFeedback(key, 'Suggestion régénérée pour ce champ.');
+        });
+      });
+      document.querySelectorAll('[data-ai-copy]').forEach((button) => {
+        button.addEventListener('click', async () => {
+          const key = button.dataset.aiCopy;
+          if (!aiSuggestions.has(key)) generateSuggestion(key);
+          const value = aiSuggestions.get(key) || '';
+          if (!value) {
+            showAiCardFeedback(key, 'Aucune suggestion à copier.', 'warning');
+            return;
+          }
+          try {
+            await navigator.clipboard?.writeText(htmlToText(value) || value);
+            showAiCardFeedback(key, 'Copié');
+          } catch {
+            showAiCardFeedback(key, 'Copie impossible automatiquement. Sélectionnez la suggestion manuellement.', 'warning');
+          }
+        });
+      });
+      document.querySelectorAll('[data-ai-edit]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const key = button.dataset.aiEdit;
+          if (!aiSuggestions.has(key)) generateSuggestion(key);
+          const box = document.querySelector(`[data-ai-edit-box="${key}"]`);
+          const textarea = document.querySelector(`[data-ai-edit-value="${key}"]`);
+          if (box && textarea) {
+            textarea.value = htmlToText(aiSuggestions.get(key) || '') || aiSuggestions.get(key) || '';
+            box.hidden = false;
+            textarea.focus();
+          }
+        });
+      });
+      document.querySelectorAll('[data-ai-apply-edited]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const key = button.dataset.aiApplyEdited;
+          const textarea = document.querySelector(`[data-ai-edit-value="${key}"]`);
+          if (!textarea) return;
+          aiSuggestions.set(key, textarea.value.trim());
+          renderAiCard(key);
+          applyAiSuggestion(key, textarea.value.trim());
+        });
+      });
+      document.querySelectorAll('[data-ai-apply], [data-ai-quick-apply]').forEach((button) => {
+        button.addEventListener('click', () => applyAiSuggestion(button.dataset.aiApply || button.dataset.aiQuickApply));
+      });
+      document.querySelector('[data-ai-generate-all]')?.addEventListener('click', () => {
+        generateAllSuggestions(false);
+        showAiCardFeedback('title', 'Toutes les suggestions importantes ont été générées.');
+      });
+      document.querySelector('[data-ai-generate-missing]')?.addEventListener('click', () => {
+        generateAllSuggestions(true);
+        showAiCardFeedback('title', 'Suggestions générées pour les champs manquants uniquement.');
+      });
+      document.querySelector('[data-ai-apply-selected]')?.addEventListener('click', () => {
+        const selected = [...document.querySelectorAll('[data-ai-select]:checked')].map((input) => input.dataset.aiSelect).filter(Boolean);
+        if (selected.length === 0) {
+          if (aiFeedback) {
+            aiFeedback.hidden = false;
+            aiFeedback.className = 'seo-ai-action-feedback is-warning';
+            aiFeedback.textContent = 'Sélectionnez au moins une suggestion avant d’appliquer.';
+          }
+          return;
+        }
+        if (!window.confirm(`Appliquer ${selected.length} suggestion(s) sélectionnée(s) ? Vous devrez ensuite enregistrer la page.`)) return;
+        selected.forEach((key) => applyAiSuggestion(key, null, { skipConfirm: true }));
+      });
+      document.querySelectorAll('[data-ai-card]').forEach((card) => renderAiCard(card.dataset.aiCard));
+      renderPriorityList();
+
+      document.querySelectorAll('[data-ai-task-action]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const task = button.closest('[data-seo-ai-task]');
+          const action = button.dataset.aiTaskAction;
+          if (!task) {
+            return;
+          }
+          task.classList.remove('is-ignored', 'is-manual', 'is-done');
+          if (action === 'ignore') {
+            task.classList.add('is-ignored');
+          } else if (action === 'manual') {
+            task.classList.add('is-manual');
+            task.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          } else {
+            task.classList.add('is-done');
+          }
+        });
+      });
+
+      const aiAdviceRaw = document.getElementById('seo-ai-advice-raw');
+      const aiFeedback = document.getElementById('seo-ai-action-feedback');
+      const cleanAdviceLine = (line) => line.replace(/\*\*/g, '').replace(/^[-*•]\s*/, '').trim();
+      const isNumberedAdviceHeading = (line) => /^\d+[.)]\s+\S/.test(cleanAdviceLine(line));
+      const findAdviceValue = (labels) => {
+        const raw = aiAdviceRaw?.value || '';
+        const lines = raw.split(/\r?\n/).map((line) => line.trim());
+
+        for (const label of labels) {
+          const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const regex = new RegExp(`^(?:[-*•]?\\s*)?${escaped}\\s*[:：-]\\s*(.+)$`, 'i');
+          const match = lines.map((line) => cleanAdviceLine(line).match(regex)).find(Boolean);
+          if (match?.[1]) {
+            return match[1].trim().replace(/^['“”\"]|['“”\"]$/g, '');
+          }
+        }
+
+        for (let index = 0; index < lines.length; index += 1) {
+          const current = cleanAdviceLine(lines[index]);
+          const lower = current.toLowerCase();
+          const matched = labels.some((label) => lower.includes(label.toLowerCase()));
+          if (!matched) {
+            continue;
+          }
+
+          const inlineValue = current.replace(/^\d+[.)]\s*/, '').replace(new RegExp(`^(?:${labels.map((label) => label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(?:\\s+(?:proposée?|recommandée?))?\\s*[:：-]?\\s*`, 'i'), '').trim();
+          if (inlineValue && !labels.some((label) => inlineValue.toLowerCase() === label.toLowerCase())) {
+            return inlineValue.replace(/^['“\”\"]|['“\”\"]$/g, '');
+          }
+
+          for (let next = index + 1; next < lines.length; next += 1) {
+            const candidate = cleanAdviceLine(lines[next]);
+            if (!candidate) {
+              continue;
+            }
+            if (isNumberedAdviceHeading(candidate)) {
+              break;
+            }
+            return candidate.replace(/^['“\”\"]|['“\”\"]$/g, '');
+          }
+        }
+
+        return '';
+      };
+      const findAdviceParagraph = (labels) => {
+        const raw = aiAdviceRaw?.value || '';
+        const lines = raw.split(/\r?\n/).map((line) => line.trim());
+
+        const direct = findAdviceValue(labels);
+        if (direct) {
+          return direct;
+        }
+
+        for (let index = 0; index < lines.length; index += 1) {
+          const current = cleanAdviceLine(lines[index]);
+          const lower = current.toLowerCase();
+          if (!labels.some((label) => lower.includes(label.toLowerCase()))) {
+            continue;
+          }
+
+          const paragraph = [];
+          for (let next = index + 1; next < lines.length; next += 1) {
+            const candidate = cleanAdviceLine(lines[next]);
+            if (!candidate) {
+              continue;
+            }
+            if (isNumberedAdviceHeading(candidate)) {
+              break;
+            }
+            paragraph.push(candidate);
+          }
+
+          if (paragraph.length > 0) {
+            return paragraph.join(' ').replace(/^['“\”\"]|['“\”\"]$/g, '');
+          }
+        }
+
+        return '';
+      };
+      const findFaqAdvice = () => {
+        const raw = aiAdviceRaw?.value || '';
+        const faqMatch = raw.match(/(?:FAQ|questions fréquentes)[\s\S]{0,900}/i);
+        if (!faqMatch) {
+          return '';
+        }
+
+        return faqMatch[0]
+          .split(/\r?\n/)
+          .map((line) => line.replace(/^[-*•\d.)\s]+/, '').trim())
+          .filter((line) => line.includes('?'))
+          .slice(0, 4)
+          .map((line) => `${line} | Réponse à compléter avec votre expertise locale.`)
+          .join('\n');
+      };
+      const showAiFeedback = (button, message, tone = 'success') => {
+        button.classList.add('is-done');
+        button.dataset.done = '1';
+        button.innerHTML = `✓ ${button.textContent.replace(/^✓\s*/, '')}`;
+
+        if (aiFeedback) {
+          aiFeedback.hidden = false;
+          aiFeedback.className = `seo-ai-action-feedback is-${tone}`;
+          aiFeedback.textContent = message;
+        }
+      };
+      const highlightField = (field) => {
+        if (!field) {
+          return;
+        }
+
+        field.classList.add('seo-field-updated');
+        field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        window.setTimeout(() => field.classList.remove('seo-field-updated'), 2200);
+      };
+
+      document.querySelectorAll('[data-seo-ai-apply]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const action = button.dataset.seoAiApply;
+
+          if (action === 'title') {
+            const title = findAdviceValue(['Title SEO', 'Titre SEO', 'Meta title', 'Meta title proposé', 'Meta title proposé recommandé', 'Title proposé']);
+            const field = document.querySelector('[name="title"]');
+            if (title && field) {
+              field.value = title;
+              field.dispatchEvent(new Event('input', { bubbles: true }));
+              highlightField(field);
+              showAiFeedback(button, 'Meta title appliqué dans le champ Titre SEO. Pensez à enregistrer la page.');
+              return;
+            }
+            showAiFeedback(button, 'Action marquée comme faite. Aucune ligne “Title SEO : …” détectée automatiquement : recopiez la proposition puis enregistrez.', 'warning');
+            return;
+          }
+
+          if (action === 'meta') {
+            const description = findAdviceParagraph(['Meta description', 'Description SEO', 'Meta description proposée']);
+            const field = document.querySelector('[name="meta_description"]');
+            if (description && field) {
+              field.value = description;
+              field.dispatchEvent(new Event('input', { bubbles: true }));
+              highlightField(field);
+              showAiFeedback(button, 'Meta description appliquée dans le champ correspondant. Pensez à enregistrer la page.');
+              return;
+            }
+            showAiFeedback(button, 'Action marquée comme faite. Aucune ligne “Meta description : …” détectée automatiquement : recopiez la proposition puis enregistrez.', 'warning');
+            return;
+          }
+
+          if (action === 'faq') {
+            const faq = findFaqAdvice();
+            const field = document.querySelector('[name="seo_faq"]');
+            if (faq && field) {
+              field.value = `${field.value.trim()}${field.value.trim() ? '\n' : ''}${faq}`;
+              highlightField(field);
+              showAiFeedback(button, 'FAQ ajoutées au bloc SEO complémentaire. Relisez les réponses puis enregistrez.');
+              return;
+            }
+            showAiFeedback(button, 'Action marquée comme faite. Aucune FAQ structurée détectée automatiquement : ajoutez les questions proposées manuellement.', 'warning');
+            return;
+          }
+
+          if (action === 'done') {
+            const field = document.querySelector('[name="seo_notes"]');
+            const date = new Date().toLocaleDateString('fr-FR');
+            if (field) {
+              const note = `Conseil IA traité le ${date}.`;
+              field.value = `${field.value.trim()}${field.value.trim() ? '\n' : ''}${note}`;
+              highlightField(field);
+            }
+            document.querySelectorAll('[data-seo-ai-apply]').forEach((item) => item.classList.add('is-done'));
+            showAiFeedback(button, 'Conseil IA marqué comme traité. Pensez à enregistrer la page pour conserver la note.');
+          }
+        });
       });
     </script>
     <?php
@@ -636,15 +1680,21 @@ function cms_render_section_editor($index, array $section): void
 {
     $items = implode("\n", $section['items'] ?? []);
     $stats = implode("\n", array_map(static fn ($stat) => trim((string) ($stat['label'] ?? '')) . '|' . trim((string) ($stat['value'] ?? '')), $section['stats'] ?? []));
+    $title = trim((string) ($section['title'] ?? ''));
+    $summaryTitle = $title !== '' ? $title : 'Nouvelle section';
+    $excerpt = trim(preg_replace('/\s+/', ' ', strip_tags((string) ($section['text'] ?? ''))) ?? '');
+    $excerpt = $excerpt !== '' ? mb_substr($excerpt, 0, 120) : 'Aucun texte saisi pour le moment.';
+    $isOpen = is_int($index) && $index === 0;
     ?>
-    <article class="section-editor">
-      <div class="panel-head compact">
+    <details class="section-editor seo-section-card" <?= $isOpen ? 'open' : '' ?>>
+      <summary class="seo-section-summary">
         <div>
-          <p class="eyebrow">Bloc</p>
-          <h3>Section</h3>
+          <p class="eyebrow">Bloc <?= is_numeric($index) ? ((int) $index + 1) : '' ?></p>
+          <h3><?= cms_h($summaryTitle) ?></h3>
+          <span><?= cms_h($excerpt) ?></span>
         </div>
-        <button type="button" class="danger-link" data-remove-section>Supprimer</button>
-      </div>
+        <div class="seo-section-summary-actions"><span class="secondary-button as-label">Modifier</span><button type="button" class="danger-link" data-remove-section>Supprimer</button></div>
+      </summary>
       <div class="grid two-cols">
         <label>
           Surtitre
@@ -681,7 +1731,7 @@ function cms_render_section_editor($index, array $section): void
           <textarea hidden id="section-text-<?= cms_h((string) $index) ?>" name="section_text[]"><?= cms_h((string) ($section['text'] ?? '')) ?></textarea>
         </label>
       </div>
-    </article>
+    </details>
     <?php
 }
 
@@ -717,7 +1767,9 @@ function cms_render_blog_index_page(array $settings): void
     cms_render_public_document_start(
         'Blog immobilier | ' . (string) $settings['site_name'],
         'Conseils, analyses et guides immobiliers pour vendre, acheter ou estimer un bien en Auxois et Morvan.',
-        true
+      true,
+      [],
+      ['preload_image' => $heroImage, 'preload_image_sizes' => '(max-width: 1023px) 100vw, 46vw']
     );
     cms_render_public_header($settings, '/blog');
     ?>
@@ -734,7 +1786,7 @@ function cms_render_blog_index_page(array $settings): void
             </div>
           </div>
           <div class="home-hero-side">
-            <div class="hero-media<?= $heroImage !== '' ? '' : ' no-image' ?>"><?php if ($heroImage !== ''): ?><img src="<?= cms_h(cms_url($heroImage)) ?>" alt="<?= cms_h($heroAlt) ?>"><?php endif; ?></div>
+            <div class="hero-media<?= $heroImage !== '' ? '' : ' no-image' ?>"><?php if ($heroImage !== ''): ?><?php cms_render_image($heroImage, $heroAlt, ['loading' => 'eager', 'fetchpriority' => 'high', 'sizes' => '(max-width: 1023px) 100vw, 46vw']); ?><?php endif; ?></div>
             <div class="home-stats-grid">
               <div class="home-stat-card"><p><?= count($posts) ?></p><span>Articles publiés</span></div>
               <div class="home-stat-card"><p><?= cms_h(implode(' · ', array_slice($categories, 0, 3))) ?></p><span>Thématiques</span></div>
@@ -755,7 +1807,7 @@ function cms_render_blog_index_page(array $settings): void
               <article class="blog-card">
                 <a href="<?= cms_h(cms_url('/blog/' . (string) $post['slug'])) ?>">
                   <?php if (!empty($post['featured_image'])): ?>
-                    <img src="<?= cms_h(cms_url((string) $post['featured_image'])) ?>" alt="<?= cms_h((string) (($post['featured_image_alt'] ?? '') ?: ($post['title'] ?? ''))) ?>">
+                    <?php cms_render_image((string) $post['featured_image'], (string) (($post['featured_image_alt'] ?? '') ?: ($post['title'] ?? '')), ['sizes' => '(max-width: 767px) 100vw, 33vw']); ?>
                   <?php endif; ?>
                   <div class="blog-card-body">
                     <div class="blog-meta"><span><?= cms_h((string) $post['category']) ?></span><span class="meta-dot"></span><span><?= cms_h(cms_format_long_date((string) ($post['published_at'] ?? $post['created_at'] ?? ''))) ?></span></div>
@@ -792,11 +1844,26 @@ function cms_render_blog_post_page(array $post, array $settings): void
     $metaTitle = trim((string) ($post['meta_title'] ?? '')) ?: (string) ($post['title'] ?? '');
     $metaDescription = trim((string) ($post['meta_description'] ?? '')) ?: (string) ($post['excerpt'] ?? '');
     $image = trim((string) ($post['featured_image'] ?? ''));
+  $postUrl = cms_absolute_url('/blog/' . (string) ($post['slug'] ?? ''));
+  $articleData = [[
+    '@context' => 'https://schema.org',
+    '@type' => 'Article',
+    'headline' => (string) ($post['title'] ?? $metaTitle),
+    'description' => $metaDescription,
+    'image' => $image !== '' ? cms_absolute_url($image) : cms_absolute_url('/uploads/auxois.jpg'),
+    'datePublished' => (string) ($post['published_at'] ?? $post['created_at'] ?? ''),
+    'dateModified' => (string) (($post['updated_at'] ?? '') ?: ($post['published_at'] ?? $post['created_at'] ?? '')),
+    'author' => ['@type' => 'Organization', 'name' => (string) $settings['site_name']],
+    'publisher' => ['@type' => 'Organization', 'name' => (string) $settings['site_name'], 'logo' => ['@type' => 'ImageObject', 'url' => cms_absolute_url('/uploads/logo-2.png')]],
+    'mainEntityOfPage' => $postUrl,
+  ]];
 
     cms_render_public_document_start(
         $metaTitle . ' | ' . (string) $settings['site_name'],
         $metaDescription,
-        (int) ($post['is_indexable'] ?? 1) === 1
+    (int) ($post['is_indexable'] ?? 1) === 1,
+    $articleData,
+    ['type' => 'article', 'image' => $image !== '' ? $image : '/uploads/auxois.jpg', 'canonical' => $postUrl, 'preload_image' => $image !== '' ? $image : '/uploads/auxois.jpg', 'preload_image_sizes' => '(max-width: 1023px) 100vw, 50vw']
     );
     cms_render_public_header($settings, '/blog');
     ?>
@@ -817,7 +1884,7 @@ function cms_render_blog_post_page(array $post, array $settings): void
               <a class="button primary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a>
             </div>
           </article>
-          <div class="hero-media<?= $image !== '' ? '' : ' no-image' ?>"><?php if ($image !== ''): ?><img src="<?= cms_h(cms_url($image)) ?>" alt="<?= cms_h((string) (($post['featured_image_alt'] ?? '') ?: ($post['title'] ?? ''))) ?>"><?php endif; ?></div>
+          <div class="hero-media<?= $image !== '' ? '' : ' no-image' ?>"><?php if ($image !== ''): ?><?php cms_render_image($image, (string) (($post['featured_image_alt'] ?? '') ?: ($post['title'] ?? '')), ['loading' => 'eager', 'fetchpriority' => 'high', 'sizes' => '(max-width: 1023px) 100vw, 50vw']); ?><?php endif; ?></div>
         </div>
       </section>
 
@@ -1194,6 +2261,7 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
         const totalSteps = panes.length;
         const mimeure = { lat: 47.1546, lng: 4.4958 };
         const autoAdvanceSteps = new Set([1, 2, 3, 4, 5, 8, 9]);
+        const autoAdvanceDelayMs = 1000;
         let activeStep = 1;
         let suggestionAbortController = null;
         let addressAbortController = null;
@@ -1514,7 +2582,7 @@ function cms_render_estimation_tunnel_page(array $settings, array $formData = []
                 }
                 activeStep = nextStep;
                 updateNavigationState();
-              }, 140);
+              }, autoAdvanceDelayMs);
             }
           });
         });
@@ -1754,6 +2822,568 @@ function cms_render_estimation_confirmation_page(array $settings): void
     <?php
 }
 
+function cms_render_viager_tunnel_page(array $settings, array $formData = [], array $errors = []): void
+{
+    $pageTitle = 'Étude viager gratuite autour de Mimeure | ' . (string) $settings['site_name'];
+    $pageDescription = 'Vous envisagez de vendre en viager autour de Mimeure, Arnay-le-Duc, Pouilly-en-Auxois, Beaune ou Autun ? Recevez une première étude gratuite, locale et confidentielle.';
+    $defaultData = [
+        'request_type' => 'viager',
+        'property_type' => '',
+        'room_count' => '',
+        'property_condition' => '',
+        'living_surface' => '',
+        'land_surface' => '',
+        'occupancy_intent' => '',
+        'commune' => '',
+        'postal_code' => '',
+        'address_details' => '',
+        'goal' => '',
+        'owner_situation' => '',
+        'project_timeline' => '',
+        'first_name' => '',
+        'last_name' => '',
+        'email' => '',
+        'phone' => '',
+        'contact_consent' => 0,
+        'outside_area' => 0,
+        'utm_source' => '',
+        'utm_campaign' => '',
+        'utm_content' => '',
+        'utm_medium' => '',
+        'origin_page' => cms_url('/etude-viager-gratuite'),
+        'source' => 'formulaire étude viager gratuite',
+    ];
+    $formData = array_merge($defaultData, $formData);
+    $structuredData = [[
+        '@context' => 'https://schema.org',
+        '@type' => 'Service',
+        'name' => 'Étude viager gratuite autour de Mimeure',
+        'serviceType' => 'Étude viager gratuite et confidentielle',
+        'provider' => [
+            '@type' => 'RealEstateAgent',
+            'name' => (string) $settings['site_name'],
+            'telephone' => (string) ($settings['phone'] ?? ''),
+            'email' => (string) ($settings['email'] ?? ''),
+        ],
+        'areaServed' => 'Mimeure, Arnay-le-Duc, Pouilly-en-Auxois, Beaune, Autun et communes dans un rayon d’environ 40 km',
+    ]];
+    $icons = [
+        'Maison' => '⌂', 'Appartement' => '▦', 'Terrain' => '◇', 'Autre' => '•••',
+        'Oui, je souhaite rester chez moi' => '✓', 'Non, le logement serait libre' => '⌁', 'Je ne sais pas encore' => '?',
+        'Obtenir un capital immédiat' => '€', 'Avoir un revenu mensuel complémentaire' => '+', 'Rester chez moi plus sereinement' => '⌂', 'Préparer ma succession' => '∞', 'Être conseillé sur les options possibles' => 'i',
+        'Je suis seul(e) propriétaire' => '1', 'Nous sommes un couple propriétaire' => '2', 'Le bien appartient à plusieurs personnes' => '3', 'C’est dans le cadre d’une succession' => '∞', 'Autre situation' => '•••',
+        'Dès maintenant' => '24', 'Dans les 3 mois' => '3', 'Dans les 6 mois' => '6', 'Plus tard' => '…', 'Je veux simplement me renseigner' => 'i',
+    ];
+    $renderChoiceCard = function (string $field, string $value, string $variant = '') use ($icons): void {
+        $classes = 'estimate-choice-card' . ($variant !== '' ? ' ' . $variant : '');
+        ?>
+        <button type="button" class="<?= cms_h($classes) ?>" data-choice-field="<?= cms_h($field) ?>" data-choice-value="<?= cms_h($value) ?>">
+          <span class="estimate-choice-icon viager-choice-icon" aria-hidden="true"><?= cms_h((string) ($icons[$value] ?? '✓')) ?></span>
+          <span class="estimate-choice-label"><?= cms_h($value) ?></span>
+        </button>
+        <?php
+    };
+
+    cms_render_public_document_start($pageTitle, $pageDescription, true, $structuredData, ['canonical' => cms_absolute_url('/etude-viager-gratuite')]);
+    cms_render_estimation_header($settings, 'Étude viager gratuite');
+    ?>
+    <main class="estimate-page viager-page">
+      <section class="estimate-section">
+        <div class="shell estimate-app-shell">
+          <div class="estimate-landing-intro">
+            <p class="eyebrow">Viager local &amp; confidentiel</p>
+            <h1>Vendre en viager autour de Mimeure</h1>
+            <p>Recevez une première étude gratuite et confidentielle pour savoir si le viager est adapté à votre situation.</p>
+          </div>
+
+          <div class="estimate-progress-block">
+            <div class="estimate-progress-head">
+              <span id="estimate-step-label">ÉTAPE 1 SUR 10</span>
+              <strong id="estimate-step-percent">10%</strong>
+            </div>
+            <div class="estimate-progress-track"><span id="estimate-progress-bar"></span></div>
+          </div>
+
+          <?php if ($errors): ?>
+            <div class="contact-alert error estimate-alert"><?= cms_h(implode(' ', $errors)) ?></div>
+          <?php endif; ?>
+
+          <form id="estimation-form" method="post" class="estimate-card estimate-app-card" novalidate>
+              <input type="hidden" name="_csrf" value="<?= cms_h(cms_csrf_token()) ?>">
+              <input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden-field" aria-hidden="true">
+              <input type="hidden" name="request_type" value="viager">
+              <input type="hidden" name="source" value="<?= cms_h((string) $formData['source']) ?>">
+              <input type="hidden" name="origin_page" id="estimate-origin-page" value="<?= cms_h((string) $formData['origin_page']) ?>">
+              <input type="hidden" name="outside_area" id="estimate-outside-area" value="<?= (int) $formData['outside_area'] === 1 ? '1' : '0' ?>">
+              <input type="hidden" name="utm_source" id="estimate-utm-source" value="<?= cms_h((string) $formData['utm_source']) ?>">
+              <input type="hidden" name="utm_medium" id="estimate-utm-medium" value="<?= cms_h((string) $formData['utm_medium']) ?>">
+              <input type="hidden" name="utm_campaign" id="estimate-utm-campaign" value="<?= cms_h((string) $formData['utm_campaign']) ?>">
+              <input type="hidden" name="utm_content" id="estimate-utm-content" value="<?= cms_h((string) $formData['utm_content']) ?>">
+              <input type="hidden" name="property_type" value="<?= cms_h((string) $formData['property_type']) ?>">
+              <input type="hidden" name="room_count" value="<?= cms_h((string) $formData['room_count']) ?>">
+              <input type="hidden" name="property_condition" value="">
+              <input type="hidden" name="living_surface" value="<?= cms_h((string) $formData['living_surface']) ?>">
+              <input type="hidden" name="land_surface" value="">
+              <input type="hidden" name="occupancy_intent" value="<?= cms_h((string) $formData['occupancy_intent']) ?>">
+              <input type="hidden" name="goal" value="<?= cms_h((string) $formData['goal']) ?>">
+              <input type="hidden" name="owner_situation" value="<?= cms_h((string) $formData['owner_situation']) ?>">
+              <input type="hidden" name="project_timeline" value="<?= cms_h((string) $formData['project_timeline']) ?>">
+
+              <section class="estimate-pane" data-step="1" data-field="property_type">
+                <h2>Quel type de bien possédez-vous ?</h2>
+                <p>Choisissez la catégorie de votre bien immobilier.</p>
+                <div class="estimate-choice-grid two-col stacked">
+                  <?php foreach (['Maison', 'Appartement', 'Terrain', 'Autre'] as $option) { $renderChoiceCard('property_type', $option, 'is-stacked'); } ?>
+                </div>
+              </section>
+
+              <section class="estimate-pane" data-step="2" data-field="room_count" hidden>
+                <h2>Combien de pièces ?</h2>
+                <p>Nombre de pièces principales du bien.</p>
+                <div class="estimate-choice-grid two-col stacked">
+                  <?php foreach (['1 ou 2', '3', '4', '5 ou plus'] as $option) { $renderChoiceCard('room_count', $option, 'is-stacked'); } ?>
+                </div>
+              </section>
+
+              <section class="estimate-pane" data-step="3" data-field="living_surface" hidden>
+                <h2>Quelle surface approximative ?</h2>
+                <p>Une estimation suffit pour commencer l’étude.</p>
+                <div class="estimate-choice-grid one-col">
+                  <?php foreach (['Moins de 60 m²', '60 à 90 m²', '90 à 120 m²', 'Plus de 120 m²', 'Je ne sais pas'] as $option) { $renderChoiceCard('living_surface', $option, 'align-left'); } ?>
+                </div>
+              </section>
+
+              <section class="estimate-pane" data-step="4" data-field="occupancy_intent" hidden>
+                <h2>Souhaitez-vous rester vivre dans le logement ?</h2>
+                <p>Cette information permet d’orienter l’étude : viager occupé, libre ou autre solution.</p>
+                <div class="estimate-choice-grid one-col">
+                  <?php foreach (['Oui, je souhaite rester chez moi', 'Non, le logement serait libre', 'Je ne sais pas encore'] as $option) { $renderChoiceCard('occupancy_intent', $option, 'align-left'); } ?>
+                </div>
+              </section>
+
+              <section class="estimate-pane" data-step="5" data-field="goal" hidden>
+                <h2>Quel est votre objectif principal ?</h2>
+                <p>Dites-nous ce qui vous motive.</p>
+                <div class="estimate-choice-grid one-col">
+                  <?php foreach (['Obtenir un capital immédiat', 'Avoir un revenu mensuel complémentaire', 'Rester chez moi plus sereinement', 'Préparer ma succession', 'Être conseillé sur les options possibles'] as $option) { $renderChoiceCard('goal', $option, 'align-left'); } ?>
+                </div>
+              </section>
+
+              <section class="estimate-pane" data-step="6" data-field="commune" hidden>
+                <h2>Où se trouve votre bien ?</h2>
+                <p>Tapez les premières lettres de votre commune.</p>
+                <div class="estimate-input-stack">
+                  <div class="estimate-search-field">
+                    <span class="estimate-search-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+                    <input id="estimate-commune-search" name="commune" autocomplete="off" value="<?= cms_h((string) $formData['commune']) ?>" placeholder="Recherche commune" required aria-label="Commune">
+                  </div>
+                  <input type="hidden" id="estimate-postal-code" name="postal_code" value="<?= cms_h((string) $formData['postal_code']) ?>">
+                  <div id="estimate-commune-suggestions" class="estimate-suggestions" hidden></div>
+                  <div id="estimate-zone-warning" class="estimate-soft-warning" hidden>Cette commune semble être en dehors de notre secteur principal. Vous pouvez tout de même envoyer votre demande, nous vous recontacterons si nous pouvons vous accompagner.</div>
+                </div>
+              </section>
+
+              <section class="estimate-pane" data-step="7" data-field="address_details" hidden>
+                <h2>Quelle est l’adresse<span class="estimate-commune-suffix" data-commune-suffix hidden> à <span data-commune-name></span></span> ?</h2>
+                <p>Tapez les premières lettres de votre adresse ou indiquez simplement le secteur.</p>
+                <div class="estimate-input-stack">
+                  <div class="estimate-search-field">
+                    <span class="estimate-search-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+                    <input id="estimate-address-details" name="address_details" autocomplete="off" value="<?= cms_h((string) $formData['address_details']) ?>" placeholder="Adresse ou secteur" aria-label="Adresse ou secteur">
+                  </div>
+                  <div id="estimate-address-suggestions" class="estimate-suggestions" hidden></div>
+                </div>
+              </section>
+
+              <section class="estimate-pane" data-step="8" data-field="owner_situation" hidden>
+                <h2>Quelle est votre situation ?</h2>
+                <p>Cela nous aide à comprendre le contexte de votre projet.</p>
+                <div class="estimate-choice-grid one-col">
+                  <?php foreach (['Je suis seul(e) propriétaire', 'Nous sommes un couple propriétaire', 'Le bien appartient à plusieurs personnes', 'C’est dans le cadre d’une succession', 'Autre situation'] as $option) { $renderChoiceCard('owner_situation', $option, 'align-left'); } ?>
+                </div>
+              </section>
+
+              <section class="estimate-pane" data-step="9" data-field="project_timeline" hidden>
+                <h2>Dans quel délai souhaitez-vous être conseillé ?</h2>
+                <p>Cette information aide à ajuster la priorité de votre demande.</p>
+                <div class="estimate-choice-grid one-col">
+                  <?php foreach (['Dès maintenant', 'Dans les 3 mois', 'Dans les 6 mois', 'Plus tard', 'Je veux simplement me renseigner'] as $option) { $renderChoiceCard('project_timeline', $option, 'align-left'); } ?>
+                </div>
+              </section>
+
+              <section class="estimate-pane" data-step="10" data-field="contact_step" hidden>
+                <div class="estimate-final-intro">
+                  <span class="estimate-final-badge">Dernière étape</span>
+                  <h2>Vos coordonnées</h2>
+                  <p>Un conseiller local vous recontacte sous 24h pour échanger sur votre projet viager.</p>
+                </div>
+                <div class="estimate-contact-card">
+                  <div class="estimate-contact-grid">
+                    <label>Prénom <span class="required-mark" aria-hidden="true">*</span><input name="first_name" value="<?= cms_h((string) $formData['first_name']) ?>" autocomplete="given-name" placeholder="Jean" required></label>
+                    <label>Nom <span class="required-mark" aria-hidden="true">*</span><input name="last_name" value="<?= cms_h((string) $formData['last_name']) ?>" autocomplete="family-name" placeholder="Dupont" required></label>
+                    <label class="full">Email <span class="required-mark" aria-hidden="true">*</span><span class="estimate-input-with-icon"><span class="estimate-input-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg></span><input type="email" name="email" value="<?= cms_h((string) $formData['email']) ?>" autocomplete="email" placeholder="jean.dupont@email.com" required></span></label>
+                    <label class="full">Téléphone <span class="required-mark" aria-hidden="true">*</span><span class="estimate-input-with-icon"><span class="estimate-input-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg></span><input type="tel" name="phone" value="<?= cms_h((string) $formData['phone']) ?>" autocomplete="tel" inputmode="numeric" maxlength="14" placeholder="06 12 34 56 78" required></span></label>
+                  </div>
+                  <p class="estimate-rgpd">Vos informations restent confidentielles et ne sont partagées qu’avec votre conseiller Immobilier Auxois Morvan.</p>
+                </div>
+                <label class="privacy-line estimate-consent-line"><input type="checkbox" name="contact_consent" value="1" <?= (int) $formData['contact_consent'] === 1 ? 'checked' : '' ?> required><span>J’accepte d’être recontacté au sujet de ma demande d’étude viager.</span></label>
+              </section>
+
+              <div class="estimate-actions is-first-step">
+                <button id="estimate-next-button" class="primary-button estimate-next-button" type="button" disabled>Suivant</button>
+                <button id="estimate-submit-button" class="primary-button estimate-submit-button" type="submit" hidden>Recevoir mon étude viager gratuite</button>
+                <button id="estimate-back-button" class="estimate-back-button" type="button" hidden>← Retour</button>
+              </div>
+          </form>
+
+          <div class="estimate-trust">
+            <div class="estimate-kpi-grid viager-kpi-grid">
+              <div class="estimate-kpi-card"><strong class="estimate-kpi-value">24h</strong><span class="estimate-kpi-label">Délai de réponse</span></div>
+              <div class="estimate-kpi-card"><strong class="estimate-kpi-value">100%</strong><span class="estimate-kpi-label">Local &amp; humain</span></div>
+              <div class="estimate-kpi-card"><strong class="estimate-kpi-value">0€</strong><span class="estimate-kpi-label">Sans engagement</span></div>
+            </div>
+            <ul class="estimate-trust-features">
+              <li><span class="estimate-trust-icon" aria-hidden="true">✓</span><span>Données sécurisées</span></li>
+              <li><span class="estimate-trust-icon" aria-hidden="true">✓</span><span>Étude gratuite</span></li>
+              <li><span class="estimate-trust-icon" aria-hidden="true">✓</span><span>100% confidentiel</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script>
+      (() => {
+        const form = document.getElementById('estimation-form');
+        if (!form) return;
+
+        const panes = Array.from(form.querySelectorAll('.estimate-pane'));
+        const backButton = document.getElementById('estimate-back-button');
+        const nextButton = document.getElementById('estimate-next-button');
+        const submitButton = document.getElementById('estimate-submit-button');
+        const actionBar = form.querySelector('.estimate-actions');
+        const stepLabel = document.getElementById('estimate-step-label');
+        const stepPercent = document.getElementById('estimate-step-percent');
+        const progressBar = document.getElementById('estimate-progress-bar');
+        const communeInput = document.getElementById('estimate-commune-search');
+        const postalCodeInput = document.getElementById('estimate-postal-code');
+        const suggestionBox = document.getElementById('estimate-commune-suggestions');
+        const zoneWarning = document.getElementById('estimate-zone-warning');
+        const addressField = document.getElementById('estimate-address-details');
+        const addressSuggestionBox = document.getElementById('estimate-address-suggestions');
+        const communeSuffixHolders = Array.from(form.querySelectorAll('[data-commune-suffix]'));
+        const communeNameHolders = Array.from(form.querySelectorAll('[data-commune-name]'));
+        const originPageField = document.getElementById('estimate-origin-page');
+        const outsideAreaField = document.getElementById('estimate-outside-area');
+        const totalSteps = panes.length;
+        const mimeure = { lat: 47.1546, lng: 4.4958 };
+        const autoAdvanceSteps = new Set([1, 2, 3, 4, 5, 8, 9]);
+        const localCommunes = [
+          { nom: 'Mimeure', codesPostaux: ['21230'], centre: { coordinates: [4.4958, 47.1546] } },
+          { nom: 'Arnay-le-Duc', codesPostaux: ['21230'], centre: { coordinates: [4.485, 47.132] } },
+          { nom: 'Pouilly-en-Auxois', codesPostaux: ['21320'], centre: { coordinates: [4.555, 47.262] } },
+          { nom: 'Bligny-sur-Ouche', codesPostaux: ['21360'], centre: { coordinates: [4.669, 47.107] } },
+          { nom: 'Nolay', codesPostaux: ['21340'], centre: { coordinates: [4.634, 46.952] } },
+          { nom: 'Beaune', codesPostaux: ['21200'], centre: { coordinates: [4.839, 47.026] } },
+          { nom: 'Autun', codesPostaux: ['71400'], centre: { coordinates: [4.299, 46.951] } },
+          { nom: 'Saulieu', codesPostaux: ['21210'], centre: { coordinates: [4.229, 47.28] } },
+          { nom: 'Vitteaux', codesPostaux: ['21350'], centre: { coordinates: [4.54, 47.397] } },
+          { nom: 'Semur-en-Auxois', codesPostaux: ['21140'], centre: { coordinates: [4.334, 47.49] } },
+          { nom: 'Épinac', codesPostaux: ['71360'], centre: { coordinates: [4.513, 46.991] } },
+          { nom: 'Liernais', codesPostaux: ['21430'], centre: { coordinates: [4.281, 47.206] } },
+          { nom: 'Chailly-sur-Armançon', codesPostaux: ['21320'], centre: { coordinates: [4.485, 47.276] } },
+          { nom: 'Lacanche', codesPostaux: ['21230'], centre: { coordinates: [4.56, 47.079] } },
+          { nom: 'Créancey', codesPostaux: ['21320'], centre: { coordinates: [4.586, 47.247] } },
+          { nom: 'Commarin', codesPostaux: ['21320'], centre: { coordinates: [4.647, 47.255] } },
+          { nom: 'Sombernon', codesPostaux: ['21540'], centre: { coordinates: [4.704, 47.309] } },
+          { nom: 'La Bussière-sur-Ouche', codesPostaux: ['21360'], centre: { coordinates: [4.722, 47.216] } },
+          { nom: 'Thoisy-le-Désert', codesPostaux: ['21320'], centre: { coordinates: [4.557, 47.244] } },
+          { nom: 'Précy-sous-Thil', codesPostaux: ['21390'], centre: { coordinates: [4.308, 47.39] } },
+          { nom: 'Montbard', codesPostaux: ['21500'], centre: { coordinates: [4.337, 47.623] } }
+        ];
+        let activeStep = 1;
+        let suggestionAbortController = null;
+        let addressAbortController = null;
+        let autoAdvanceTimer = null;
+        let suppressNextSuggestion = false;
+        let suppressNextAddressSuggestion = false;
+
+        const getField = (name) => form.querySelector(`[name="${name}"]`);
+        const getValue = (name) => (getField(name)?.value || '').trim();
+        const setValue = (name, value) => { const field = getField(name); if (field) field.value = value; };
+        const normalizeText = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        const formatPhoneNumber = (value) => value.replace(/\D+/g, '').slice(0, 10).replace(/(.{2})/g, '$1 ').trim();
+        const phoneField = getField('phone');
+        if (phoneField instanceof HTMLInputElement) {
+          phoneField.value = formatPhoneNumber(phoneField.value);
+          phoneField.addEventListener('input', () => { phoneField.value = formatPhoneNumber(phoneField.value); });
+        }
+        const computeDistanceKm = (lat1, lng1, lat2, lng2) => {
+          const toRadians = (value) => (value * Math.PI) / 180;
+          const earthRadius = 6371;
+          const dLat = toRadians(lat2 - lat1);
+          const dLng = toRadians(lng2 - lng1);
+          const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLng / 2) ** 2;
+          return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        };
+        const updateZoneWarning = (distanceKm) => {
+          const outOfArea = Number.isFinite(distanceKm) && distanceKm > 40;
+          outsideAreaField.value = outOfArea ? '1' : '0';
+          zoneWarning.hidden = !outOfArea;
+        };
+        const renderSuggestions = (items) => {
+          suggestionBox.innerHTML = '';
+          if (!items.length) { suggestionBox.hidden = true; return; }
+          items.forEach((item) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'estimate-suggestion-item';
+            button.textContent = `${item.nom}${item.codesPostaux?.[0] ? ` (${item.codesPostaux[0]})` : ''}`;
+            button.addEventListener('click', () => {
+              communeInput.value = item.nom || communeInput.value;
+              setValue('commune', item.nom || communeInput.value);
+              if (postalCodeInput && item.codesPostaux?.[0]) postalCodeInput.value = item.codesPostaux[0];
+              const coordinates = item.centre?.coordinates || [];
+              if (coordinates.length === 2) {
+                updateZoneWarning(computeDistanceKm(mimeure.lat, mimeure.lng, Number(coordinates[1]), Number(coordinates[0])));
+              } else {
+                updateZoneWarning(Number.NaN);
+              }
+              suppressNextSuggestion = true;
+              suggestionBox.hidden = true;
+              suggestionBox.innerHTML = '';
+              suggestionAbortController?.abort();
+              suggestionAbortController = null;
+              communeInput.blur();
+              updateNavigationState();
+            });
+            suggestionBox.appendChild(button);
+          });
+          suggestionBox.hidden = false;
+        };
+        const fetchSuggestions = async (query) => {
+          if (query.length < 2) { suggestionBox.hidden = true; suggestionBox.innerHTML = ''; return; }
+          const localMatches = localCommunes.filter((item) => normalizeText(item.nom).includes(normalizeText(query))).slice(0, 6);
+          renderSuggestions(localMatches);
+          if (suggestionAbortController) suggestionAbortController.abort();
+          suggestionAbortController = new AbortController();
+          try {
+            const response = await fetch(`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(query)}&boost=population&limit=6&fields=nom,codesPostaux,centre`, { signal: suggestionAbortController.signal });
+            if (!response.ok) throw new Error('lookup-failed');
+            const apiItems = await response.json();
+            const merged = [...localMatches];
+            (Array.isArray(apiItems) ? apiItems : []).forEach((item) => {
+              if (!merged.some((existing) => normalizeText(existing.nom) === normalizeText(item.nom || ''))) merged.push(item);
+            });
+            renderSuggestions(merged.slice(0, 6));
+          } catch (error) {
+            if (error?.name !== 'AbortError' && localMatches.length === 0) suggestionBox.hidden = true;
+          }
+        };
+        const isContactStepValid = () => {
+          const firstName = getField('first_name');
+          const lastName = getField('last_name');
+          const email = getField('email');
+          const phone = getField('phone');
+          const consent = getField('contact_consent');
+          return !!firstName?.value.trim() && !!lastName?.value.trim() && !!email?.value.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim()) && phone?.value.replace(/\D+/g, '').length >= 9 && !!consent?.checked;
+        };
+        const isStepValid = (stepNumber) => {
+          switch (stepNumber) {
+            case 1: return getValue('property_type') !== '';
+            case 2: return getValue('room_count') !== '';
+            case 3: return getValue('living_surface') !== '';
+            case 4: return getValue('occupancy_intent') !== '';
+            case 5: return getValue('goal') !== '';
+            case 6: return communeInput?.value.trim() !== '';
+            case 7: return !!addressField?.value.trim();
+            case 8: return getValue('owner_situation') !== '';
+            case 9: return getValue('project_timeline') !== '';
+            case 10: return isContactStepValid();
+            default: return false;
+          }
+        };
+        const firstIncompleteStep = () => {
+          for (let step = 1; step <= totalSteps; step += 1) if (!isStepValid(step)) return step;
+          return totalSteps;
+        };
+        const syncChoiceState = () => {
+          form.querySelectorAll('[data-choice-field]').forEach((button) => {
+            const targetField = button.getAttribute('data-choice-field');
+            const targetValue = button.getAttribute('data-choice-value');
+            button.classList.toggle('is-selected', targetField !== null && getValue(targetField) === targetValue);
+          });
+        };
+        const updateCommuneSuffix = () => {
+          const name = (communeInput?.value || '').trim();
+          communeNameHolders.forEach((node) => { node.textContent = name; });
+          communeSuffixHolders.forEach((node) => { node.hidden = name === ''; });
+        };
+        const updateNavigationState = () => {
+          panes.forEach((pane, index) => { pane.hidden = index + 1 !== activeStep; });
+          const stepIsValid = isStepValid(activeStep);
+          const percent = Math.round((activeStep / totalSteps) * 100);
+          stepLabel.textContent = `ÉTAPE ${activeStep} SUR ${totalSteps}`;
+          stepPercent.textContent = `${percent}%`;
+          progressBar.style.width = `${percent}%`;
+          backButton.hidden = activeStep === 1;
+          nextButton.hidden = activeStep === totalSteps || (activeStep === 1 && autoAdvanceSteps.has(activeStep) && stepIsValid);
+          submitButton.hidden = activeStep !== totalSteps;
+          nextButton.disabled = !stepIsValid || autoAdvanceSteps.has(activeStep);
+          submitButton.disabled = !isContactStepValid();
+          actionBar?.classList.toggle('is-first-step', activeStep === 1);
+          syncChoiceState();
+          updateCommuneSuffix();
+        };
+        form.querySelectorAll('[data-choice-field]').forEach((button) => {
+          button.addEventListener('click', () => {
+            const parentPane = button.closest('.estimate-pane');
+            const stepNumber = Number(parentPane?.dataset.step || '0');
+            const fieldName = button.getAttribute('data-choice-field');
+            const fieldValue = button.getAttribute('data-choice-value');
+            if (!fieldName || fieldValue === null) return;
+            setValue(fieldName, fieldValue);
+            updateNavigationState();
+            if (autoAdvanceTimer) window.clearTimeout(autoAdvanceTimer);
+            if (stepNumber === activeStep && autoAdvanceSteps.has(stepNumber) && isStepValid(stepNumber)) {
+              autoAdvanceTimer = window.setTimeout(() => { activeStep = Math.min(totalSteps, stepNumber + 1); updateNavigationState(); }, 650);
+            }
+          });
+        });
+        const renderAddressSuggestions = (items) => {
+          if (!addressSuggestionBox) return;
+          addressSuggestionBox.innerHTML = '';
+          if (!items.length) { addressSuggestionBox.hidden = true; return; }
+          items.forEach((item) => {
+            const props = item?.properties || {};
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'estimate-suggestion-item';
+            button.textContent = props.label || props.name || '';
+            button.addEventListener('click', () => {
+              const label = props.label || props.name || '';
+              if (addressField) { addressField.value = label; setValue('address_details', label); }
+              suppressNextAddressSuggestion = true;
+              addressSuggestionBox.hidden = true;
+              addressSuggestionBox.innerHTML = '';
+              addressAbortController?.abort();
+              addressAbortController = null;
+              addressField?.blur();
+              updateNavigationState();
+            });
+            addressSuggestionBox.appendChild(button);
+          });
+          addressSuggestionBox.hidden = false;
+        };
+        const fetchAddressSuggestions = async (query) => {
+          if (!addressSuggestionBox) return;
+          const trimmed = query.trim();
+          if (trimmed.length < 3) { addressSuggestionBox.hidden = true; addressSuggestionBox.innerHTML = ''; return; }
+          addressAbortController?.abort();
+          addressAbortController = new AbortController();
+          const params = new URLSearchParams({ q: trimmed, autocomplete: '1', limit: '8' });
+          const postcode = (postalCodeInput?.value || '').trim();
+          const communeName = (communeInput?.value || '').trim();
+          if (postcode) params.set('postcode', postcode);
+          if (communeName && !postcode) params.set('q', `${trimmed} ${communeName}`);
+          try {
+            const response = await fetch(`https://api-adresse.data.gouv.fr/search/?${params.toString()}`, { signal: addressAbortController.signal });
+            if (!response.ok) throw new Error('address-lookup-failed');
+            const data = await response.json();
+            let features = Array.isArray(data?.features) ? data.features : [];
+            if (postcode) features = features.filter((feature) => (feature?.properties?.postcode || '') === postcode);
+            else if (communeName) features = features.filter((feature) => ((feature?.properties?.city || '') + '').toLowerCase().includes(communeName.toLowerCase()));
+            renderAddressSuggestions(features.slice(0, 6));
+          } catch (error) {
+            if (error?.name !== 'AbortError') addressSuggestionBox.hidden = true;
+          }
+        };
+        addressField?.addEventListener('input', () => {
+          if (suppressNextAddressSuggestion) { suppressNextAddressSuggestion = false; return; }
+          setValue('address_details', addressField.value);
+          fetchAddressSuggestions(addressField.value);
+          updateNavigationState();
+        });
+        addressField?.addEventListener('focus', () => { if (addressField.value.trim().length >= 3) fetchAddressSuggestions(addressField.value); });
+        addressField?.addEventListener('blur', () => { window.setTimeout(() => { if (addressSuggestionBox) addressSuggestionBox.hidden = true; }, 150); });
+        communeInput?.addEventListener('input', () => {
+          if (suppressNextSuggestion) { suppressNextSuggestion = false; return; }
+          const typed = communeInput.value.trim();
+          setValue('commune', typed);
+          updateZoneWarning(Number.NaN);
+          fetchSuggestions(typed);
+          updateNavigationState();
+        });
+        communeInput?.addEventListener('blur', () => { window.setTimeout(() => { suggestionBox.hidden = true; }, 120); });
+        form.querySelectorAll('input[name="first_name"], input[name="last_name"], input[name="email"], input[name="phone"], input[name="contact_consent"]').forEach((field) => {
+          field.addEventListener('input', updateNavigationState);
+          field.addEventListener('change', updateNavigationState);
+        });
+        nextButton.addEventListener('click', () => {
+          if (!isStepValid(activeStep)) return;
+          if (autoAdvanceTimer) window.clearTimeout(autoAdvanceTimer);
+          activeStep = Math.min(totalSteps, activeStep + 1);
+          updateNavigationState();
+        });
+        backButton.addEventListener('click', () => {
+          if (autoAdvanceTimer) window.clearTimeout(autoAdvanceTimer);
+          activeStep = Math.max(1, activeStep - 1);
+          updateNavigationState();
+        });
+        form.addEventListener('submit', (event) => {
+          if (!isContactStepValid()) { event.preventDefault(); updateNavigationState(); return; }
+          originPageField.value = window.location.pathname + window.location.search;
+          submitButton.disabled = true;
+          submitButton.textContent = 'Envoi en cours...';
+        });
+        const urlParams = new URLSearchParams(window.location.search);
+        ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content'].forEach((name) => {
+          const field = document.getElementById(`estimate-${name.replace('_', '-')}`);
+          if (field && urlParams.get(name) && !field.value) field.value = urlParams.get(name);
+        });
+        activeStep = firstIncompleteStep();
+        updateNavigationState();
+      })();
+    </script>
+    <?php
+}
+
+function cms_render_viager_confirmation_page(array $settings): void
+{
+    cms_render_public_document_start('Demande d’étude viager envoyée | ' . (string) $settings['site_name'], 'Confirmation de réception de votre demande d’étude viager gratuite.', false, [], ['canonical' => cms_absolute_url('/etude-viager-gratuite/confirmation')]);
+    cms_render_estimation_header($settings, 'Étude viager gratuite');
+    ?>
+    <main class="estimate-page viager-page">
+      <section class="estimate-section">
+        <div class="shell estimate-app-shell estimate-confirmation-shell">
+          <article class="estimate-card estimate-confirmation-card">
+            <p class="eyebrow">Demande envoyée</p>
+            <h1>Votre demande d’étude viager a bien été envoyée</h1>
+            <p>Merci, j’ai bien reçu les informations concernant votre projet. Je vais les analyser avec attention et vous recontacter sous 24h pour échanger sur les possibilités adaptées à votre situation : viager occupé, viager libre, vente à terme ou vente classique si cela semble plus pertinent.</p>
+            <div class="estimate-reassurance-row confirmation-row">
+              <span>Étude offerte</span>
+              <span>Conseiller local</span>
+              <span>Confidentiel</span>
+              <span>Sans engagement</span>
+            </div>
+            <div class="estimate-actions single-action">
+              <a class="primary-button estimate-submit-button" href="<?= cms_h(cms_url('/')) ?>">Retour à l’accueil</a>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+    <script>
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'viager_form_submitted', { success: true });
+      }
+      if (typeof window.fbq === 'function') {
+        window.fbq('track', 'Lead');
+        window.fbq('trackCustom', 'viager_form_submitted', { success: true });
+      }
+    </script>
+    <?php
+}
+
 function cms_render_contact_page(array $page, array $settings, array $snapshot): void
 {
     $areas = array_slice($snapshot['siteSettings']['coveredAreas'] ?? cms_json_list($settings['covered_areas_json'] ?? '[]'), 0, 8);
@@ -1779,11 +3409,11 @@ function cms_render_contact_page(array $page, array $settings, array $snapshot):
             </div>
             <div class="contact-advisor-compact-grid">
               <article class="contact-advisor-compact-card">
-                <?php if ($marionPhoto !== ''): ?><img src="<?= cms_h(cms_url($marionPhoto)) ?>" alt="<?= cms_h((string) $settings['marion_name']) ?>" loading="lazy" decoding="async"><?php else: ?><span><?= cms_h(substr((string) $settings['marion_name'], 0, 1)) ?></span><?php endif; ?>
+                <?php if ($marionPhoto !== ''): ?><?php cms_render_image($marionPhoto, (string) $settings['marion_name'], ['sizes' => '56px']); ?><?php else: ?><span><?= cms_h(substr((string) $settings['marion_name'], 0, 1)) ?></span><?php endif; ?>
                 <div><strong><?= cms_h((string) $settings['marion_name']) ?></strong><small>Suivi · écoute · coordination</small></div>
               </article>
               <article class="contact-advisor-compact-card">
-                <?php if ($mickaelPhoto !== ''): ?><img src="<?= cms_h(cms_url($mickaelPhoto)) ?>" alt="<?= cms_h((string) $settings['mickael_name']) ?>" loading="lazy" decoding="async"><?php else: ?><span><?= cms_h(substr((string) $settings['mickael_name'], 0, 1)) ?></span><?php endif; ?>
+                <?php if ($mickaelPhoto !== ''): ?><?php cms_render_image($mickaelPhoto, (string) $settings['mickael_name'], ['sizes' => '56px']); ?><?php else: ?><span><?= cms_h(substr((string) $settings['mickael_name'], 0, 1)) ?></span><?php endif; ?>
                 <div><strong><?= cms_h((string) $settings['mickael_name']) ?></strong><small>Terrain · stratégie · négociation</small></div>
               </article>
             </div>
@@ -1879,25 +3509,101 @@ function cms_is_active_nav(string $currentPage, string $href): bool
     return str_starts_with($currentPage, $href);
 }
 
-function cms_render_public_document_start(string $title, string $description, bool $indexable = true, array $structuredData = []): void
+function cms_render_public_document_start(string $title, string $description, bool $indexable = true, array $structuredData = [], array $meta = []): void
 {
+    $svgFaviconVersion = (string) (@filemtime(__DIR__ . '/../favicon.svg') ?: time());
+    $icoFaviconVersion = (string) (@filemtime(__DIR__ . '/../favicon.ico') ?: time());
+    $canonicalUrl = (string) ($meta['canonical'] ?? cms_current_canonical_url());
+    $settings = cms_settings();
+    $siteName = (string) ($settings['site_name'] ?? 'Immobilier Auxois Morvan');
+    $ogType = (string) ($meta['type'] ?? 'website');
+    $ogImage = (string) ($meta['image'] ?? cms_absolute_url('/uploads/auxois.jpg'));
+    $preloadImage = trim((string) ($meta['preload_image'] ?? ''));
+    $preloadImageSizes = trim((string) ($meta['preload_image_sizes'] ?? '100vw'));
+    $preloadImageSrcset = $preloadImage !== '' ? cms_optimized_image_srcset($preloadImage) : '';
+    $extraStylesheets = is_array($meta['stylesheets'] ?? null) ? $meta['stylesheets'] : [];
+    if (preg_match('#^https?://#i', $ogImage) !== 1) {
+        $ogImage = cms_absolute_url($ogImage);
+    }
+    $globalStructuredData = [
+      [
+        '@context' => 'https://schema.org',
+        '@type' => 'RealEstateAgent',
+        '@id' => cms_absolute_url('/#real-estate-agent'),
+        'name' => $siteName,
+        'url' => cms_absolute_url('/'),
+        'logo' => cms_absolute_url('/uploads/logo-2.png'),
+        'image' => cms_absolute_url('/uploads/auxois.jpg'),
+        'telephone' => (string) ($settings['phone'] ?? ''),
+        'email' => (string) ($settings['email'] ?? ''),
+        'areaServed' => array_map(static fn (string $area): array => ['@type' => 'Place', 'name' => $area], cms_json_list($settings['covered_areas_json'] ?? '[]')),
+        'sameAs' => array_values(array_filter([(string) ($settings['facebook_url'] ?? ''), (string) ($settings['instagram_url'] ?? ''), (string) ($settings['iad_url'] ?? '')])),
+      ],
+      [
+        '@context' => 'https://schema.org',
+        '@type' => 'WebSite',
+        '@id' => cms_absolute_url('/#website'),
+        'name' => $siteName,
+        'url' => cms_absolute_url('/'),
+        'publisher' => ['@id' => cms_absolute_url('/#real-estate-agent')],
+        'inLanguage' => 'fr-FR',
+      ],
+    ];
+    $structuredData = array_merge($globalStructuredData, $structuredData);
+    $googleAnalyticsId = trim((string) (cms_config()['google_analytics_id'] ?? ''));
+    if ($googleAnalyticsId !== '' && !preg_match('/^G-[A-Z0-9]+$/', $googleAnalyticsId)) {
+        $googleAnalyticsId = '';
+    }
     ?>
     <!doctype html>
     <html lang="fr">
       <head>
         <meta charset="utf-8">
+        <?php if ($googleAnalyticsId !== ''): ?>
+          <!-- Google tag (gtag.js) -->
+          <script async src="https://www.googletagmanager.com/gtag/js?id=<?= cms_h($googleAnalyticsId) ?>"></script>
+          <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', <?= json_encode($googleAnalyticsId, JSON_UNESCAPED_SLASHES) ?>);
+          </script>
+        <?php endif; ?>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="<?= cms_h($description) ?>">
         <?php if (!$indexable): ?>
           <meta name="robots" content="noindex,nofollow">
+        <?php else: ?>
+          <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
         <?php endif; ?>
+        <link rel="canonical" href="<?= cms_h($canonicalUrl) ?>">
+        <meta property="og:locale" content="fr_FR">
+        <meta property="og:site_name" content="<?= cms_h($siteName) ?>">
+        <meta property="og:type" content="<?= cms_h($ogType) ?>">
+        <meta property="og:title" content="<?= cms_h($title) ?>">
+        <meta property="og:description" content="<?= cms_h($description) ?>">
+        <meta property="og:url" content="<?= cms_h($canonicalUrl) ?>">
+        <meta property="og:image" content="<?= cms_h($ogImage) ?>">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="<?= cms_h($title) ?>">
+        <meta name="twitter:description" content="<?= cms_h($description) ?>">
+        <meta name="twitter:image" content="<?= cms_h($ogImage) ?>">
         <?php foreach ($structuredData as $block): ?>
           <script type="application/ld+json"><?= json_encode($block, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?></script>
         <?php endforeach; ?>
         <title><?= cms_h($title) ?></title>
-        <link rel="icon" type="image/svg+xml" href="<?= cms_h(cms_url('/favicon.svg')) ?>">
-        <link rel="icon" href="<?= cms_h(cms_url('/favicon.ico')) ?>">
+        <link rel="icon" type="image/svg+xml" sizes="any" href="<?= cms_h(cms_url('/favicon.svg')) ?>?v=<?= cms_h($svgFaviconVersion) ?>">
+        <link rel="alternate icon" type="image/x-icon" href="<?= cms_h(cms_url('/favicon.ico')) ?>?v=<?= cms_h($icoFaviconVersion) ?>">
+        <link rel="preload" href="<?= cms_h(cms_url('/assets/fonts/fraunces-latin.woff2')) ?>" as="font" type="font/woff2" crossorigin>
+        <?php if ($preloadImage !== ''): ?>
+          <link rel="preload" as="image" href="<?= cms_h(cms_image_url($preloadImage)) ?>"<?php if ($preloadImageSrcset !== ''): ?> imagesrcset="<?= cms_h($preloadImageSrcset) ?>" imagesizes="<?= cms_h($preloadImageSizes) ?>" type="image/webp"<?php endif; ?> fetchpriority="high">
+        <?php endif; ?>
         <link rel="stylesheet" href="<?= cms_h(cms_url('/assets/site.css')) ?>?v=<?= cms_h((string) (@filemtime(__DIR__ . '/../assets/site.css') ?: time())) ?>">
+        <?php foreach ($extraStylesheets as $stylesheet): ?>
+          <?php if (is_array($stylesheet) && !empty($stylesheet['href'])): ?>
+            <link rel="stylesheet" href="<?= cms_h((string) $stylesheet['href']) ?>"<?php if (!empty($stylesheet['integrity'])): ?> integrity="<?= cms_h((string) $stylesheet['integrity']) ?>"<?php endif; ?><?php if (array_key_exists('crossorigin', $stylesheet)): ?> crossorigin="<?= cms_h((string) $stylesheet['crossorigin']) ?>"<?php endif; ?>>
+          <?php endif; ?>
+        <?php endforeach; ?>
       </head>
       <body>
     <?php
@@ -1906,35 +3612,57 @@ function cms_render_public_document_start(string $title, string $description, bo
 function cms_render_public_header(array $settings, string $currentPage): void
 {
     $blogEnabled = cms_is_blog_public_enabled($settings);
+    $navItems = cms_public_nav_items($blogEnabled);
     ?>
     <header class="site-header">
       <div class="shell">
         <nav class="site-header-bar">
           <a class="site-logo-link" href="<?= cms_h(cms_url('/')) ?>" aria-label="Accueil Immobilier Auxois Morvan">
-            <img src="<?= cms_h(cms_url('/uploads/logo-2.png')) ?>" alt="Immobilier Auxois Morvan" class="site-logo">
+            <?php cms_render_image('/uploads/logo-2.png', 'Immobilier Auxois Morvan', ['class' => 'site-logo', 'loading' => 'eager', 'sizes' => '180px']); ?>
           </a>
           <div class="site-nav desktop-only">
-            <?php foreach (cms_public_nav_items($blogEnabled) as $item): ?>
+            <?php foreach ($navItems as $item): ?>
               <a class="site-nav-link<?= cms_is_active_nav($currentPage, (string) $item['href']) ? ' is-active' : '' ?>" href="<?= cms_h(cms_url((string) $item['href'])) ?>"><?= cms_h((string) $item['label']) ?></a>
             <?php endforeach; ?>
           </div>
           <a class="site-cta desktop-only" href="<?= cms_h(cms_url('/contact')) ?>">Contactez-nous</a>
-          <a class="mobile-contact" href="<?= cms_h(cms_url('/contact')) ?>">Contact</a>
+          <button
+            class="mobile-menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="site-mobile-menu"
+            aria-label="Ouvrir le menu"
+            data-mobile-menu-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
         </nav>
+        <div class="site-mobile-menu" id="site-mobile-menu" hidden>
+          <div class="site-mobile-menu-inner">
+            <div class="site-mobile-nav">
+              <?php foreach ($navItems as $item): ?>
+                <a class="site-mobile-nav-link<?= cms_is_active_nav($currentPage, (string) $item['href']) ? ' is-active' : '' ?>" href="<?= cms_h(cms_url((string) $item['href'])) ?>"><?= cms_h((string) $item['label']) ?></a>
+              <?php endforeach; ?>
+            </div>
+            <a class="site-mobile-cta" href="<?= cms_h(cms_url('/contact')) ?>">Contactez-nous</a>
+          </div>
+        </div>
       </div>
     </header>
     <?php
 }
 
-function cms_render_estimation_header(array $settings): void
+function cms_render_estimation_header(array $settings, string $label = 'Estimation gratuite'): void
 {
     ?>
     <header class="estimate-header">
       <div class="shell estimate-header-shell">
         <a class="estimate-header-brand" href="<?= cms_h(cms_url('/')) ?>" aria-label="Retour à l'accueil Immobilier Auxois Morvan">
-          <img src="<?= cms_h(cms_url('/uploads/logo-2.png')) ?>" alt="Immobilier Auxois Morvan" class="estimate-header-logo">
+          <?php cms_render_image('/uploads/logo-2.png', 'Immobilier Auxois Morvan', ['class' => 'estimate-header-logo', 'loading' => 'eager', 'sizes' => '180px']); ?>
         </a>
-        <span class="estimate-header-cta">Estimation gratuite</span>
+        <span class="estimate-header-cta"><?= cms_h($label) ?></span>
       </div>
     </header>
     <?php
@@ -1945,19 +3673,19 @@ function cms_render_public_footer(array $settings, array $snapshot): void
     $areas = array_slice($snapshot['siteSettings']['coveredAreas'] ?? cms_json_list($settings['covered_areas_json'] ?? '[]'), 0, 6);
     $mobileAreas = array_slice($areas, 0, 4);
     $services = $snapshot['services'] ?? [];
-  $facebookUrl = 'https://www.facebook.com/profile.php?id=61589488680956';
+    $facebookUrl = 'https://www.facebook.com/profile.php?id=61589488680956';
     ?>
     <footer class="site-footer">
       <div class="shell footer-shell">
         <div class="footer-mobile-stack">
           <div class="footer-brand-column">
-            <img src="<?= cms_h(cms_url('/uploads/logo-2.png')) ?>" alt="Immobilier Auxois Morvan" class="footer-logo">
+            <?php cms_render_image('/uploads/logo-2.png', 'Immobilier Auxois Morvan', ['class' => 'footer-logo', 'sizes' => '180px']); ?>
             <p class="footer-copy"><?= cms_h((string) $settings['footer_text']) ?></p>
           </div>
           <div class="footer-contact-card">
             <p class="eyebrow">Contact</p>
             <a href="<?= cms_h('tel:' . preg_replace('/\s+/', '', (string) $settings['phone'])) ?>"><?= cms_h((string) $settings['phone']) ?></a>
-            <a href="<?= cms_h('mailto:' . (string) $settings['email']) ?>"><?= cms_h((string) $settings['email']) ?></a>
+            <a class="footer-contact-email" href="<?= cms_h('mailto:' . (string) $settings['email']) ?>"><?= cms_h((string) $settings['email']) ?></a>
           </div>
           <details class="footer-accordion">
             <summary>Prestations</summary>
@@ -1978,7 +3706,7 @@ function cms_render_public_footer(array $settings, array $snapshot): void
 
         <div class="footer-top footer-desktop-grid">
           <div class="footer-brand-column">
-            <img src="<?= cms_h(cms_url('/uploads/logo-2.png')) ?>" alt="Immobilier Auxois Morvan" class="footer-logo">
+            <?php cms_render_image('/uploads/logo-2.png', 'Immobilier Auxois Morvan', ['class' => 'footer-logo', 'sizes' => '180px']); ?>
             <p class="footer-copy"><?= cms_h((string) $settings['footer_text']) ?></p>
             <div class="footer-socials">
               <a href="<?= cms_h($facebookUrl) ?>" target="_blank" rel="noopener noreferrer">Facebook</a>
@@ -2005,12 +3733,12 @@ function cms_render_public_footer(array $settings, array $snapshot): void
               <span><?= cms_h((string) $settings['mickael_name']) ?></span>
               <span><?= cms_h((string) $settings['main_city']) ?></span>
               <a href="<?= cms_h('tel:' . preg_replace('/\s+/', '', (string) $settings['phone'])) ?>"><?= cms_h((string) $settings['phone']) ?></a>
-              <a href="<?= cms_h('mailto:' . (string) $settings['email']) ?>"><?= cms_h((string) $settings['email']) ?></a>
+              <a class="footer-contact-email" href="<?= cms_h('mailto:' . (string) $settings['email']) ?>"><?= cms_h((string) $settings['email']) ?></a>
             </div>
           </div>
         </div>
         <div class="footer-bottom">
-          <p><?= cms_h((string) $settings['footer_text']) ?></p>
+          <p>&copy; <?= cms_h(date('Y')) ?> <?= cms_h((string) $settings['site_name']) ?></p>
           <div>
             <a href="<?= cms_h(cms_url('/contact')) ?>">Mentions légales</a>
             <a href="<?= cms_h(cms_url('/contact')) ?>">Politique de confidentialité</a>
@@ -2018,6 +3746,115 @@ function cms_render_public_footer(array $settings, array $snapshot): void
         </div>
       </div>
     </footer>
+    <script>
+      (() => {
+        const toggle = document.querySelector('[data-mobile-menu-toggle]');
+        const menu = document.getElementById('site-mobile-menu');
+        const serviceCards = Array.from(document.querySelectorAll('.services-grid > details.service-card'));
+
+        const isMobileServicesAccordion = () => window.matchMedia('(max-width: 767.98px)').matches;
+
+        const syncServiceCardsMode = () => {
+          if (serviceCards.length === 0) {
+            return;
+          }
+
+          if (!isMobileServicesAccordion()) {
+            serviceCards.forEach((card) => {
+              card.open = true;
+            });
+            return;
+          }
+
+          const activeCard = serviceCards.find((card) => card.open) || serviceCards[0];
+          serviceCards.forEach((card) => {
+            card.open = card === activeCard;
+          });
+        };
+
+        serviceCards.forEach((card) => {
+          const summary = card.querySelector('summary');
+          if (summary) {
+            summary.addEventListener('click', (event) => {
+              if (isMobileServicesAccordion()) {
+                return;
+              }
+
+              event.preventDefault();
+              serviceCards.forEach((serviceCard) => {
+                serviceCard.open = true;
+              });
+            });
+          }
+
+          card.addEventListener('toggle', () => {
+            if (!isMobileServicesAccordion()) {
+              if (!card.open) {
+                card.open = true;
+              }
+              return;
+            }
+
+            if (!card.open || !isMobileServicesAccordion()) {
+              return;
+            }
+
+            serviceCards.forEach((otherCard) => {
+              if (otherCard !== card) {
+                otherCard.open = false;
+              }
+            });
+          });
+        });
+
+        syncServiceCardsMode();
+
+        if (!toggle || !menu) {
+          return;
+        }
+
+        const closeMenu = () => {
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.setAttribute('aria-label', 'Ouvrir le menu');
+          menu.hidden = true;
+          document.body.classList.remove('mobile-menu-open');
+        };
+
+        const openMenu = () => {
+          toggle.setAttribute('aria-expanded', 'true');
+          toggle.setAttribute('aria-label', 'Fermer le menu');
+          menu.hidden = false;
+          document.body.classList.add('mobile-menu-open');
+        };
+
+        toggle.addEventListener('click', () => {
+          if (menu.hidden) {
+            openMenu();
+            return;
+          }
+
+          closeMenu();
+        });
+
+        menu.querySelectorAll('a').forEach((link) => {
+          link.addEventListener('click', closeMenu);
+        });
+
+        window.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape') {
+            closeMenu();
+          }
+        });
+
+        window.addEventListener('resize', () => {
+          syncServiceCardsMode();
+
+          if (window.innerWidth >= 1024) {
+            closeMenu();
+          }
+        });
+      })();
+    </script>
     </body>
     </html>
     <?php
@@ -2091,7 +3928,10 @@ function cms_render_homepage(array $page, array $settings, array $snapshot): voi
         'sameAs' => array_values(array_filter([(string) ($settings['facebook_url'] ?? ''), (string) ($settings['instagram_url'] ?? ''), (string) ($settings['iad_url'] ?? '')])),
     ]];
 
-    cms_render_public_document_start($homeTitle . ' | ' . (string) $settings['site_name'], $homeDescription, true, $structuredData);
+    cms_render_public_document_start($homeTitle . ' | ' . (string) $settings['site_name'], $homeDescription, true, $structuredData, [
+      'preload_image' => $heroImage !== '' ? $heroImage : '/uploads/auxois.jpg',
+      'preload_image_sizes' => '(max-width: 1023px) 100vw, 46vw',
+    ]);
     cms_render_public_header($settings, '/');
     ?>
     <main>
@@ -2107,12 +3947,12 @@ function cms_render_homepage(array $page, array $settings, array $snapshot): voi
             </div>
           </div>
           <div class="home-hero-side">
-            <div class="hero-media<?= $heroImage !== '' ? '' : ' no-image' ?>"><?php if ($heroImage !== ''): ?><img src="<?= cms_h(cms_url($heroImage)) ?>" alt="<?= cms_h((string) $page['hero_image_alt']) ?>"><?php endif; ?></div>
+            <div class="hero-media<?= $heroImage !== '' ? '' : ' no-image' ?>"><?php if ($heroImage !== ''): ?><?php cms_render_image($heroImage, (string) $page['hero_image_alt'], ['loading' => 'eager', 'fetchpriority' => 'high', 'sizes' => '(max-width: 1023px) 100vw, 46vw']); ?><?php endif; ?></div>
             <div class="hero-people-card">
               <p class="hero-people-kicker">Accompagnement local</p>
               <div class="hero-people-grid">
-                <div class="hero-person"><?php if ($mickaelPhoto !== ''): ?><img src="<?= cms_h(cms_url($mickaelPhoto)) ?>" alt="<?= cms_h((string) $settings['mickael_name']) ?>" loading="lazy" decoding="async"><?php else: ?><span><?= cms_h(substr((string) $settings['mickael_name'], 0, 1)) ?></span><?php endif; ?><div><strong><?= cms_h((string) $settings['mickael_name']) ?></strong><small>Conseiller immobilier local</small></div></div>
-                <div class="hero-person"><?php if ($marionPhoto !== ''): ?><img src="<?= cms_h(cms_url($marionPhoto)) ?>" alt="<?= cms_h((string) $settings['marion_name']) ?>" loading="lazy" decoding="async"><?php else: ?><span><?= cms_h(substr((string) $settings['marion_name'], 0, 1)) ?></span><?php endif; ?><div><strong><?= cms_h((string) $settings['marion_name']) ?></strong><small>Conseillère immobilier locale</small></div></div>
+                <div class="hero-person"><?php if ($mickaelPhoto !== ''): ?><?php cms_render_image($mickaelPhoto, (string) $settings['mickael_name'], ['sizes' => '44px']); ?><?php else: ?><span><?= cms_h(substr((string) $settings['mickael_name'], 0, 1)) ?></span><?php endif; ?><div><strong><?= cms_h((string) $settings['mickael_name']) ?></strong><small>Conseiller immobilier local</small></div></div>
+                <div class="hero-person"><?php if ($marionPhoto !== ''): ?><?php cms_render_image($marionPhoto, (string) $settings['marion_name'], ['sizes' => '44px']); ?><?php else: ?><span><?= cms_h(substr((string) $settings['marion_name'], 0, 1)) ?></span><?php endif; ?><div><strong><?= cms_h((string) $settings['marion_name']) ?></strong><small>Conseillère immobilier locale</small></div></div>
               </div>
             </div>
             <div class="home-stats-grid">
@@ -2129,8 +3969,8 @@ function cms_render_homepage(array $page, array $settings, array $snapshot): voi
           <article class="panel-card home-portraits-panel">
             <p class="eyebrow">Présence locale</p>
             <div class="home-portraits-grid">
-              <div class="advisor-card"><?php if ($mickaelPhoto !== ''): ?><img src="<?= cms_h(cms_url($mickaelPhoto)) ?>" alt="<?= cms_h((string) $settings['mickael_name']) ?>" loading="lazy" decoding="async"><?php else: ?><span><?= cms_h(substr((string) $settings['mickael_name'], 0, 1)) ?></span><?php endif; ?><h3><?= cms_h((string) $settings['mickael_name']) ?></h3><p>Conseiller immobilier local</p></div>
-              <div class="advisor-card"><?php if ($marionPhoto !== ''): ?><img src="<?= cms_h(cms_url($marionPhoto)) ?>" alt="<?= cms_h((string) $settings['marion_name']) ?>" loading="lazy" decoding="async"><?php else: ?><span><?= cms_h(substr((string) $settings['marion_name'], 0, 1)) ?></span><?php endif; ?><h3><?= cms_h((string) $settings['marion_name']) ?></h3><p>Conseillère immobilier locale</p></div>
+              <div class="advisor-card"><?php if ($mickaelPhoto !== ''): ?><?php cms_render_image($mickaelPhoto, (string) $settings['mickael_name'], ['sizes' => '(max-width: 767px) 50vw, 240px']); ?><?php else: ?><span><?= cms_h(substr((string) $settings['mickael_name'], 0, 1)) ?></span><?php endif; ?><h3><?= cms_h((string) $settings['mickael_name']) ?></h3><p>Conseiller immobilier local</p></div>
+              <div class="advisor-card"><?php if ($marionPhoto !== ''): ?><?php cms_render_image($marionPhoto, (string) $settings['marion_name'], ['sizes' => '(max-width: 767px) 50vw, 240px']); ?><?php else: ?><span><?= cms_h(substr((string) $settings['marion_name'], 0, 1)) ?></span><?php endif; ?><h3><?= cms_h((string) $settings['marion_name']) ?></h3><p>Conseillère immobilier locale</p></div>
             </div>
           </article>
           <article class="panel-card panel-muted">
@@ -2163,7 +4003,21 @@ function cms_render_homepage(array $page, array $settings, array $snapshot): voi
           <h2 class="section-title">Nos services</h2>
           <p class="section-subtitle">Une présence utile pour vendre, acheter, estimer un bien ou préparer une transmission de fonds de commerce, sans alourdir la lecture de la home.</p>
           <div class="services-grid">
-            <?php foreach ($services as $service): ?><a class="service-card" href="<?= cms_h(cms_url((string) $service['href'])) ?>"><p class="card-kicker">Service</p><h3><?= cms_h((string) $service['title']) ?></h3><p><?= cms_h((string) $service['description']) ?></p><ul class="accent-list compact-list"><?php foreach (array_slice(($service['features'] ?? []), 0, 3) as $feature): ?><li><?= cms_h((string) $feature) ?></li><?php endforeach; ?></ul><span class="card-link">En savoir plus →</span></a><?php endforeach; ?>
+            <?php foreach ($services as $index => $service): ?>
+              <details class="service-card" open>
+                <summary class="service-card-summary">
+                  <div>
+                    <p class="card-kicker">Service</p>
+                    <h3><?= cms_h((string) $service['title']) ?></h3>
+                  </div>
+                </summary>
+                <div class="service-card-content">
+                  <p><?= cms_h((string) $service['description']) ?></p>
+                  <ul class="accent-list compact-list"><?php foreach (array_slice(($service['features'] ?? []), 0, 3) as $feature): ?><li><?= cms_h((string) $feature) ?></li><?php endforeach; ?></ul>
+                  <a class="card-link" href="<?= cms_h(cms_url((string) $service['href'])) ?>">En savoir plus →</a>
+                </div>
+              </details>
+            <?php endforeach; ?>
           </div>
         </div>
       </section>
@@ -2187,14 +4041,14 @@ function cms_render_homepage(array $page, array $settings, array $snapshot): voi
             <p class="section-subtitle">Des repères concrets sur les villes et bassins de vie où nous accompagnons régulièrement des projets immobiliers.</p>
             <p class="home-local-copy">Nous accompagnons les propriétaires, acheteurs et porteurs de projets dans l’Auxois, le Morvan et plus largement en Côte-d’Or et Bourgogne. Notre secteur couvre notamment Arnay-le-Duc, Pouilly-en-Auxois, Saulieu, Autun, Beaune, Dijon, Vitteaux et Semur-en-Auxois, avec une attention particulière aux maisons anciennes, résidences secondaires, biens familiaux, immeubles et <a href="<?= cms_h(cms_url('/fonds')) ?>">fonds de commerce</a>.</p>
             <div class="home-link-row"><a href="<?= cms_h(cms_url('/vendre')) ?>">Vendre</a><a href="<?= cms_h(cms_url('/acheter')) ?>">Acheter</a><a href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Estimation</a><?php if ($blogEnabled): ?><a href="<?= cms_h(cms_url('/blog')) ?>">Conseils</a><?php endif; ?></div>
-            <div class="cards-grid three-cols"><?php foreach ($featuredAreas as $index => $area): ?><article class="soft-card area-card<?= $index >= 3 ? ' mobile-hide' : '' ?>"><?php $areaImage = (string) ($snapshot['areaImages'][$area] ?? '/uploads/auxois.jpg'); ?><img src="<?= cms_h(cms_url($areaImage)) ?>" alt="<?= cms_h((string) $area) ?>" loading="lazy" decoding="async"><div><p class="card-kicker">Secteur</p><h3><?= cms_h((string) $area) ?></h3><p><?= cms_h((string) ($snapshot['areaDescriptions'][$area] ?? 'Un secteur suivi avec attention pour ses dynamiques de marché et ses projets de vie.')) ?></p></div></article><?php endforeach; ?></div>
+            <div class="cards-grid three-cols"><?php foreach ($featuredAreas as $index => $area): ?><article class="soft-card area-card<?= $index >= 3 ? ' mobile-hide' : '' ?>"><?php $areaImage = (string) ($snapshot['areaImages'][$area] ?? '/uploads/auxois.jpg'); ?><?php cms_render_image($areaImage, (string) $area, ['sizes' => '(max-width: 767px) 100vw, 33vw']); ?><div><p class="card-kicker">Secteur</p><h3><?= cms_h((string) $area) ?></h3><p><?= cms_h((string) ($snapshot['areaDescriptions'][$area] ?? 'Un secteur suivi avec attention pour ses dynamiques de marché et ses projets de vie.')) ?></p></div></article><?php endforeach; ?></div>
             <div class="section-actions"><a class="button primary" href="<?= cms_h(cms_url('/secteur')) ?>">Voir tout notre secteur</a><span>Arnay-le-Duc, Pouilly-en-Auxois, Autun, Saulieu, Beaune, Dijon, Semur-en-Auxois et Vitteaux.</span></div>
           </div>
           <div>
             <p class="eyebrow">Conseils locaux</p>
             <h2 class="section-title">Nos conseils immobiliers par secteur</h2>
             <p class="section-subtitle">Des pages utiles pour retrouver des repères concrets, ville par ville, sans alourdir la lecture de la home.</p>
-            <div class="cards-grid three-cols"><?php foreach ($localPages as $index => $localPage): ?><article class="soft-card local-card<?= $index >= 2 ? ' mobile-hide' : '' ?>"><?php $localImage = (string) ($localPage['image'] ?? '/uploads/auxois.jpg'); ?><img src="<?= cms_h(cms_url($localImage)) ?>" alt="<?= cms_h((string) $localPage['title']) ?>" loading="lazy" decoding="async"><div><p class="card-kicker"><?= cms_h(str_replace('-', ' ', (string) $localPage['pageType'])) ?></p><h3><?= cms_h((string) $localPage['title']) ?></h3><p class="card-city"><?= cms_h((string) $localPage['city']) ?></p><p class="clamp-2-mobile"><?= cms_h((string) $localPage['excerpt']) ?></p><a class="card-link-inline" href="<?= cms_h(cms_url((string) $localPage['href'])) ?>">Voir la page locale →</a></div></article><?php endforeach; ?></div>
+            <div class="cards-grid three-cols"><?php foreach ($localPages as $index => $localPage): ?><article class="soft-card local-card<?= $index >= 2 ? ' mobile-hide' : '' ?>"><?php $localImage = (string) ($localPage['image'] ?? '/uploads/auxois.jpg'); ?><?php cms_render_image($localImage, (string) $localPage['title'], ['sizes' => '(max-width: 767px) 100vw, 33vw']); ?><div><p class="card-kicker"><?= cms_h(str_replace('-', ' ', (string) $localPage['pageType'])) ?></p><h3><?= cms_h((string) $localPage['title']) ?></h3><p class="card-city"><?= cms_h((string) $localPage['city']) ?></p><p class="clamp-2-mobile"><?= cms_h((string) $localPage['excerpt']) ?></p><a class="card-link-inline" href="<?= cms_h(cms_url((string) $localPage['href'])) ?>">Voir la page locale →</a></div></article><?php endforeach; ?></div>
             <div class="section-actions"><a class="button secondary" href="<?= cms_h(cms_url('/secteur')) ?>">Voir toutes les pages locales</a></div>
           </div>
         </div>
@@ -2204,7 +4058,7 @@ function cms_render_homepage(array $page, array $settings, array $snapshot): voi
 
       <section id="avis-clients" class="section section-tight"><div class="shell"><p class="eyebrow">Avis clients</p><h2 class="section-title">Des retours fondés sur la qualité du suivi</h2><p class="section-subtitle">Des échanges clairs, une présence régulière et une vraie lecture du terrain pour accompagner le projet jusqu’au bout.</p><div class="cards-grid three-cols"><?php foreach ($testimonials as $index => $testimonial): ?><article class="testimonial-card<?= $index >= 2 ? ' mobile-hide' : '' ?>"><div class="dots-row"><?php for ($starIndex = 0; $starIndex < (int) ($testimonial['rating'] ?? 5); $starIndex += 1): ?><span></span><?php endfor; ?></div><p class="testimonial-quote">“<?= cms_h((string) $testimonial['quote']) ?>”</p><div class="testimonial-meta"><strong><?= cms_h((string) $testimonial['author']) ?></strong><span><?= cms_h(implode(' — ', array_filter([(string) ($testimonial['title'] ?? ''), (string) ($testimonial['location'] ?? '')]))) ?></span></div></article><?php endforeach; ?></div></div></section>
 
-      <?php if ($blogEnabled && $blogPosts !== []): ?><section class="section section-tight"><div class="shell"><p class="eyebrow">Blog</p><h2 class="section-title">Derniers articles</h2><p class="section-subtitle">Des contenus utiles pour comprendre le marché local, préparer une vente et cadrer un projet immobilier.</p><div class="cards-grid three-cols"><?php foreach ($blogPosts as $index => $post): ?><article class="blog-card<?= $index >= 2 ? ' mobile-hide' : '' ?>"><a href="<?= cms_h(cms_url((string) $post['href'])) ?>"><img src="<?= cms_h(cms_url((string) $post['image'])) ?>" alt="<?= cms_h((string) ($post['imageAlt'] ?? $post['title'])) ?>" loading="lazy" decoding="async"><div class="blog-card-body"><div class="blog-meta"><span><?= cms_h((string) $post['category']) ?></span><span class="meta-dot"></span><span><?= cms_h(cms_format_long_date((string) $post['date'])) ?></span></div><h3><?= cms_h((string) $post['title']) ?></h3><p class="clamp-2-mobile"><?= cms_h((string) $post['excerpt']) ?></p><span class="card-link-inline">Lire l'article →</span></div></a></article><?php endforeach; ?></div><div class="section-actions"><a class="button secondary" href="<?= cms_h(cms_url('/blog')) ?>">Voir tous les articles</a></div></div></section><?php endif; ?>
+      <?php if ($blogEnabled && $blogPosts !== []): ?><section class="section section-tight"><div class="shell"><p class="eyebrow">Blog</p><h2 class="section-title">Derniers articles</h2><p class="section-subtitle">Des contenus utiles pour comprendre le marché local, préparer une vente et cadrer un projet immobilier.</p><div class="cards-grid three-cols"><?php foreach ($blogPosts as $index => $post): ?><article class="blog-card<?= $index >= 2 ? ' mobile-hide' : '' ?>"><a href="<?= cms_h(cms_url((string) $post['href'])) ?>"><?php cms_render_image((string) $post['image'], (string) ($post['imageAlt'] ?? $post['title']), ['sizes' => '(max-width: 767px) 100vw, 33vw']); ?><div class="blog-card-body"><div class="blog-meta"><span><?= cms_h((string) $post['category']) ?></span><span class="meta-dot"></span><span><?= cms_h(cms_format_long_date((string) $post['date'])) ?></span></div><h3><?= cms_h((string) $post['title']) ?></h3><p class="clamp-2-mobile"><?= cms_h((string) $post['excerpt']) ?></p><span class="card-link-inline">Lire l'article →</span></div></a></article><?php endforeach; ?></div><div class="section-actions"><a class="button secondary" href="<?= cms_h(cms_url('/blog')) ?>">Voir tous les articles</a></div></div></section><?php endif; ?>
 
       <section class="section section-tight"><div class="shell"><div class="cta-band cta-band-hero"><div><p class="eyebrow">Projet immobilier</p><h2>Vous avez un projet immobilier ?</h2><div class="richtext"><p>Parlons simplement de votre bien, de votre secteur et de la meilleure stratégie à adopter.</p></div></div><div class="cta-actions"><a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Faire estimer mon bien</a><a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a></div></div></div></section>
     </main>
@@ -2228,7 +4082,14 @@ function cms_render_sector_page(array $page, array $settings, array $snapshot): 
         ['name' => 'Semur-en-Auxois', 'lat' => 47.4911, 'lng' => 4.3330, 'profile' => 'Cité médiévale attractive, belles pierres, marché résidentiel et patrimonial.', 'tag' => 'Belles pierres'],
     ];
 
-    cms_render_public_document_start($title . ' | ' . (string) $settings['site_name'], $description, true);
+    cms_render_public_document_start($title . ' | ' . (string) $settings['site_name'], $description, true, [], [
+      'preload_image' => $heroImage,
+      'preload_image_sizes' => '(max-width: 1023px) 100vw, 38vw',
+      'stylesheets' => [[
+        'href' => 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+        'crossorigin' => '',
+      ]],
+    ]);
     cms_render_public_header($settings, '/secteur');
     ?>
     <main class="sector-premium-page">
@@ -2244,7 +4105,7 @@ function cms_render_sector_page(array $page, array $settings, array $snapshot): 
             </div>
           </div>
           <aside class="sector-hero-media">
-            <img src="<?= cms_h(cms_url($heroImage)) ?>" alt="Paysages de l’Auxois Morvan">
+            <?php cms_render_image($heroImage, 'Paysages de l’Auxois Morvan', ['loading' => 'eager', 'fetchpriority' => 'high', 'sizes' => '(max-width: 1023px) 100vw, 38vw']); ?>
             <div class="sector-hero-badge"><strong>8</strong><span>communes clés</span></div>
           </aside>
         </div>
@@ -2254,12 +4115,32 @@ function cms_render_sector_page(array $page, array $settings, array $snapshot): 
         <div class="shell sector-intro-grid">
           <article class="sector-intro-card is-main">
             <p class="eyebrow">Un territoire en renaissance</p>
-            <h2>L’Auxois Morvan conjugue nature, accessibilité et patrimoine</h2>
-            <p>Le secteur séduit par son cadre préservé, ses prix encore lisibles et sa proximité avec les grands axes. On y trouve des maisons en pierre, des villages vivants, des résidences secondaires et des biens familiaux avec jardin.</p>
+            <h2>Comprendre le marché local</h2>
+            <p>L’Auxois Morvan conjugue nature, accessibilité et patrimoine. Pour bien acheter ou vendre, il faut lire finement la commune, l’état du bâti, les accès, les services et le potentiel réel du bien.</p>
+            <ul class="sector-card-list">
+              <li>Prix encore lisibles selon les villages.</li>
+              <li>Demande portée par la qualité de vie et la pierre.</li>
+              <li>Arbitrage clé : travaux, jardin, dépendances, mobilité.</li>
+            </ul>
           </article>
-          <article class="sector-intro-card"><strong>Maison familiale</strong><span>avec jardin, dépendances ou potentiel d’accueil.</span></article>
-          <article class="sector-intro-card"><strong>Projet patrimonial</strong><span>belle pierre, maison de caractère, résidence secondaire.</span></article>
-          <article class="sector-intro-card"><strong>Investissement local</strong><span>marché locatif mesuré, demande stable et qualité de vie.</span></article>
+          <article class="sector-intro-card">
+            <p class="sector-card-kicker">Habiter</p>
+            <h3>Maison familiale avec extérieur</h3>
+            <p>Les recherches portent souvent sur une maison saine, un jardin utilisable, une pièce de vie confortable et des services accessibles sans perdre l’esprit campagne.</p>
+            <div class="sector-card-note">À regarder : écoles, chauffage, assainissement, fibre, temps de trajet et coût des travaux.</div>
+          </article>
+          <article class="sector-intro-card">
+            <p class="sector-card-kicker">Patrimoine</p>
+            <h3>Pierre, résidence secondaire, charme ancien</h3>
+            <p>Maisons de caractère, longères, bâtisses de village et dépendances séduisent les acquéreurs qui veulent un lieu de vie singulier ou un pied-à-terre bourguignon.</p>
+            <div class="sector-card-note">Point clé : valoriser l’authenticité sans sous-estimer rénovation, énergie et entretien.</div>
+          </article>
+          <article class="sector-intro-card">
+            <p class="sector-card-kicker">Investir</p>
+            <h3>Locatif local et projet de rendement</h3>
+            <p>Le marché reste mesuré, mais certains pôles offrent une demande régulière : actifs locaux, mobilité professionnelle, petites surfaces, logements avec stationnement.</p>
+            <div class="sector-card-note">À cadrer : loyer réaliste, vacance, fiscalité, budget travaux et attractivité de la commune.</div>
+          </article>
         </div>
       </section>
 
@@ -2334,7 +4215,7 @@ function cms_render_sector_page(array $page, array $settings, array $snapshot): 
       </section>
     </main>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         const mapNode = document.getElementById('auxois-interactive-map');
@@ -2365,8 +4246,450 @@ function cms_render_sector_page(array $page, array $settings, array $snapshot): 
     cms_render_public_footer($settings, $snapshot);
 }
 
+function cms_local_profile(string $city, string $pageType): array
+{
+    $profiles = [
+        'Arnay-le-Duc' => [
+            'territory' => 'entre centre-bourg patrimonial, maisons anciennes, villages du Pays d’Arnay et accès vers Pouilly-en-Auxois, Saulieu et Beaune',
+            'market' => 'un marché de proximité où les biens familiaux, les maisons de caractère et les projets de vie plus ruraux demandent une lecture fine du cadre de vie.',
+            'buyers' => ['familles recherchant commerces et services', 'acquéreurs attirés par les maisons anciennes', 'projets de résidence secondaire ou de campagne', 'vendeurs souhaitant cadrer un prix réaliste'],
+            'propertyTypes' => ['maisons de ville', 'maisons anciennes', 'biens familiaux', 'maisons avec jardin', 'projets de rénovation'],
+            'microAreas' => ['centre-bourg', 'villages autour d’Arnay-le-Duc', 'axe Pouilly-en-Auxois', 'direction Saulieu et Morvan'],
+            'nearby' => ['Pouilly-en-Auxois', 'Saulieu', 'Beaune', 'Bligny-sur-Ouche'],
+        ],
+        'Pouilly-en-Auxois' => [
+            'territory' => 'au cœur d’un secteur charnière de l’Auxois, marqué par l’accessibilité, le canal de Bourgogne et les liaisons vers Dijon, Beaune et Arnay-le-Duc',
+            'market' => 'un marché où la mobilité, la visibilité des axes et la qualité du cadre résidentiel pèsent fortement dans la valeur perçue.',
+            'buyers' => ['actifs recherchant un accès rapide aux axes', 'familles attachées aux services de proximité', 'acquéreurs comparant Auxois et couronne dijonnaise', 'vendeurs de maisons avec terrain'],
+            'propertyTypes' => ['maisons familiales', 'pavillons avec terrain', 'maisons de village', 'biens proches des axes', 'projets locatifs'],
+            'microAreas' => ['centre de Pouilly-en-Auxois', 'canal de Bourgogne', 'axe A6/A38', 'villages du bassin pouillysois'],
+            'nearby' => ['Arnay-le-Duc', 'Vitteaux', 'Dijon', 'Sombernon'],
+        ],
+        'Autun' => [
+            'territory' => 'dans un bassin de vie structuré entre patrimoine, quartiers résidentiels, accès au Morvan et attractivité d’une ville centre',
+            'market' => 'un marché à lire quartier par quartier, où l’état du bien, la localisation, le stationnement, les extérieurs et le niveau de travaux changent fortement l’analyse.',
+            'buyers' => ['familles cherchant une ville de services', 'acquéreurs sensibles au patrimoine autunois', 'projets de vente de maison avec jardin', 'investisseurs et résidences secondaires selon le secteur'],
+            'propertyTypes' => ['maisons de ville', 'maisons avec jardin', 'biens anciens', 'pavillons', 'immeubles et projets patrimoniaux'],
+            'microAreas' => ['centre historique', 'quartiers résidentiels', 'entrée du Morvan', 'communes du Grand Autunois'],
+            'nearby' => ['Saulieu', 'Beaune', 'Arnay-le-Duc', 'Épinac'],
+        ],
+    ];
+
+    $profile = $profiles[$city] ?? [
+        'territory' => 'dans un secteur de l’Auxois-Morvan où la lecture du cadre de vie, des accès et des biens comparables reste essentielle',
+        'market' => 'un marché local à analyser selon la typologie du bien, l’environnement immédiat, la demande active et le calendrier du vendeur.',
+        'buyers' => ['acquéreurs locaux', 'familles en recherche de résidence principale', 'projets de maison avec extérieur', 'vendeurs souhaitant sécuriser leur positionnement'],
+        'propertyTypes' => ['maisons anciennes', 'maisons familiales', 'biens avec terrain', 'projets de rénovation'],
+        'microAreas' => ['centre-bourg', 'villages voisins', 'axes de déplacement', 'secteurs résidentiels'],
+        'nearby' => [],
+    ];
+
+    $isSale = $pageType === 'vendre-maison';
+    $profile['intentTitle'] = $isSale ? 'Vendre une maison à ' . $city . ' avec une stratégie locale' : 'Faire estimer un bien à ' . $city . ' avec une lecture locale';
+    $profile['intentText'] = $isSale
+        ? 'Vendre une maison à ' . $city . ' demande de combiner estimation, présentation du bien, qualification des acquéreurs et suivi des offres. L’objectif est de défendre un prix cohérent tout en gardant un calendrier lisible.'
+        : 'Une estimation immobilière à ' . $city . ' doit tenir compte des références comparables, de l’état du bien, de son environnement, de la demande active et du projet du propriétaire.';
+    $profile['primaryKeyword'] = $isSale ? 'vendre maison ' . $city : 'estimation immobilière ' . $city;
+    $profile['keywords'] = array_values(array_unique([
+        'estimation ' . $city,
+        'estimation immobilière ' . $city,
+        'vendre maison ' . $city,
+        'immobilier ' . $city,
+        'agence immobilière ' . $city,
+        'prix maison ' . $city,
+        'conseiller immobilier ' . $city,
+    ]));
+    $profile['seoTitle'] = $isSale
+        ? 'Vendre maison ' . $city . ' | Estimation et immobilier local'
+        : 'Estimation immobilière ' . $city . ' | Vendre, prix maison et immobilier local';
+    $profile['seoDescription'] = $isSale
+        ? 'Vendre une maison à ' . $city . ' : estimation locale, stratégie de prix, valorisation du bien et accompagnement immobilier jusqu’à la signature.'
+        : 'Estimation immobilière à ' . $city . ' : avis de valeur local, analyse du marché, prix maison et accompagnement pour vendre dans de bonnes conditions.';
+    $profile['faqs'] = $isSale ? [
+        ['question' => 'Comment vendre une maison à ' . $city . ' au bon prix ?', 'answer' => 'La première étape consiste à croiser les références comparables, l’état du bien, son emplacement, les extérieurs, les travaux éventuels et la demande active sur ' . $city . ' et ses alentours.'],
+        ['question' => 'Faut-il faire estimer sa maison avant de vendre à ' . $city . ' ?', 'answer' => 'Oui. Une estimation locale permet de fixer une stratégie cohérente, d’éviter un prix trop haut qui bloque les visites ou un prix trop bas qui fragilise votre projet.'],
+        ['question' => 'Quels éléments influencent l’immobilier à ' . $city . ' ?', 'answer' => 'La localisation précise, la qualité du bâti, les accès, les services, la présence d’un jardin ou de dépendances et le niveau de travaux sont déterminants.'],
+    ] : [
+        ['question' => 'Comment obtenir une estimation immobilière à ' . $city . ' ?', 'answer' => 'Il faut analyser le bien, son état, ses surfaces, son environnement, les références utiles et la demande actuelle sur ' . $city . ' et les communes proches.'],
+        ['question' => 'Une estimation en ligne suffit-elle pour vendre à ' . $city . ' ?', 'answer' => 'Une première estimation en ligne donne un repère, mais un avis de valeur fiable doit intégrer une lecture locale et les spécificités concrètes du bien.'],
+        ['question' => 'Quels mots clés décrivent le marché immobilier à ' . $city . ' ?', 'answer' => 'Les recherches fréquentes croisent estimation ' . $city . ', vendre maison ' . $city . ', immobilier ' . $city . ', prix maison et conseiller immobilier local.'],
+    ];
+
+    return $profile;
+}
+
+function cms_render_local_public_page(array $page, array $settings, array $snapshot): void
+{
+    $sections = cms_page_sections($page);
+    $heroImage = trim((string) ($page['hero_image'] ?? ''));
+    $city = trim((string) ($page['city'] ?? '')) ?: (string) ($settings['main_city'] ?? 'Auxois-Morvan');
+    $pageType = trim((string) ($page['local_page_type'] ?? ''));
+    $profile = cms_local_profile($city, $pageType);
+    $advantages = cms_json_list($page['local_advantages_json'] ?? '[]');
+    $nearbyCities = cms_json_list($page['nearby_cities_json'] ?? '[]');
+    $pageFaqs = cms_json_objects((string) ($page['seo_faq_json'] ?? '[]'));
+    $internalLinks = cms_json_objects((string) ($page['seo_internal_links_json'] ?? '[]'));
+    $faqs = $pageFaqs !== [] ? $pageFaqs : $profile['faqs'];
+    if ($nearbyCities === []) {
+        $nearbyCities = $profile['nearby'];
+    }
+
+    $slug = (string) ($page['slug'] ?? '/');
+    $appUrl = rtrim((string) (cms_config()['app_url'] ?? ''), '/');
+    $pageUrl = $appUrl !== '' ? $appUrl . cms_url($slug) : cms_url($slug);
+    $imageUrl = $heroImage !== '' ? cms_url($heroImage) : cms_url('/uploads/auxois.jpg');
+    if ($appUrl !== '') {
+        $imageUrl = $appUrl . $imageUrl;
+    }
+
+    $structuredData = [
+        [
+            '@context' => 'https://schema.org',
+            '@type' => 'RealEstateAgent',
+            'name' => (string) $settings['site_name'],
+            'url' => $pageUrl,
+            'telephone' => (string) ($settings['phone'] ?? ''),
+            'email' => (string) ($settings['email'] ?? ''),
+            'image' => $imageUrl,
+            'areaServed' => ['@type' => 'City', 'name' => $city],
+            'keywords' => implode(', ', $profile['keywords']),
+        ],
+        [
+            '@context' => 'https://schema.org',
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => [
+                ['@type' => 'ListItem', 'position' => 1, 'name' => 'Accueil', 'item' => $appUrl !== '' ? $appUrl . cms_url('/') : cms_url('/')],
+                ['@type' => 'ListItem', 'position' => 2, 'name' => $city, 'item' => $pageUrl],
+            ],
+        ],
+        [
+            '@context' => 'https://schema.org',
+            '@type' => 'FAQPage',
+            'mainEntity' => array_map(static fn (array $faq): array => [
+                '@type' => 'Question',
+                'name' => $faq['question'],
+                'acceptedAnswer' => ['@type' => 'Answer', 'text' => $faq['answer']],
+            ], $faqs),
+        ],
+    ];
+
+    cms_render_public_document_start($profile['seoTitle'] . ' | ' . (string) $settings['site_name'], $profile['seoDescription'], (int) ($page['is_indexable'] ?? 1) === 1, $structuredData, [
+      'preload_image' => $heroImage !== '' ? $heroImage : '/uploads/auxois.jpg',
+      'preload_image_sizes' => '(max-width: 1023px) 100vw, 42vw',
+    ]);
+    cms_render_public_header($settings, $slug);
+    ?>
+    <main class="local-premium-page">
+      <section class="local-hero">
+        <div class="shell local-hero-grid">
+          <div class="local-hero-copy">
+            <p class="eyebrow">Expertise locale</p>
+            <h1><?= cms_h((string) $page['hero_title']) ?></h1>
+            <div class="hero-text richtext"><?= (string) $page['hero_subtitle'] ?></div>
+            <div class="local-keyword-row"><?php foreach (array_slice($profile['keywords'], 0, 4) as $keyword): ?><span><?= cms_h($keyword) ?></span><?php endforeach; ?></div>
+            <div class="hero-actions"><a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne?ville=' . rawurlencode($city))) ?>">Demander une estimation</a><a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Parler du secteur</a></div>
+          </div>
+          <aside class="local-hero-visual">
+            <div class="local-hero-image"><?php if ($heroImage !== ''): ?><?php cms_render_image($heroImage, (string) $page['hero_image_alt'], ['loading' => 'eager', 'fetchpriority' => 'high', 'sizes' => '(max-width: 1023px) 100vw, 42vw']); ?><?php endif; ?></div>
+            <div class="local-hero-card"><span><?= cms_h($city) ?></span><strong><?= cms_h($profile['primaryKeyword']) ?></strong><p><?= cms_h($profile['territory']) ?></p></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="local-section local-intent-section">
+        <div class="shell local-intent-grid">
+          <article class="local-intro-card">
+            <p class="eyebrow">Marché local</p>
+            <h2><?= cms_h($profile['intentTitle']) ?></h2>
+            <p><?= cms_h($profile['intentText']) ?></p>
+            <div class="richtext local-original-intro"><?= (string) $page['intro_html'] ?></div>
+          </article>
+          <aside class="local-side-card">
+            <p class="eyebrow">Recherches SEO couvertes</p>
+            <div class="local-seo-tags"><?php foreach ($profile['keywords'] as $keyword): ?><span><?= cms_h($keyword) ?></span><?php endforeach; ?></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="local-section">
+        <div class="shell">
+          <div class="local-section-head"><p class="eyebrow">Données locales utiles</p><h2>Ce qui influence l’immobilier à <?= cms_h($city) ?></h2><p><?= cms_h($profile['market']) ?></p></div>
+          <div class="local-data-grid">
+            <article><span>01</span><h3>Typologies recherchées</h3><ul><?php foreach ($profile['propertyTypes'] as $item): ?><li><?= cms_h($item) ?></li><?php endforeach; ?></ul></article>
+            <article><span>02</span><h3>Profils d’acquéreurs</h3><ul><?php foreach ($profile['buyers'] as $item): ?><li><?= cms_h($item) ?></li><?php endforeach; ?></ul></article>
+            <article><span>03</span><h3>Secteurs à comparer</h3><ul><?php foreach ($profile['microAreas'] as $item): ?><li><?= cms_h($item) ?></li><?php endforeach; ?></ul></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="local-section">
+        <div class="shell local-standard-grid">
+          <?php foreach ($sections as $index => $section): ?>
+            <article class="local-premium-card<?= $index === 0 ? ' is-featured' : '' ?>">
+              <?php if (!empty($section['eyebrow'])): ?><p class="eyebrow"><?= cms_h((string) $section['eyebrow']) ?></p><?php endif; ?>
+              <h2><?= cms_h((string) ($section['title'] ?? 'Analyse locale')) ?></h2>
+              <div class="richtext panel-copy"><?= (string) ($section['text'] ?? '') ?></div>
+              <?php if (!empty($section['items'])): ?><ul class="accent-list"><?php foreach ($section['items'] as $item): ?><li><?= cms_h((string) $item) ?></li><?php endforeach; ?></ul><?php endif; ?>
+            </article>
+          <?php endforeach; ?>
+        </div>
+      </section>
+
+      <section class="local-section">
+        <div class="shell local-proof-grid">
+          <article class="local-proof-card dark"><p class="eyebrow">Atouts locaux</p><h2>Pourquoi une approche locale change l’analyse</h2><ul><?php foreach ($advantages as $item): ?><li><?= cms_h($item) ?></li><?php endforeach; ?></ul></article>
+          <article class="local-proof-card"><p class="eyebrow">Autour de <?= cms_h($city) ?></p><h2>Villes et secteurs proches</h2><div class="tags-wrap"><?php foreach ($nearbyCities as $nearbyCity): ?><span><?= cms_h($nearbyCity) ?></span><?php endforeach; ?></div><p>Ces secteurs proches servent de points de comparaison pour affiner une estimation, comprendre la demande et positionner un bien de manière cohérente.</p></article>
+        </div>
+      </section>
+
+      <section class="local-section local-faq-section">
+        <div class="shell local-faq-grid">
+          <div><p class="eyebrow">Questions fréquentes</p><h2>SEO local : estimation, vente et immobilier à <?= cms_h($city) ?></h2></div>
+          <div class="local-faq-list"><?php foreach ($faqs as $faq): ?><details><summary><?= cms_h((string) ($faq['question'] ?? '')) ?></summary><p><?= cms_h((string) ($faq['answer'] ?? '')) ?></p></details><?php endforeach; ?></div>
+        </div>
+      </section>
+
+      <?php if ($internalLinks !== []): ?>
+        <section class="local-section local-links-section">
+          <div class="shell local-section-head">
+            <p class="eyebrow">À lire aussi</p>
+            <h2>Continuer votre recherche immobilière locale</h2>
+            <div class="tags-wrap local-internal-links"><?php foreach ($internalLinks as $link): ?><a href="<?= cms_h(cms_url((string) ($link['url'] ?? '/'))) ?>"><?= cms_h((string) ($link['label'] ?? 'Lien utile')) ?></a><?php endforeach; ?></div>
+          </div>
+        </section>
+      <?php endif; ?>
+
+      <section class="local-section local-final-cta"><div class="shell"><div class="cta-band cta-band-hero"><div><p class="eyebrow">Passer à l’action</p><h2><?= cms_h((string) $page['cta_title']) ?></h2><div class="richtext"><?= (string) $page['cta_text'] ?></div></div><div class="cta-actions"><a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne?ville=' . rawurlencode($city))) ?>">Faire estimer mon bien</a><a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a></div></div></div></section>
+    </main>
+    <?php
+    cms_render_public_footer($settings, $snapshot);
+}
+
+function cms_service_profile(string $pageKey): ?array
+{
+    $profiles = [
+        'vendre' => [
+            'eyebrow' => 'Vente immobilière',
+            'seoTitle' => 'Vendre un bien en Auxois-Morvan | Estimation, stratégie et immobilier local',
+            'seoDescription' => 'Vendre une maison ou un bien en Auxois-Morvan : estimation locale, stratégie de prix, valorisation, diffusion et accompagnement jusqu’à la signature.',
+            'primaryKeyword' => 'vendre maison Auxois Morvan',
+            'keywords' => ['vendre maison Auxois', 'vendre maison Morvan', 'estimation avant vente', 'immobilier Auxois Morvan', 'prix maison Auxois', 'mandataire immobilier local'],
+            'intentTitle' => 'Vendre au bon prix avec une stratégie claire',
+            'intentText' => 'Une vente réussie repose sur une estimation juste, une présentation lisible, une diffusion cohérente et un suivi rigoureux des acquéreurs. En Auxois-Morvan, le positionnement doit tenir compte des maisons anciennes, des biens avec terrain, des résidences secondaires et du niveau réel de demande.',
+            'signals' => [
+                ['title' => 'Prix de départ', 'text' => 'Un avis de valeur argumenté pour éviter un prix trop haut qui bloque les visites ou trop bas qui fragilise votre projet.'],
+                ['title' => 'Présentation du bien', 'text' => 'Mise en avant des volumes, extérieurs, dépendances, travaux, environnement et usages possibles.'],
+                ['title' => 'Qualification', 'text' => 'Tri des contacts, suivi des visites, lecture des offres et coordination jusqu’à la signature.'],
+            ],
+            'audiences' => ['Propriétaires de maisons anciennes', 'Vendeurs de résidence principale', 'Familles en changement de vie', 'Biens avec terrain ou dépendances'],
+            'process' => ['Évaluation locale', 'Stratégie de prix', 'Préparation du dossier', 'Diffusion ciblée', 'Négociation et signature'],
+            'faqs' => [
+                ['question' => 'Comment vendre une maison en Auxois-Morvan au bon prix ?', 'answer' => 'Il faut croiser les références récentes, l’état du bien, les extérieurs, les travaux, l’environnement et la demande active sur le secteur.'],
+                ['question' => 'Pourquoi faire une estimation avant de vendre ?', 'answer' => 'L’estimation permet de fixer une stratégie de prix crédible et d’éviter une mise en vente qui s’essouffle faute de positionnement réaliste.'],
+                ['question' => 'Quels biens se vendent en Auxois et Morvan ?', 'answer' => 'Les maisons de village, maisons familiales, biens de caractère, maisons avec terrain et projets de rénovation attirent des profils variés selon la commune et les accès.'],
+            ],
+        ],
+        'acheter' => [
+            'eyebrow' => 'Achat immobilier',
+            'seoTitle' => 'Acheter un bien en Auxois-Morvan | Maison, secteur et conseil immobilier local',
+            'seoDescription' => 'Acheter une maison ou un bien en Auxois-Morvan : recherche, analyse des secteurs, lecture du marché local et accompagnement des visites.',
+            'primaryKeyword' => 'acheter maison Auxois Morvan',
+            'keywords' => ['acheter maison Auxois', 'acheter maison Morvan', 'immobilier Auxois', 'immobilier Morvan', 'maison à vendre Auxois', 'conseil achat immobilier'],
+            'intentTitle' => 'Acheter avec une vraie lecture du terrain',
+            'intentText' => 'Acheter dans l’Auxois ou le Morvan suppose de comparer les communes, les accès, les services, l’état du bâti, les travaux et la cohérence du prix. Un regard local aide à éviter les arbitrages trop rapides et à prioriser les biens réellement adaptés au projet.',
+            'signals' => [
+                ['title' => 'Secteur', 'text' => 'Comparaison des communes, bassins de vie, axes et services utiles selon votre projet.'],
+                ['title' => 'Potentiel du bien', 'text' => 'Lecture de l’état, des travaux, dépendances, extérieurs, performance et usages possibles.'],
+                ['title' => 'Décision', 'text' => 'Repères de marché pour comprendre si le prix, le calendrier et les conditions sont cohérents.'],
+            ],
+            'audiences' => ['Familles cherchant plus d’espace', 'Acquéreurs de résidence secondaire', 'Projets de rénovation', 'Acheteurs comparant Auxois, Morvan et Côte-d’Or'],
+            'process' => ['Cadrage du projet', 'Sélection des secteurs', 'Analyse des biens', 'Visites accompagnées', 'Aide à la décision'],
+            'faqs' => [
+                ['question' => 'Où acheter une maison en Auxois-Morvan ?', 'answer' => 'Le bon secteur dépend de vos usages : résidence principale, secondaire, accès aux services, besoin de terrain, temps de trajet et niveau de travaux accepté.'],
+                ['question' => 'Comment savoir si le prix d’un bien est cohérent ?', 'answer' => 'Il faut comparer avec des biens similaires, tenir compte de l’état réel, de la commune, des extérieurs, des travaux et du profil de demande.'],
+                ['question' => 'Pourquoi se faire accompagner pour acheter ?', 'answer' => 'Un accompagnement local permet de mieux lire les écarts entre secteurs, d’anticiper les contraintes et de sécuriser les étapes de décision.'],
+            ],
+        ],
+        'estimation' => [
+            'eyebrow' => 'Estimation immobilière',
+            'seoTitle' => 'Estimation immobilière en Auxois-Morvan | Prix maison et avis de valeur local',
+            'seoDescription' => 'Estimation immobilière en Auxois-Morvan : avis de valeur local, analyse du marché, prix maison, potentiel du bien et stratégie avant vente.',
+            'primaryKeyword' => 'estimation immobilière Auxois Morvan',
+            'keywords' => ['estimation immobilière Auxois', 'estimation immobilière Morvan', 'prix maison Auxois', 'prix maison Morvan', 'avis de valeur immobilier', 'faire estimer sa maison'],
+            'intentTitle' => 'Une estimation utile pour décider, vendre ou arbitrer',
+            'intentText' => 'Une estimation sérieuse ne se limite pas à une moyenne de prix. Elle doit intégrer les références comparables, la typologie du bien, son état, son environnement, les travaux, la demande actuelle et l’objectif du propriétaire.',
+            'signals' => [
+                ['title' => 'Références comparables', 'text' => 'Sélection de repères réellement pertinents par secteur, type de bien et état général.'],
+                ['title' => 'Spécificités du bien', 'text' => 'Surfaces, terrain, dépendances, rénovation, exposition, accès, cadre et potentiel d’usage.'],
+                ['title' => 'Objectif du vendeur', 'text' => 'Vente rapide, meilleur prix, succession, séparation ou simple arbitrage patrimonial.'],
+            ],
+            'audiences' => ['Propriétaires avant mise en vente', 'Succession ou séparation', 'Projet patrimonial', 'Vendeurs voulant cadrer un calendrier'],
+            'process' => ['Collecte des informations', 'Analyse locale', 'Lecture du bien', 'Avis de valeur', 'Conseil de stratégie'],
+            'faqs' => [
+                ['question' => 'Comment obtenir une estimation immobilière en Auxois-Morvan ?', 'answer' => 'Vous pouvez transmettre les premières informations en ligne, puis l’analyse est affinée selon le bien, son état, sa commune et les références locales.'],
+                ['question' => 'Quelle différence entre estimation en ligne et avis de valeur ?', 'answer' => 'L’estimation en ligne donne un premier repère. L’avis de valeur argumenté ajoute la lecture locale, les spécificités du bien et la stratégie adaptée.'],
+                ['question' => 'Quels critères influencent le prix d’une maison ?', 'answer' => 'L’emplacement, l’état, les surfaces, le terrain, les dépendances, les travaux, les accès, l’environnement et la demande active influencent fortement le prix.'],
+            ],
+        ],
+        'fonds-de-commerce' => [
+            'eyebrow' => 'Fonds de commerce',
+            'seoTitle' => 'Vendre un fonds de commerce en Auxois-Morvan | Estimation, dossier et repreneurs',
+            'seoDescription' => 'Vendre un fonds de commerce en Auxois-Morvan, Beaune, Dijon et environs : estimation, dossier repreneur, diffusion ciblée et accompagnement confidentiel.',
+            'primaryKeyword' => 'vendre fonds de commerce Auxois Morvan',
+            'keywords' => ['vendre fonds de commerce Auxois', 'cession fonds de commerce Morvan', 'estimation fonds de commerce', 'commerce à vendre Bourgogne', 'repreneur commerce Côte-d’Or', 'transmission commerce local'],
+            'intentTitle' => 'Préparer une transmission lisible et confidentielle',
+            'intentText' => 'La vente d’un fonds de commerce exige une lecture à la fois immobilière, économique et humaine. Le dossier doit présenter l’activité clairement, qualifier les repreneurs et protéger le temps du cédant.',
+            'signals' => [
+                ['title' => 'Valorisation', 'text' => 'Analyse de l’emplacement, de l’activité, du bail, des éléments transmis et du potentiel de reprise.'],
+                ['title' => 'Dossier repreneur', 'text' => 'Présentation structurée pour rendre l’activité compréhensible et faciliter les premiers échanges.'],
+                ['title' => 'Confidentialité', 'text' => 'Diffusion maîtrisée, qualification des profils et accompagnement des échanges jusqu’à la cession.'],
+            ],
+            'audiences' => ['Commerçants en transmission', 'Cafés, restaurants et commerces de proximité', 'Activités avec clientèle locale', 'Cédants recherchant discrétion et méthode'],
+            'process' => ['Cadrage de la cession', 'Valorisation', 'Préparation du dossier', 'Qualification repreneurs', 'Accompagnement des négociations'],
+            'faqs' => [
+                ['question' => 'Comment vendre un fonds de commerce en Bourgogne ?', 'answer' => 'Il faut préparer un dossier clair, valoriser l’activité, cadrer les conditions de reprise et qualifier les repreneurs avant de partager les informations sensibles.'],
+                ['question' => 'Comment estimer un fonds de commerce ?', 'answer' => 'L’estimation prend en compte l’emplacement, le bail, l’activité, la clientèle, les éléments transmis, le potentiel et le contexte local.'],
+                ['question' => 'Pourquoi qualifier les repreneurs ?', 'answer' => 'La qualification protège le temps du cédant, limite les demandes peu sérieuses et permet de concentrer les échanges sur des profils cohérents.'],
+            ],
+        ],
+    ];
+
+    return $profiles[$pageKey] ?? null;
+}
+
+function cms_render_service_public_page(array $page, array $settings, array $snapshot, array $profile): void
+{
+    $sections = cms_page_sections($page);
+    $heroImage = trim((string) ($page['hero_image'] ?? ''));
+    $slug = (string) ($page['slug'] ?? '/');
+  $twoColumnServiceGrid = in_array((string) ($page['page_key'] ?? ''), ['vendre', 'acheter', 'estimation'], true);
+    $appUrl = rtrim((string) (cms_config()['app_url'] ?? ''), '/');
+    $pageUrl = $appUrl !== '' ? $appUrl . cms_url($slug) : cms_url($slug);
+    $imageUrl = $heroImage !== '' ? cms_url($heroImage) : cms_url('/uploads/auxois.jpg');
+    if ($appUrl !== '') {
+        $imageUrl = $appUrl . $imageUrl;
+    }
+
+    $structuredData = [
+        [
+            '@context' => 'https://schema.org',
+            '@type' => 'Service',
+            'name' => (string) $page['title'],
+            'description' => $profile['seoDescription'],
+            'provider' => ['@type' => 'RealEstateAgent', 'name' => (string) $settings['site_name'], 'telephone' => (string) ($settings['phone'] ?? ''), 'email' => (string) ($settings['email'] ?? '')],
+            'areaServed' => array_map(static fn (string $area): array => ['@type' => 'Place', 'name' => $area], cms_json_list($settings['covered_areas_json'] ?? '[]')),
+            'keywords' => implode(', ', $profile['keywords']),
+            'url' => $pageUrl,
+            'image' => $imageUrl,
+        ],
+        [
+            '@context' => 'https://schema.org',
+            '@type' => 'FAQPage',
+            'mainEntity' => array_map(static fn (array $faq): array => [
+                '@type' => 'Question',
+                'name' => $faq['question'],
+                'acceptedAnswer' => ['@type' => 'Answer', 'text' => $faq['answer']],
+            ], $profile['faqs']),
+        ],
+    ];
+
+    cms_render_public_document_start($profile['seoTitle'] . ' | ' . (string) $settings['site_name'], $profile['seoDescription'], (int) ($page['is_indexable'] ?? 1) === 1, $structuredData, [
+      'preload_image' => $heroImage !== '' ? $heroImage : '/uploads/auxois.jpg',
+      'preload_image_sizes' => '(max-width: 1023px) 100vw, 42vw',
+    ]);
+    cms_render_public_header($settings, $slug);
+    ?>
+    <main class="local-premium-page service-premium-page">
+      <section class="local-hero service-hero">
+        <div class="shell local-hero-grid">
+          <div class="local-hero-copy">
+            <p class="eyebrow"><?= cms_h($profile['eyebrow']) ?></p>
+            <h1><?= cms_h((string) $page['hero_title']) ?></h1>
+            <div class="hero-text richtext"><?= (string) $page['hero_subtitle'] ?></div>
+            <div class="local-keyword-row"><?php foreach (array_slice($profile['keywords'], 0, 4) as $keyword): ?><span><?= cms_h($keyword) ?></span><?php endforeach; ?></div>
+            <div class="hero-actions"><a class="button primary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Faire estimer mon bien</a><a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a></div>
+          </div>
+          <aside class="local-hero-visual">
+            <div class="local-hero-image"><?php if ($heroImage !== ''): ?><?php cms_render_image($heroImage, (string) $page['hero_image_alt'], ['loading' => 'eager', 'fetchpriority' => 'high', 'sizes' => '(max-width: 1023px) 100vw, 42vw']); ?><?php endif; ?></div>
+            <div class="local-hero-card"><span>Objectif SEO</span><strong><?= cms_h($profile['primaryKeyword']) ?></strong><p><?= cms_h($profile['seoDescription']) ?></p></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="local-section service-intent-section">
+        <div class="shell local-intent-grid">
+          <article class="local-intro-card">
+            <p class="eyebrow">Approche métier</p>
+            <h2><?= cms_h($profile['intentTitle']) ?></h2>
+            <p><?= cms_h($profile['intentText']) ?></p>
+            <div class="richtext local-original-intro"><?= (string) $page['intro_html'] ?></div>
+          </article>
+          <aside class="local-side-card">
+            <p class="eyebrow">Mots clés travaillés</p>
+            <div class="local-seo-tags"><?php foreach ($profile['keywords'] as $keyword): ?><span><?= cms_h($keyword) ?></span><?php endforeach; ?></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="local-section">
+        <div class="shell">
+          <div class="local-section-head"><p class="eyebrow">Points de décision</p><h2>Les éléments qui changent vraiment le résultat</h2><p>Chaque projet doit être analysé selon son objectif, son calendrier, son secteur et les attentes réelles des acquéreurs ou repreneurs.</p></div>
+          <div class="local-data-grid"><?php foreach ($profile['signals'] as $index => $signal): ?><article><span><?= cms_h(str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT)) ?></span><h3><?= cms_h($signal['title']) ?></h3><p><?= cms_h($signal['text']) ?></p></article><?php endforeach; ?></div>
+        </div>
+      </section>
+
+      <section class="local-section">
+        <div class="shell local-standard-grid<?= $twoColumnServiceGrid ? ' service-two-column-grid' : '' ?>">
+          <?php foreach ($sections as $index => $section): ?>
+            <?php
+              $sectionEyebrow = trim((string) ($section['eyebrow'] ?? ''));
+              if (strcasecmp($sectionEyebrow, 'Migration WordPress') === 0) {
+                  $sectionEyebrow = 'Accompagnement';
+              }
+            ?>
+            <article class="local-premium-card<?= $index === 0 ? ' is-featured' : '' ?>">
+              <?php if ($sectionEyebrow !== ''): ?><p class="eyebrow"><?= cms_h($sectionEyebrow) ?></p><?php endif; ?>
+              <h2><?= cms_h((string) ($section['title'] ?? 'Accompagnement')) ?></h2>
+              <div class="richtext panel-copy"><?= (string) ($section['text'] ?? '') ?></div>
+              <?php if (!empty($section['items'])): ?><ul class="accent-list"><?php foreach ($section['items'] as $item): ?><li><?= cms_h((string) $item) ?></li><?php endforeach; ?></ul><?php endif; ?>
+            </article>
+          <?php endforeach; ?>
+        </div>
+      </section>
+
+      <section class="local-section">
+        <div class="shell local-proof-grid">
+          <article class="local-proof-card dark"><p class="eyebrow">Parcours</p><h2>Une méthode claire, étape par étape</h2><ol class="service-process-list"><?php foreach ($profile['process'] as $index => $step): ?><li><span><?= cms_h(str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT)) ?></span><?= cms_h($step) ?></li><?php endforeach; ?></ol></article>
+          <article class="local-proof-card"><p class="eyebrow">Pour quels projets ?</p><h2>Un accompagnement adapté aux situations réelles</h2><div class="tags-wrap"><?php foreach ($profile['audiences'] as $audience): ?><span><?= cms_h($audience) ?></span><?php endforeach; ?></div><p>Le contenu de cette page est construit pour répondre aux recherches concrètes des propriétaires, acquéreurs ou commerçants en Auxois-Morvan.</p></article>
+        </div>
+      </section>
+
+      <section class="local-section local-faq-section">
+        <div class="shell local-faq-grid">
+          <div><p class="eyebrow">Questions fréquentes</p><h2>Réponses aux recherches autour de <?= cms_h($profile['primaryKeyword']) ?></h2></div>
+          <div class="local-faq-list"><?php foreach ($profile['faqs'] as $faq): ?><details><summary><?= cms_h($faq['question']) ?></summary><p><?= cms_h($faq['answer']) ?></p></details><?php endforeach; ?></div>
+        </div>
+      </section>
+
+      <section class="local-section local-final-cta"><div class="shell"><div class="cta-band cta-band-hero"><div><p class="eyebrow">Passer à l’action</p><h2><?= cms_h((string) $page['cta_title']) ?></h2><div class="richtext"><?= (string) $page['cta_text'] ?></div></div><div class="cta-actions"><a class="button primary" href="<?= cms_h(cms_url((string) $page['cta_button_url'])) ?>"><?= cms_h((string) $page['cta_button_label']) ?></a><a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a></div></div></div></section>
+    </main>
+    <?php
+    cms_render_public_footer($settings, $snapshot);
+}
+
 function cms_render_standard_public_page(array $page, array $settings, array $snapshot): void
 {
+    if (($page['page_type'] ?? 'main') === 'local') {
+        cms_render_local_public_page($page, $settings, $snapshot);
+        return;
+    }
+
+    $serviceProfile = cms_service_profile((string) ($page['page_key'] ?? ''));
+    if ($serviceProfile !== null) {
+        cms_render_service_public_page($page, $settings, $snapshot, $serviceProfile);
+        return;
+    }
+
     $sections = cms_page_sections($page);
     $heroImage = trim((string) ($page['hero_image'] ?? ''));
 
@@ -2382,13 +4705,13 @@ function cms_render_standard_public_page(array $page, array $settings, array $sn
             <div class="hero-text richtext"><?= (string) $page['hero_subtitle'] ?></div>
             <div class="hero-actions"><a class="button primary" href="<?= cms_h(cms_url((string) $page['cta_button_url'])) ?>"><?= cms_h((string) $page['cta_button_label']) ?></a><a class="button secondary" href="<?= cms_h(cms_url('/contact')) ?>">Nous contacter</a></div>
           </div>
-          <div class="home-hero-side"><div class="hero-media<?= $heroImage !== '' ? '' : ' no-image' ?>"><?php if ($heroImage !== ''): ?><img src="<?= cms_h(cms_url($heroImage)) ?>" alt="<?= cms_h((string) $page['hero_image_alt']) ?>"><?php endif; ?></div></div>
+          <div class="home-hero-side"><div class="hero-media<?= $heroImage !== '' ? '' : ' no-image' ?>"><?php if ($heroImage !== ''): ?><?php cms_render_image($heroImage, (string) $page['hero_image_alt'], ['loading' => 'eager', 'fetchpriority' => 'high', 'sizes' => '(max-width: 1023px) 100vw, 46vw']); ?><?php endif; ?></div></div>
         </div>
       </section>
 
       <section class="section section-tight"><div class="shell"><article class="panel-card intro-card richtext"><?= (string) $page['intro_html'] ?></article></div></section>
 
-      <section class="section section-tight"><div class="shell standard-sections"><?php foreach ($sections as $section): ?><article class="panel-card standard-section-card"><div><?php if (!empty($section['eyebrow'])): ?><p class="eyebrow"><?= cms_h((string) $section['eyebrow']) ?></p><?php endif; ?><h2><?= cms_h((string) ($section['title'] ?? 'Section')) ?></h2><div class="richtext panel-copy"><?= (string) ($section['text'] ?? '') ?></div><?php if (!empty($section['items'])): ?><ul class="accent-list"><?php foreach ($section['items'] as $item): ?><li><?= cms_h((string) $item) ?></li><?php endforeach; ?></ul><?php endif; ?></div><div><?php if (!empty($section['image'])): ?><img class="section-image" src="<?= cms_h(cms_url((string) $section['image'])) ?>" alt="<?= cms_h((string) ($section['imageAlt'] ?? '')) ?>"><?php endif; ?><?php if (!empty($section['stats'])): ?><div class="stats-tiles"><?php foreach ($section['stats'] as $stat): ?><div class="tile-card"><strong><?= cms_h((string) ($stat['value'] ?? '')) ?></strong><span><?= cms_h((string) ($stat['label'] ?? '')) ?></span></div><?php endforeach; ?></div><?php endif; ?></div></article><?php endforeach; ?></div></section>
+      <section class="section section-tight"><div class="shell standard-sections"><?php foreach ($sections as $section): ?><article class="panel-card standard-section-card"><div><?php if (!empty($section['eyebrow'])): ?><p class="eyebrow"><?= cms_h((string) $section['eyebrow']) ?></p><?php endif; ?><h2><?= cms_h((string) ($section['title'] ?? 'Section')) ?></h2><div class="richtext panel-copy"><?= (string) ($section['text'] ?? '') ?></div><?php if (!empty($section['items'])): ?><ul class="accent-list"><?php foreach ($section['items'] as $item): ?><li><?= cms_h((string) $item) ?></li><?php endforeach; ?></ul><?php endif; ?></div><div><?php if (!empty($section['image'])): ?><?php cms_render_image((string) $section['image'], (string) ($section['imageAlt'] ?? ''), ['class' => 'section-image', 'sizes' => '(max-width: 767px) 100vw, 40vw']); ?><?php endif; ?><?php if (!empty($section['stats'])): ?><div class="stats-tiles"><?php foreach ($section['stats'] as $stat): ?><div class="tile-card"><strong><?= cms_h((string) ($stat['value'] ?? '')) ?></strong><span><?= cms_h((string) ($stat['label'] ?? '')) ?></span></div><?php endforeach; ?></div><?php endif; ?></div></article><?php endforeach; ?></div></section>
 
       <?php if (($page['page_type'] ?? 'main') === 'local'): ?>
         <?php $advantages = cms_json_list($page['local_advantages_json'] ?? '[]'); ?>
@@ -2416,7 +4739,10 @@ function cms_render_histoire_page(array $settings): void
         ['number' => '04', 'title' => 'Rester présents jusqu’au bout', 'text' => 'Suivre les échanges, sécuriser les étapes administratives et garder un dialogue simple jusqu’à la signature.'],
     ];
 
-    cms_render_public_document_start($title . ' | ' . (string) $settings['site_name'], $description, true);
+    cms_render_public_document_start($title . ' | ' . (string) $settings['site_name'], $description, true, [], [
+      'preload_image' => $heroImage,
+      'preload_image_sizes' => '(max-width: 1023px) 100vw, 42vw',
+    ]);
     cms_render_public_header($settings, '/histoire');
     ?>
     <main class="history-premium-page">
@@ -2432,7 +4758,7 @@ function cms_render_histoire_page(array $settings): void
             </div>
           </div>
           <aside class="history-hero-media">
-            <img src="<?= cms_h(cms_url($heroImage)) ?>" alt="Village et patrimoine en Auxois-Morvan">
+            <?php cms_render_image($heroImage, 'Village et patrimoine en Auxois-Morvan', ['loading' => 'eager', 'fetchpriority' => 'high', 'sizes' => '(max-width: 1023px) 100vw, 42vw']); ?>
             <div class="history-hero-note"><strong>Local</strong><span>Auxois · Morvan · Côte-d’Or</span></div>
           </aside>
         </div>
@@ -2458,7 +4784,7 @@ function cms_render_histoire_page(array $settings): void
           </article>
           <div class="history-team-grid" aria-label="Présentation de Mickael Gury et Marion Roullier">
             <article class="history-profile-card">
-              <?php if ($mickaelPhoto !== ''): ?><img src="<?= cms_h(cms_url($mickaelPhoto)) ?>" alt="<?= cms_h((string) $settings['mickael_name']) ?>" loading="lazy" decoding="async"><?php endif; ?>
+              <?php if ($mickaelPhoto !== ''): ?><?php cms_render_image($mickaelPhoto, (string) $settings['mickael_name'], ['sizes' => '(max-width: 767px) 100vw, 320px']); ?><?php endif; ?>
               <div>
                 <p class="card-kicker">Terrain · stratégie · négociation</p>
                 <h3><?= cms_h((string) $settings['mickael_name']) ?></h3>
@@ -2466,7 +4792,7 @@ function cms_render_histoire_page(array $settings): void
               </div>
             </article>
             <article class="history-profile-card is-reverse">
-              <?php if ($marionPhoto !== ''): ?><img src="<?= cms_h(cms_url($marionPhoto)) ?>" alt="<?= cms_h((string) $settings['marion_name']) ?>" loading="lazy" decoding="async"><?php endif; ?>
+              <?php if ($marionPhoto !== ''): ?><?php cms_render_image($marionPhoto, (string) $settings['marion_name'], ['sizes' => '(max-width: 767px) 100vw, 320px']); ?><?php endif; ?>
               <div>
                 <p class="card-kicker">Écoute · suivi · accompagnement</p>
                 <h3><?= cms_h((string) $settings['marion_name']) ?></h3>
@@ -2508,7 +4834,7 @@ function cms_render_histoire_page(array $settings): void
               <li>Villages, bourgs actifs et secteurs ruraux</li>
             </ul>
           </article>
-          <article class="history-image-card"><img src="<?= cms_h(cms_url('/uploads/maison-Maconge-20.jpg')) ?>" alt="Maison en pierre en Auxois-Morvan" loading="lazy" decoding="async"></article>
+          <article class="history-image-card"><?php cms_render_image('/uploads/maison-Maconge-20.jpg', 'Maison en pierre en Auxois-Morvan', ['sizes' => '(max-width: 767px) 100vw, 45vw']); ?></article>
         </div>
       </section>
 
@@ -2550,7 +4876,10 @@ function cms_render_avis_page(array $settings): void
     };
     $featured = $testimonials[0] ?? null;
 
-    cms_render_public_document_start($title . ' | ' . (string) $settings['site_name'], $description, true);
+    cms_render_public_document_start($title . ' | ' . (string) $settings['site_name'], $description, true, [], [
+      'preload_image' => '/uploads/pouilly.jpg',
+      'preload_image_sizes' => '(max-width: 1023px) 100vw, 42vw',
+    ]);
     cms_render_public_header($settings, '/avis');
     ?>
     <main class="avis-premium-page">
@@ -2571,7 +4900,7 @@ function cms_render_avis_page(array $settings): void
               <div class="dots-row"><?php for ($i = 0; $i < 5; $i += 1): ?><span></span><?php endfor; ?></div>
               <p>Note moyenne des avis intégrés</p>
             </div>
-            <img src="<?= cms_h(cms_url('/uploads/pouilly.jpg')) ?>" alt="Paysage de l'Auxois-Morvan" loading="lazy" decoding="async">
+            <?php cms_render_image('/uploads/pouilly.jpg', 'Paysage de l\'Auxois-Morvan', ['loading' => 'eager', 'fetchpriority' => 'high', 'sizes' => '(max-width: 1023px) 100vw, 42vw']); ?>
           </aside>
         </div>
       </section>
@@ -2705,7 +5034,10 @@ function cms_render_prestations_page(array $settings): void
         ['title' => 'Suivre', 'text' => 'Des échanges réguliers, des décisions expliquées et une présence jusqu’à la signature.'],
     ];
 
-    cms_render_public_document_start($title . ' | ' . (string) $settings['site_name'], $description, true);
+    cms_render_public_document_start($title . ' | ' . (string) $settings['site_name'], $description, true, [], [
+      'preload_image' => '/uploads/auxois.jpg',
+      'preload_image_sizes' => '(max-width: 1023px) 100vw, 42vw',
+    ]);
     cms_render_public_header($settings, '/prestations');
     ?>
     <main class="prestations-premium-page">
@@ -2721,7 +5053,7 @@ function cms_render_prestations_page(array $settings): void
             </div>
           </div>
           <aside class="prestations-hero-media">
-            <img src="<?= cms_h(cms_url('/uploads/auxois.jpg')) ?>" alt="Paysage immobilier en Auxois-Morvan">
+            <?php cms_render_image('/uploads/auxois.jpg', 'Paysage immobilier en Auxois-Morvan', ['loading' => 'eager', 'fetchpriority' => 'high', 'sizes' => '(max-width: 1023px) 100vw, 42vw']); ?>
             <div class="prestations-hero-card"><strong>4</strong><span>domaines d’accompagnement</span></div>
           </aside>
         </div>
@@ -2757,7 +5089,7 @@ function cms_render_prestations_page(array $settings): void
           <?php foreach ($serviceSections as $index => $service): ?>
             <article class="prestations-service-row<?= $index % 2 === 1 ? ' is-reverse' : '' ?>">
               <a class="prestations-service-image" href="<?= cms_h(cms_url($service['href'])) ?>">
-                <img src="<?= cms_h(cms_url($service['image'])) ?>" alt="<?= cms_h($service['alt']) ?>" loading="lazy" decoding="async">
+                <?php cms_render_image($service['image'], $service['alt'], ['sizes' => '(max-width: 767px) 100vw, 40vw']); ?>
               </a>
               <div class="prestations-service-content">
                 <span class="prestations-number"><?= cms_h($service['number']) ?></span>
