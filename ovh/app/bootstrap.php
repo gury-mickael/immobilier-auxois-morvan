@@ -4079,6 +4079,7 @@ function cms_public_sitemap_entries(array $settings): array
     $addEntry('/histoire', '0.74', 'monthly');
     $addEntry('/avis', '0.76', 'monthly');
     $addEntry('/prestations', '0.88', 'monthly');
+    $addEntry('/viager', '0.9', 'monthly');
     $addEntry('/estimation-en-ligne', '0.92', 'weekly');
     $addEntry('/etude-viager-gratuite', '0.9', 'weekly');
 

@@ -57,6 +57,11 @@ try {
       exit;
     }
 
+    if ($requestPath === '/viager' || $requestPath === '/viager/') {
+      cms_render_viager_seo_page($settings, cms_snapshot());
+      exit;
+    }
+
     if ($requestPath === '/estimation-en-ligne' || $requestPath === '/estimation-en-ligne/' || $requestPath === '/estimation-immobiliere-auxois-morvan' || $requestPath === '/estimation-immobiliere-auxois-morvan/') {
       $formState = ['errors' => [], 'payload' => []];
 
@@ -73,7 +78,7 @@ try {
       exit;
     }
 
-    if ($requestPath === '/etude-viager-gratuite' || $requestPath === '/etude-viager-gratuite/' || $requestPath === '/viager' || $requestPath === '/viager/') {
+    if ($requestPath === '/etude-viager-gratuite' || $requestPath === '/etude-viager-gratuite/') {
       $formState = ['errors' => [], 'payload' => []];
 
       if ($_SERVER['REQUEST_METHOD'] === 'POST') {

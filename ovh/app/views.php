@@ -3383,6 +3383,233 @@ function cms_render_viager_confirmation_page(array $settings): void
     <?php
 }
 
+function cms_render_viager_seo_page(array $settings, array $snapshot): void
+{
+    $title = 'Viager autour de Mimeure, Arnay-le-Duc et Beaune | ' . (string) $settings['site_name'];
+    $description = 'Vous envisagez une vente en viager autour de Mimeure, Arnay-le-Duc, Pouilly-en-Auxois, Beaune ou Autun ? Découvrez les solutions possibles et demandez une étude viager gratuite et confidentielle.';
+    $ctaUrl = cms_url('/etude-viager-gratuite');
+    $areas = ['Mimeure', 'Arnay-le-Duc', 'Pouilly-en-Auxois', 'Bligny-sur-Ouche', 'Nolay', 'Beaune', 'Autun', 'Saulieu', 'Vitteaux', 'Semur-en-Auxois', 'Épinac', 'Liernais', 'Sombernon', 'La Bussière-sur-Ouche'];
+    $audiences = [
+        ['title' => 'Propriétaires souhaitant rester chez eux', 'text' => 'Vous souhaitez continuer à vivre dans votre maison ou votre appartement tout en valorisant votre patrimoine.'],
+        ['title' => 'Retraités cherchant un complément de revenus', 'text' => 'Le viager peut permettre d’obtenir un capital, une rente ou une combinaison des deux.'],
+        ['title' => 'Familles qui veulent anticiper', 'text' => 'Le viager peut aussi être étudié dans un contexte familial, patrimonial ou successoral.'],
+        ['title' => 'Propriétaires d’un bien difficile à transmettre ou à entretenir', 'text' => 'Une maison devenue trop lourde à entretenir peut parfois être valorisée autrement grâce à une solution adaptée.'],
+    ];
+    $forms = [
+        ['title' => 'Viager occupé', 'text' => 'Le vendeur cède son bien, mais conserve le droit d’y vivre. C’est la forme la plus connue du viager. Le prix tient compte de l’occupation du logement.'],
+        ['title' => 'Viager libre', 'text' => 'L’acquéreur peut disposer du bien immédiatement. Cette solution concerne plutôt les biens déjà libres ou les vendeurs qui souhaitent quitter le logement.'],
+        ['title' => 'Vente à terme', 'text' => 'Le prix est payé sur une durée définie à l’avance. Cette solution peut parfois être plus lisible qu’un viager classique selon le projet.'],
+    ];
+    $studyItems = [
+        'la valeur réelle du bien sur le marché local',
+        'l’état général du logement',
+        'la commune et la demande locale',
+        'l’occupation ou non du bien',
+        'l’âge et la situation du ou des vendeurs',
+        'l’équilibre entre bouquet et rente',
+        'la cohérence avec les attentes des acquéreurs',
+    ];
+    $reasons = [
+        ['title' => 'Comprendre vos options', 'text' => 'Viager occupé, viager libre, vente à terme ou vente classique : toutes les solutions ne se valent pas selon votre situation.'],
+        ['title' => 'Éviter une mauvaise décision', 'text' => 'Le viager engage le vendeur, l’acquéreur et parfois la famille. Il faut donc prendre le temps de poser les bonnes bases.'],
+        ['title' => 'Obtenir une vision réaliste', 'text' => 'Une étude locale permet d’analyser le bien, le marché et la faisabilité du projet.'],
+        ['title' => 'Échanger avec un conseiller local', 'text' => 'Vous pouvez poser vos questions simplement, sans engagement et en toute confidentialité.'],
+    ];
+    $faqs = [
+        ['question' => 'Qu’est-ce qu’une vente en viager ?', 'answer' => 'La vente en viager consiste à vendre un bien immobilier en échange d’un bouquet, d’une rente ou d’une combinaison des deux. Selon le type de viager, le vendeur peut continuer à occuper le logement.'],
+        ['question' => 'Quelle est la différence entre viager occupé et viager libre ?', 'answer' => 'En viager occupé, le vendeur conserve le droit d’habiter le logement. En viager libre, l’acquéreur peut utiliser ou louer le bien immédiatement.'],
+        ['question' => 'Peut-on vendre en viager autour de Mimeure ?', 'answer' => 'Oui, un projet viager peut être étudié autour de Mimeure et dans les communes voisines comme Arnay-le-Duc, Pouilly-en-Auxois, Beaune, Autun ou Semur-en-Auxois, à condition que le bien et la situation soient adaptés.'],
+        ['question' => 'Le viager est-il adapté à tous les propriétaires ?', 'answer' => 'Non. Le viager doit être étudié au cas par cas. L’âge, la situation familiale, la valeur du bien, l’état du logement et les objectifs du vendeur doivent être analysés.'],
+        ['question' => 'Peut-on rester chez soi après une vente en viager ?', 'answer' => 'Oui, dans le cadre d’un viager occupé, le vendeur peut conserver le droit de vivre dans le logement selon les conditions prévues dans l’acte de vente.'],
+        ['question' => 'Combien coûte une étude viager ?', 'answer' => 'L’étude proposée par Immobilier Auxois Morvan est gratuite et sans engagement.'],
+        ['question' => 'Est-ce confidentiel ?', 'answer' => 'Oui. Une demande d’étude viager reste confidentielle et sert uniquement à échanger sur votre projet.'],
+    ];
+    $structuredData = [
+        [
+            '@context' => 'https://schema.org',
+            '@type' => 'Service',
+            'name' => 'Étude viager autour de Mimeure',
+            'serviceType' => 'Accompagnement immobilier local pour projet viager',
+            'provider' => ['@id' => cms_absolute_url('/#real-estate-agent')],
+            'areaServed' => array_map(static fn (string $area): array => ['@type' => 'Place', 'name' => $area], array_slice($areas, 0, 8)),
+            'url' => cms_absolute_url('/viager'),
+        ],
+        [
+            '@context' => 'https://schema.org',
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => [
+                ['@type' => 'ListItem', 'position' => 1, 'name' => 'Accueil', 'item' => cms_absolute_url('/')],
+                ['@type' => 'ListItem', 'position' => 2, 'name' => 'Viager', 'item' => cms_absolute_url('/viager')],
+            ],
+        ],
+        [
+            '@context' => 'https://schema.org',
+            '@type' => 'FAQPage',
+            'mainEntity' => array_map(static fn (array $faq): array => [
+                '@type' => 'Question',
+                'name' => $faq['question'],
+                'acceptedAnswer' => ['@type' => 'Answer', 'text' => $faq['answer']],
+            ], $faqs),
+        ],
+    ];
+
+    cms_render_public_document_start($title, $description, true, $structuredData, ['canonical' => cms_absolute_url('/viager')]);
+    cms_render_public_header($settings, '/viager');
+    ?>
+    <main class="viager-seo-page">
+      <section class="viager-seo-hero">
+        <div class="shell viager-seo-hero-grid">
+          <div class="viager-seo-hero-copy">
+            <p class="eyebrow">Viager local &amp; confidentiel</p>
+            <h1>Vendre en viager autour de Mimeure</h1>
+            <h2>Vendre en viager autour de Mimeure, Arnay-le-Duc, Beaune et Autun</h2>
+            <p class="hero-text">Vous souhaitez rester chez vous tout en obtenant un capital ou un revenu complémentaire ? Nous vous aidons à étudier, gratuitement et en toute confidentialité, si le viager est adapté à votre situation.</p>
+            <div class="viager-seo-actions">
+              <a class="button primary" href="<?= cms_h($ctaUrl) ?>">Demander mon étude viager gratuite</a>
+              <a class="button secondary" href="#comprendre-viager">Comprendre le viager</a>
+            </div>
+          </div>
+          <aside class="viager-hero-card" aria-label="Réassurances">
+            <span>Étude gratuite</span>
+            <span>Confidentiel</span>
+            <span>Conseiller local</span>
+            <span>Sans engagement</span>
+          </aside>
+        </div>
+      </section>
+
+      <section id="comprendre-viager" class="viager-seo-section">
+        <div class="shell viager-intro-grid">
+          <article class="viager-panel is-main">
+            <p class="eyebrow">Comprendre simplement</p>
+            <h2>Le viager, une solution pour vendre autrement</h2>
+            <p>Le viager permet à un propriétaire de vendre son bien tout en conservant, selon la formule choisie, le droit d’y vivre.</p>
+            <details class="viager-more-details">
+              <summary>En savoir plus</summary>
+              <p>En contrepartie, le vendeur peut recevoir un capital initial, appelé bouquet, et/ou une rente versée dans le temps. C’est une solution qui peut permettre de mieux vivre sa retraite, d’anticiper la transmission de son patrimoine ou de rester plus sereinement à domicile.</p>
+            </details>
+          </article>
+          <aside class="viager-note-card">Le viager ne convient pas à toutes les situations. C’est pourquoi une étude personnalisée est indispensable avant de prendre une décision.</aside>
+        </div>
+      </section>
+
+      <section class="viager-seo-section">
+        <div class="shell">
+          <div class="viager-section-head"><p class="eyebrow">Profils concernés</p><h2>À qui s’adresse la vente en viager ?</h2></div>
+          <div class="viager-card-grid four-cols">
+            <?php foreach ($audiences as $item): ?>
+              <article class="viager-info-card"><h3><?= cms_h($item['title']) ?></h3><p><?= cms_h($item['text']) ?></p></article>
+            <?php endforeach; ?>
+          </div>
+        </div>
+      </section>
+
+      <section class="viager-seo-section">
+        <div class="shell">
+          <div class="viager-section-head"><p class="eyebrow">Solutions possibles</p><h2>Viager occupé, viager libre, vente à terme : quelles différences ?</h2></div>
+          <div class="viager-card-grid three-cols viager-accordion-grid" data-accordion-group="formes">
+            <?php foreach ($forms as $item): ?>
+              <details class="viager-info-card viager-mobile-accordion" open>
+                <summary><?= cms_h($item['title']) ?></summary>
+                <p><?= cms_h($item['text']) ?></p>
+              </details>
+            <?php endforeach; ?>
+          </div>
+          <div class="viager-section-cta"><a class="button primary" href="<?= cms_h($ctaUrl) ?>">Je veux savoir quelle solution est adaptée à mon bien</a></div>
+        </div>
+      </section>
+
+      <section class="viager-seo-section">
+        <div class="shell viager-study-grid">
+          <article class="viager-panel">
+            <p class="eyebrow">Étude personnalisée</p>
+            <h2>Comment se calcule une étude viager ?</h2>
+            <p>Une étude viager sérieuse ne se résume pas à un calcul automatique. Elle croise le bien, la localisation, la situation du vendeur et l’équilibre possible entre les différentes solutions.</p>
+            <div class="viager-note-inline">Nous ne promettons pas une rente automatique en ligne. L’objectif est d’abord de vérifier si le viager est une solution adaptée à votre situation.</div>
+          </article>
+          <div class="viager-factor-list" data-accordion-group="etude">
+            <?php foreach ($studyItems as $index => $item): ?>
+              <details class="viager-factor-item viager-mobile-accordion" open>
+                <summary><span><?= cms_h(str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT)) ?></span><?= cms_h($item) ?></summary>
+                <p>Ce point est analysé avec prudence pour replacer votre projet dans le marché local et dans votre situation réelle.</p>
+              </details>
+            <?php endforeach; ?>
+          </div>
+        </div>
+      </section>
+
+      <section class="viager-seo-section">
+        <div class="shell viager-local-panel">
+          <div><p class="eyebrow">Secteur local</p><h2>Un accompagnement local autour de Mimeure et dans l’Auxois Morvan</h2><p>Immobilier Auxois Morvan accompagne les propriétaires dans un secteur local autour de Mimeure, Arnay-le-Duc, Pouilly-en-Auxois, Beaune, Autun, Saulieu, Semur-en-Auxois, Vitteaux et les communes voisines. L’objectif est de proposer une approche humaine, claire et confidentielle, adaptée au marché immobilier local.</p></div>
+          <div class="viager-area-tags"><?php foreach ($areas as $area): ?><span><?= cms_h($area) ?></span><?php endforeach; ?></div>
+        </div>
+      </section>
+
+      <section class="viager-seo-section">
+        <div class="shell">
+          <div class="viager-section-head"><p class="eyebrow">Avant de décider</p><h2>Pourquoi demander une étude avant de décider ?</h2></div>
+          <div class="viager-card-grid four-cols viager-accordion-grid" data-accordion-group="raisons">
+            <?php foreach ($reasons as $item): ?>
+              <details class="viager-info-card viager-mobile-accordion" open>
+                <summary><?= cms_h($item['title']) ?></summary>
+                <p><?= cms_h($item['text']) ?></p>
+              </details>
+            <?php endforeach; ?>
+          </div>
+          <div class="viager-section-cta"><a class="button secondary" href="<?= cms_h(cms_url('/estimation-en-ligne')) ?>">Demander une estimation classique</a></div>
+        </div>
+      </section>
+
+      <section class="viager-seo-section viager-faq-section">
+        <div class="shell viager-faq-grid">
+          <div><p class="eyebrow">Questions fréquentes</p><h2>FAQ sur le viager autour de Mimeure</h2><p>Des réponses simples pour cadrer les premières questions, avant une étude personnalisée.</p></div>
+          <div class="viager-faq-list" data-accordion-group="faq">
+            <?php foreach ($faqs as $faq): ?>
+              <details class="viager-faq-item">
+                <summary><?= cms_h($faq['question']) ?></summary>
+                <p><?= cms_h($faq['answer']) ?></p>
+              </details>
+            <?php endforeach; ?>
+          </div>
+        </div>
+      </section>
+
+      <section class="viager-seo-section viager-final-section">
+        <div class="shell">
+          <div class="viager-final-cta">
+            <div><p class="eyebrow">Étude offerte</p><h2>Vous souhaitez savoir si le viager est adapté à votre situation ?</h2><p>Décrivez votre bien et votre projet en quelques étapes. Nous vous recontactons sous 24h pour échanger sur les solutions possibles, gratuitement et sans engagement.</p><span>Gratuit · Confidentiel · Local · Sans engagement</span></div>
+            <div class="viager-final-actions"><a class="button primary" href="<?= cms_h($ctaUrl) ?>">Demander mon étude viager gratuite</a><a class="button secondary" href="<?= cms_h(cms_url('/')) ?>">Retour à l’accueil</a></div>
+          </div>
+        </div>
+      </section>
+      <a class="viager-sticky-cta" href="<?= cms_h($ctaUrl) ?>">Étude gratuite</a>
+    </main>
+    <script>
+      (() => {
+        const isMobile = () => window.matchMedia('(max-width: 767.98px)').matches;
+        const groupedDetails = Array.from(document.querySelectorAll('.viager-seo-page [data-accordion-group] details'));
+        const mobileDetails = Array.from(document.querySelectorAll('.viager-mobile-accordion'));
+        const syncDetails = () => {
+          mobileDetails.forEach((detail) => { detail.open = !isMobile(); });
+        };
+        groupedDetails.forEach((detail) => {
+          detail.addEventListener('toggle', () => {
+            if (!detail.open || !isMobile()) return;
+            const group = detail.closest('[data-accordion-group]');
+            if (!group) return;
+            group.querySelectorAll('details').forEach((other) => {
+              if (other !== detail) other.open = false;
+            });
+          });
+        });
+        syncDetails();
+        window.addEventListener('resize', syncDetails, { passive: true });
+      })();
+    </script>
+    <?php
+    cms_render_public_footer($settings, $snapshot);
+}
+
 function cms_render_contact_page(array $page, array $settings, array $snapshot): void
 {
     $areas = array_slice($snapshot['siteSettings']['coveredAreas'] ?? cms_json_list($settings['covered_areas_json'] ?? '[]'), 0, 8);
@@ -3692,6 +3919,7 @@ function cms_render_public_footer(array $settings, array $snapshot): void
               <?php foreach ($services as $service): ?>
                 <a href="<?= cms_h(cms_url((string) $service['href'])) ?>"><?= cms_h((string) $service['title']) ?></a>
               <?php endforeach; ?>
+              <a href="<?= cms_h(cms_url('/viager')) ?>">Viager</a>
             </div>
           </details>
           <details class="footer-accordion">
@@ -3718,6 +3946,7 @@ function cms_render_public_footer(array $settings, array $snapshot): void
               <?php foreach ($services as $service): ?>
                 <a href="<?= cms_h(cms_url((string) $service['href'])) ?>"><?= cms_h((string) $service['title']) ?></a>
               <?php endforeach; ?>
+              <a href="<?= cms_h(cms_url('/viager')) ?>">Viager</a>
             </div>
             <div>
               <h3>Secteur</h3>

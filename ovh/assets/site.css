@@ -2172,6 +2172,394 @@ section[id] { scroll-margin-top: 6rem; }
     .local-data-grid article { padding: 1.1rem; }
 }
 
+/* === PAGE SEO VIAGER === */
+.viager-seo-page {
+    background:
+        radial-gradient(circle at top left, rgba(218, 183, 132, 0.18), transparent 28rem),
+        var(--color-panel);
+    color: var(--color-ink);
+}
+
+.viager-seo-hero {
+    padding-block: clamp(1.4rem, 4vw, 4.2rem) clamp(1.1rem, 3vw, 3rem);
+}
+
+.viager-seo-hero-grid {
+    display: grid;
+    gap: 1rem;
+    align-items: stretch;
+}
+
+@media (min-width: 920px) {
+    .viager-seo-hero-grid { grid-template-columns: minmax(0, 1.25fr) minmax(17rem, 0.55fr); }
+}
+
+.viager-seo-hero-copy {
+    padding: clamp(1.25rem, 4vw, 3.2rem);
+    border-radius: clamp(1.4rem, 3vw, 2.4rem);
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(20, 37, 35, 0.06);
+}
+
+.viager-seo-hero-copy h1 {
+    margin-top: 0.8rem;
+    max-width: 15ch;
+    font-size: clamp(2.15rem, 7vw, 4.9rem);
+    line-height: 0.95;
+    letter-spacing: -0.055em;
+}
+
+.viager-seo-hero-copy h2 {
+    margin-top: 0.8rem;
+    max-width: 36rem;
+    color: var(--color-primary);
+    font-size: clamp(1.05rem, 2.2vw, 1.45rem);
+    line-height: 1.2;
+}
+
+.viager-seo-hero-copy .hero-text {
+    margin-top: 1rem;
+    max-width: 42rem;
+    color: var(--color-muted);
+    font-size: clamp(1rem, 1.8vw, 1.14rem);
+    line-height: 1.7;
+}
+
+.viager-seo-actions,
+.viager-final-actions {
+    margin-top: 1.35rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.viager-hero-card {
+    display: grid;
+    gap: 0.7rem;
+    align-content: center;
+    padding: clamp(1.15rem, 3vw, 2rem);
+    border-radius: clamp(1.4rem, 3vw, 2.2rem);
+    background: var(--color-primary);
+    color: white;
+}
+
+.viager-hero-card span {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.13);
+    font-weight: 800;
+}
+
+.viager-hero-card span::before {
+    content: '✓';
+    display: grid;
+    place-items: center;
+    width: 1.45rem;
+    height: 1.45rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--color-warm);
+}
+
+.viager-hero-card span:last-child { border-bottom: 0; }
+
+.viager-seo-section {
+    padding-block: clamp(1.35rem, 4vw, 3.6rem);
+}
+
+.viager-intro-grid,
+.viager-study-grid,
+.viager-faq-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+@media (min-width: 900px) {
+    .viager-intro-grid { grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.65fr); }
+    .viager-study-grid { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); }
+    .viager-faq-grid { grid-template-columns: minmax(16rem, 0.55fr) minmax(0, 1fr); }
+}
+
+.viager-panel,
+.viager-note-card,
+.viager-info-card,
+.viager-factor-item,
+.viager-faq-item,
+.viager-local-panel,
+.viager-final-cta {
+    border: 1px solid rgba(20, 37, 35, 0.06);
+    border-radius: 1.55rem;
+    background: rgba(255, 255, 255, 0.78);
+}
+
+.viager-panel,
+.viager-note-card,
+.viager-local-panel,
+.viager-final-cta {
+    padding: clamp(1.25rem, 3vw, 2.4rem);
+}
+
+.viager-panel h2,
+.viager-section-head h2,
+.viager-faq-grid h2,
+.viager-local-panel h2,
+.viager-final-cta h2 {
+    margin-top: 0.55rem;
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    line-height: 1.02;
+}
+
+.viager-panel p,
+.viager-local-panel p,
+.viager-final-cta p,
+.viager-faq-grid > div > p {
+    margin-top: 0.95rem;
+    color: var(--color-muted);
+    line-height: 1.75;
+}
+
+.viager-note-card {
+    align-self: stretch;
+    display: grid;
+    align-content: center;
+    background: var(--color-primary);
+    color: white;
+    font-family: var(--font-display);
+    font-size: clamp(1.2rem, 2.5vw, 1.65rem);
+    line-height: 1.18;
+}
+
+.viager-more-details {
+    margin-top: 0.9rem;
+}
+
+.viager-more-details summary,
+.viager-info-card summary,
+.viager-factor-item summary,
+.viager-faq-item summary {
+    cursor: pointer;
+    list-style: none;
+}
+
+.viager-more-details summary::-webkit-details-marker,
+.viager-info-card summary::-webkit-details-marker,
+.viager-factor-item summary::-webkit-details-marker,
+.viager-faq-item summary::-webkit-details-marker { display: none; }
+
+.viager-more-details summary {
+    color: var(--color-primary);
+    font-weight: 800;
+}
+
+.viager-section-head {
+    max-width: 54rem;
+    margin-bottom: 1.05rem;
+}
+
+.viager-card-grid {
+    display: grid;
+    gap: 0.85rem;
+}
+
+@media (min-width: 760px) {
+    .viager-card-grid.three-cols { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .viager-card-grid.four-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1120px) {
+    .viager-card-grid.four-cols { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.viager-info-card {
+    padding: 1.25rem;
+}
+
+.viager-info-card h3,
+.viager-info-card summary {
+    color: var(--color-ink-strong);
+    font-size: 1.05rem;
+    font-weight: 850;
+    line-height: 1.22;
+}
+
+.viager-info-card p {
+    margin-top: 0.75rem;
+    color: var(--color-muted);
+    line-height: 1.65;
+}
+
+.viager-section-cta {
+    margin-top: 1.1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.viager-note-inline {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    background: rgba(218, 183, 132, 0.18);
+    color: var(--color-primary);
+    font-weight: 750;
+    line-height: 1.55;
+}
+
+.viager-factor-list,
+.viager-faq-list {
+    display: grid;
+    gap: 0.7rem;
+}
+
+.viager-factor-item,
+.viager-faq-item {
+    overflow: hidden;
+}
+
+.viager-factor-item summary,
+.viager-faq-item summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.15rem;
+    color: var(--color-ink-strong);
+    font-weight: 800;
+}
+
+.viager-factor-item summary::after,
+.viager-faq-item summary::after,
+.viager-info-card summary::after {
+    content: '+';
+    color: var(--color-muted);
+}
+
+.viager-factor-item[open] summary::after,
+.viager-faq-item[open] summary::after,
+.viager-info-card[open] summary::after { content: '−'; }
+
+.viager-factor-item summary span {
+    color: var(--color-primary);
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+}
+
+.viager-factor-item p,
+.viager-faq-item p {
+    padding: 0 1.15rem 1.1rem;
+    color: var(--color-muted);
+    line-height: 1.65;
+}
+
+.viager-local-panel {
+    display: grid;
+    gap: 1.2rem;
+    background: white;
+}
+
+@media (min-width: 900px) {
+    .viager-local-panel { grid-template-columns: minmax(0, 1fr) minmax(20rem, 0.8fr); align-items: center; }
+}
+
+.viager-area-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+}
+
+.viager-area-tags span {
+    padding: 0.58rem 0.78rem;
+    border-radius: 999px;
+    background: var(--color-bg-soft);
+    color: var(--color-primary);
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.viager-final-section {
+    padding-bottom: clamp(2rem, 5vw, 4rem);
+}
+
+.viager-final-cta {
+    display: grid;
+    gap: 1.25rem;
+    background: var(--color-primary);
+    color: white;
+}
+
+@media (min-width: 900px) {
+    .viager-final-cta { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+}
+
+.viager-final-cta h2,
+.viager-final-cta .eyebrow { color: white; }
+.viager-final-cta p { color: rgba(255, 255, 255, 0.78); }
+.viager-final-cta span { display: inline-flex; margin-top: 0.9rem; color: var(--color-warm); font-weight: 800; }
+
+.viager-sticky-cta {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .viager-seo-page { padding-bottom: 5rem; }
+    .viager-seo-hero { padding-block: 0.85rem 0.55rem; }
+    .viager-seo-hero-copy { padding: 1.05rem; border-radius: 1.25rem; }
+    .viager-seo-hero-copy .eyebrow { font-size: 0.64rem; }
+    .viager-seo-hero-copy h1 { margin-top: 0.55rem; font-size: clamp(2rem, 11vw, 3rem); }
+    .viager-seo-hero-copy h2 { display: none; }
+    .viager-seo-hero-copy .hero-text { margin-top: 0.7rem; font-size: 0.94rem; line-height: 1.48; }
+    .viager-seo-actions { margin-top: 0.95rem; display: grid; }
+    .viager-seo-actions .button,
+    .viager-final-actions .button,
+    .viager-section-cta .button { width: 100%; justify-content: center; }
+    .viager-hero-card { grid-template-columns: 1fr 1fr; padding: 0.85rem; border-radius: 1.15rem; gap: 0.25rem 0.7rem; }
+    .viager-hero-card span { padding: 0.45rem 0; border-bottom: 0; font-size: 0.76rem; }
+    .viager-hero-card span::before { width: 1.1rem; height: 1.1rem; font-size: 0.7rem; }
+    .viager-seo-section { padding-block: 0.95rem; }
+    .viager-panel,
+    .viager-note-card,
+    .viager-local-panel,
+    .viager-final-cta { padding: 1rem; border-radius: 1.2rem; }
+    .viager-panel h2,
+    .viager-section-head h2,
+    .viager-faq-grid h2,
+    .viager-local-panel h2,
+    .viager-final-cta h2 { font-size: clamp(1.45rem, 8vw, 2.05rem); }
+    .viager-panel p,
+    .viager-local-panel p,
+    .viager-final-cta p,
+    .viager-faq-grid > div > p { line-height: 1.55; }
+    .viager-note-card { font-size: 1.05rem; }
+    .viager-info-card { padding: 0; overflow: hidden; }
+    .viager-info-card:not(details) { padding: 1rem; }
+    .viager-info-card summary { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem; }
+    .viager-info-card p { padding: 0 1rem 1rem; margin-top: 0; line-height: 1.55; }
+    .viager-card-grid { gap: 0.65rem; }
+    .viager-section-head { margin-bottom: 0.8rem; }
+    .viager-factor-item summary,
+    .viager-faq-item summary { padding: 0.9rem 1rem; }
+    .viager-factor-item p,
+    .viager-faq-item p { padding: 0 1rem 1rem; line-height: 1.55; }
+    .viager-area-tags { gap: 0.45rem; }
+    .viager-area-tags span { padding: 0.5rem 0.65rem; font-size: 0.76rem; }
+    .viager-sticky-cta {
+        position: fixed;
+        left: 1rem;
+        right: 1rem;
+        bottom: 0.85rem;
+        z-index: 80;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 3.1rem;
+        border-radius: 999px;
+        background: var(--color-primary);
+        color: white;
+        font-weight: 900;
+        box-shadow: 0 18px 42px rgba(20, 37, 35, 0.22);
+    }
+}
+
 /* === HOME LOCAL COPY === */
 .home-local-copy {
     margin-top: 1.5rem;
