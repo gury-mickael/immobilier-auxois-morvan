@@ -3385,10 +3385,12 @@ function cms_render_viager_confirmation_page(array $settings): void
 
 function cms_render_viager_seo_page(array $settings, array $snapshot): void
 {
-    $title = 'Viager autour de Mimeure, Arnay-le-Duc et Beaune | ' . (string) $settings['site_name'];
-    $description = 'Vous envisagez une vente en viager autour de Mimeure, Arnay-le-Duc, Pouilly-en-Auxois, Beaune ou Autun ? Découvrez les solutions possibles et demandez une étude viager gratuite et confidentielle.';
+    $title = 'Viager en Côte-d’Or et Auxois Morvan | ' . (string) $settings['site_name'];
+    $description = 'Vous envisagez une vente en viager en Côte-d’Or, autour de Beaune, Autun, Arnay-le-Duc, Pouilly-en-Auxois ou Semur-en-Auxois ? Demandez une étude gratuite, locale et confidentielle.';
     $ctaUrl = cms_url('/etude-viager-gratuite');
-    $areas = ['Mimeure', 'Arnay-le-Duc', 'Pouilly-en-Auxois', 'Bligny-sur-Ouche', 'Nolay', 'Beaune', 'Autun', 'Saulieu', 'Vitteaux', 'Semur-en-Auxois', 'Épinac', 'Liernais', 'Sombernon', 'La Bussière-sur-Ouche'];
+    $ctaLabel = 'Faire mon étude viager gratuite';
+    $localLine = 'Beaune · Autun · Arnay-le-Duc · Pouilly-en-Auxois · Semur-en-Auxois';
+    $areas = ['Beaune', 'Autun', 'Arnay-le-Duc', 'Pouilly-en-Auxois', 'Semur-en-Auxois', 'Saulieu', 'Vitteaux', 'Bligny-sur-Ouche', 'Nolay', 'Épinac', 'Liernais', 'Sombernon', 'La Bussière-sur-Ouche', 'Auxois Morvan'];
     $audiences = [
         ['title' => 'Propriétaires souhaitant rester chez eux', 'text' => 'Vous souhaitez continuer à vivre dans votre maison ou votre appartement tout en valorisant votre patrimoine.'],
         ['title' => 'Retraités cherchant un complément de revenus', 'text' => 'Le viager peut permettre d’obtenir un capital, une rente ou une combinaison des deux.'],
@@ -3418,7 +3420,7 @@ function cms_render_viager_seo_page(array $settings, array $snapshot): void
     $faqs = [
         ['question' => 'Qu’est-ce qu’une vente en viager ?', 'answer' => 'La vente en viager consiste à vendre un bien immobilier en échange d’un bouquet, d’une rente ou d’une combinaison des deux. Selon le type de viager, le vendeur peut continuer à occuper le logement.'],
         ['question' => 'Quelle est la différence entre viager occupé et viager libre ?', 'answer' => 'En viager occupé, le vendeur conserve le droit d’habiter le logement. En viager libre, l’acquéreur peut utiliser ou louer le bien immédiatement.'],
-        ['question' => 'Peut-on vendre en viager autour de Mimeure ?', 'answer' => 'Oui, un projet viager peut être étudié autour de Mimeure et dans les communes voisines comme Arnay-le-Duc, Pouilly-en-Auxois, Beaune, Autun ou Semur-en-Auxois, à condition que le bien et la situation soient adaptés.'],
+        ['question' => 'Peut-on vendre en viager en Côte-d’Or ou dans l’Auxois Morvan ?', 'answer' => 'Oui, un projet viager peut être étudié autour de Beaune, Autun, Arnay-le-Duc, Pouilly-en-Auxois, Semur-en-Auxois et dans les communes voisines, à condition que le bien et la situation soient adaptés.'],
         ['question' => 'Le viager est-il adapté à tous les propriétaires ?', 'answer' => 'Non. Le viager doit être étudié au cas par cas. L’âge, la situation familiale, la valeur du bien, l’état du logement et les objectifs du vendeur doivent être analysés.'],
         ['question' => 'Peut-on rester chez soi après une vente en viager ?', 'answer' => 'Oui, dans le cadre d’un viager occupé, le vendeur peut conserver le droit de vivre dans le logement selon les conditions prévues dans l’acte de vente.'],
         ['question' => 'Combien coûte une étude viager ?', 'answer' => 'L’étude proposée par Immobilier Auxois Morvan est gratuite et sans engagement.'],
@@ -3428,7 +3430,7 @@ function cms_render_viager_seo_page(array $settings, array $snapshot): void
         [
             '@context' => 'https://schema.org',
             '@type' => 'Service',
-            'name' => 'Étude viager autour de Mimeure',
+            'name' => 'Étude viager en Côte-d’Or et Auxois Morvan',
             'serviceType' => 'Accompagnement immobilier local pour projet viager',
             'provider' => ['@id' => cms_absolute_url('/#real-estate-agent')],
             'areaServed' => array_map(static fn (string $area): array => ['@type' => 'Place', 'name' => $area], array_slice($areas, 0, 8)),
@@ -3461,11 +3463,12 @@ function cms_render_viager_seo_page(array $settings, array $snapshot): void
         <div class="shell viager-seo-hero-grid">
           <div class="viager-seo-hero-copy">
             <p class="eyebrow">Viager local &amp; confidentiel</p>
-            <h1>Vendre en viager en Auxois Morvan</h1>
-            <h2>Autour d’Arnay-le-Duc, Pouilly-en-Auxois, Beaune et Autun</h2>
-            <p class="hero-text">Vous souhaitez rester chez vous tout en obtenant un capital ou un revenu complémentaire ? Nous vous aidons à étudier, gratuitement et en toute confidentialité, si le viager est adapté à votre situation.</p>
+            <h1>Vendre en viager en Côte-d’Or et Auxois Morvan</h1>
+            <h2>Vendre en viager en Côte-d’Or et Auxois Morvan</h2>
+            <p class="viager-local-line"><?= cms_h($localLine) ?></p>
+            <p class="hero-text">De Beaune à Autun, en passant par Arnay-le-Duc, Pouilly-en-Auxois et Semur-en-Auxois, nous vous aidons à étudier gratuitement et confidentiellement votre projet de vente en viager.</p>
             <div class="viager-seo-actions">
-              <a class="button primary" href="<?= cms_h($ctaUrl) ?>">Demander une étude viager gratuite</a>
+              <a class="button primary" href="<?= cms_h($ctaUrl) ?>"><?= cms_h($ctaLabel) ?></a>
               <a class="button secondary" href="#comprendre-viager">Comprendre le viager</a>
             </div>
           </div>
@@ -3513,6 +3516,16 @@ function cms_render_viager_seo_page(array $settings, array $snapshot): void
 
       <section class="viager-seo-section">
         <div class="shell">
+          <article class="viager-family-card">
+            <p class="eyebrow">Famille &amp; transmission</p>
+            <h2>Et si ma famille se pose des questions ?</h2>
+            <p>Le viager peut soulever des interrogations chez les proches, notamment lorsqu’il touche à la maison familiale ou à la succession. Notre rôle est de vous expliquer les options simplement, sans pression, afin que vous puissiez prendre une décision claire et en parler sereinement avec votre famille.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="viager-seo-section">
+        <div class="shell">
           <div class="viager-section-head"><p class="eyebrow">Solutions possibles</p><h2>Viager occupé, viager libre, vente à terme : quelles différences ?</h2></div>
           <div class="viager-card-grid three-cols viager-accordion-grid" data-accordion-group="formes">
             <?php foreach ($forms as $item): ?>
@@ -3522,7 +3535,28 @@ function cms_render_viager_seo_page(array $settings, array $snapshot): void
               </details>
             <?php endforeach; ?>
           </div>
-          <div class="viager-section-cta"><a class="button primary" href="<?= cms_h($ctaUrl) ?>">Je veux savoir quelle solution est adaptée à mon bien</a></div>
+          <div class="viager-section-cta"><a class="button primary" href="<?= cms_h($ctaUrl) ?>"><?= cms_h($ctaLabel) ?></a></div>
+        </div>
+      </section>
+
+      <section class="viager-seo-section">
+        <div class="shell">
+          <article class="viager-example-card">
+            <div class="viager-example-copy">
+              <p class="eyebrow">Exemple concret</p>
+              <h2>Exemple concret : rester chez soi tout en obtenant un complément de revenu</h2>
+              <p>Marie, 76 ans, est propriétaire d’une maison estimée à 180 000 €. Elle souhaite continuer à vivre dans sa maison, mais aimerait disposer d’un capital immédiat et d’un revenu complémentaire chaque mois.</p>
+              <p>Dans le cadre d’un viager occupé, une étude pourrait par exemple permettre de rester chez elle tout en combinant un bouquet et une rente mensuelle.</p>
+              <div class="viager-example-warning">Exemple fictif, non contractuel, donné à titre illustratif. Les montants varient selon la valeur du bien, l’âge du vendeur, l’occupation du logement, l’état du bien, le bouquet souhaité et le marché local.</div>
+              <a class="button primary" href="<?= cms_h($ctaUrl) ?>"><?= cms_h($ctaLabel) ?></a>
+            </div>
+            <div class="viager-example-numbers" aria-label="Chiffres fictifs de l’exemple">
+              <div><span>Maison estimée</span><strong>180 000 €</strong></div>
+              <div><span>Bouquet possible</span><strong>35 000 €</strong></div>
+              <div><span>Rente mensuelle possible</span><strong>450 €</strong></div>
+              <div><span>Occupation</span><strong>Marie reste chez elle</strong></div>
+            </div>
+          </article>
         </div>
       </section>
 
@@ -3531,6 +3565,7 @@ function cms_render_viager_seo_page(array $settings, array $snapshot): void
           <article class="viager-panel">
             <p class="eyebrow">Étude personnalisée</p>
             <h2>Comment se calcule une étude viager ?</h2>
+            <p>Avant de parler de bouquet ou de rente, nous commençons par comprendre votre situation : souhaitez-vous rester dans le logement, obtenir un capital immédiat, sécuriser un complément de revenu ou simplement avoir un avis clair avant d’en parler à vos proches ?</p>
             <p>Une étude viager sérieuse ne se résume pas à un calcul automatique. Elle croise le bien, la localisation, la situation du vendeur et l’équilibre possible entre les différentes solutions.</p>
             <div class="viager-note-inline">Nous ne promettons pas une rente automatique en ligne. L’objectif est d’abord de vérifier si le viager est une solution adaptée à votre situation.</div>
           </article>
@@ -3547,7 +3582,7 @@ function cms_render_viager_seo_page(array $settings, array $snapshot): void
 
       <section class="viager-seo-section">
         <div class="shell viager-local-panel">
-          <div><p class="eyebrow">Secteur local</p><h2>Un accompagnement local autour de Mimeure et dans l’Auxois Morvan</h2><p>Immobilier Auxois Morvan accompagne les propriétaires dans un secteur local autour de Mimeure, Arnay-le-Duc, Pouilly-en-Auxois, Beaune, Autun, Saulieu, Semur-en-Auxois, Vitteaux et les communes voisines. L’objectif est de proposer une approche humaine, claire et confidentielle, adaptée au marché immobilier local.</p></div>
+          <div><p class="eyebrow">Secteur local</p><h2>Un accompagnement local en Côte-d’Or et Auxois Morvan</h2><p>Immobilier Auxois Morvan accompagne les propriétaires sur un secteur local couvrant notamment Beaune, Autun, Arnay-le-Duc, Pouilly-en-Auxois, Semur-en-Auxois, Saulieu, Vitteaux et les communes voisines. L’objectif est de proposer une approche humaine, claire et confidentielle, adaptée au marché immobilier local.</p></div>
           <div class="viager-area-tags"><?php foreach ($areas as $area): ?><span><?= cms_h($area) ?></span><?php endforeach; ?></div>
         </div>
       </section>
@@ -3569,7 +3604,7 @@ function cms_render_viager_seo_page(array $settings, array $snapshot): void
 
       <section class="viager-seo-section viager-faq-section">
         <div class="shell viager-faq-grid">
-          <div><p class="eyebrow">Questions fréquentes</p><h2>FAQ sur le viager autour de Mimeure</h2><p>Des réponses simples pour cadrer les premières questions, avant une étude personnalisée.</p></div>
+          <div><p class="eyebrow">Questions fréquentes</p><h2>FAQ sur le viager en Côte-d’Or et Auxois Morvan</h2><p>Des réponses simples pour cadrer les premières questions, avant une étude personnalisée.</p></div>
           <div class="viager-faq-list" data-accordion-group="faq">
             <?php foreach ($faqs as $faq): ?>
               <details class="viager-faq-item">
@@ -3585,11 +3620,11 @@ function cms_render_viager_seo_page(array $settings, array $snapshot): void
         <div class="shell">
           <div class="viager-final-cta">
             <div><p class="eyebrow">Étude offerte</p><h2>Vous souhaitez savoir si le viager est adapté à votre situation ?</h2><p>Décrivez votre bien et votre projet en quelques étapes. Nous vous recontactons sous 24h pour échanger sur les solutions possibles, gratuitement et sans engagement.</p><span>Gratuit · Confidentiel · Local · Sans engagement</span></div>
-            <div class="viager-final-actions"><a class="button primary" href="<?= cms_h($ctaUrl) ?>">Demander une étude viager gratuite</a></div>
+            <div class="viager-final-actions"><a class="button primary" href="<?= cms_h($ctaUrl) ?>"><?= cms_h($ctaLabel) ?></a></div>
           </div>
         </div>
       </section>
-      <a class="viager-sticky-cta" href="<?= cms_h($ctaUrl) ?>">Étude gratuite</a>
+      <a class="viager-sticky-cta" href="<?= cms_h($ctaUrl) ?>">Étude viager gratuite</a>
     </main>
     <script>
       (() => {
@@ -3609,8 +3644,6 @@ function cms_render_viager_seo_page(array $settings, array $snapshot): void
             });
           });
         });
-        syncDetails();
-        window.addEventListener('resize', syncDetails, { passive: true });
       })();
     </script>
     <?php
@@ -3906,6 +3939,13 @@ function cms_render_public_footer(array $settings, array $snapshot): void
     $areas = array_slice($snapshot['siteSettings']['coveredAreas'] ?? cms_json_list($settings['covered_areas_json'] ?? '[]'), 0, 6);
     $mobileAreas = array_slice($areas, 0, 4);
     $services = $snapshot['services'] ?? [];
+    $footerServices = [
+      ['title' => 'Estimation gratuite', 'href' => '/estimation-en-ligne'],
+      ['title' => 'Vendre', 'href' => '/vendre'],
+      ['title' => 'Acheter', 'href' => '/acheter'],
+      ['title' => 'Viager', 'href' => '/viager'],
+      ['title' => 'Fonds de commerce', 'href' => '/fonds'],
+    ];
     $facebookUrl = 'https://www.facebook.com/profile.php?id=61589488680956';
     ?>
     <footer class="site-footer">
@@ -3923,10 +3963,9 @@ function cms_render_public_footer(array $settings, array $snapshot): void
           <details class="footer-accordion">
             <summary>Prestations</summary>
             <div class="footer-accordion-content">
-              <?php foreach ($services as $service): ?>
+              <?php foreach ($footerServices as $service): ?>
                 <a href="<?= cms_h(cms_url((string) $service['href'])) ?>"><?= cms_h((string) $service['title']) ?></a>
               <?php endforeach; ?>
-              <a href="<?= cms_h(cms_url('/viager')) ?>">Viager</a>
             </div>
           </details>
           <details class="footer-accordion">
@@ -3950,10 +3989,9 @@ function cms_render_public_footer(array $settings, array $snapshot): void
           <div class="footer-columns">
             <div>
               <h3>Services</h3>
-              <?php foreach ($services as $service): ?>
+              <?php foreach ($footerServices as $service): ?>
                 <a href="<?= cms_h(cms_url((string) $service['href'])) ?>"><?= cms_h((string) $service['title']) ?></a>
               <?php endforeach; ?>
-              <a href="<?= cms_h(cms_url('/viager')) ?>">Viager</a>
             </div>
             <div>
               <h3>Secteur</h3>

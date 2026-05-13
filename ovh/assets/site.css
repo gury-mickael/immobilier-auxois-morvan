@@ -2178,6 +2178,7 @@ section[id] { scroll-margin-top: 6rem; }
         radial-gradient(circle at top left, rgba(218, 183, 132, 0.18), transparent 28rem),
         var(--color-panel);
     color: var(--color-ink);
+    font-size: 1.02rem;
 }
 
 .viager-seo-hero {
@@ -2203,10 +2204,10 @@ section[id] { scroll-margin-top: 6rem; }
 
 .viager-seo-hero-copy h1 {
     margin-top: 0.8rem;
-    max-width: 15ch;
-    font-size: clamp(2.15rem, 7vw, 4.9rem);
-    line-height: 0.95;
-    letter-spacing: -0.055em;
+    max-width: 16ch;
+    font-size: clamp(2.05rem, 6.2vw, 4.35rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
 }
 
 .viager-seo-hero-copy h2 {
@@ -2217,12 +2218,20 @@ section[id] { scroll-margin-top: 6rem; }
     line-height: 1.2;
 }
 
+.viager-local-line {
+    margin-top: 0.85rem;
+    color: var(--color-primary);
+    font-size: 0.88rem;
+    font-weight: 850;
+    letter-spacing: 0.02em;
+}
+
 .viager-seo-hero-copy .hero-text {
     margin-top: 1rem;
     max-width: 42rem;
-    color: var(--color-muted);
-    font-size: clamp(1rem, 1.8vw, 1.14rem);
-    line-height: 1.7;
+    color: #51615d;
+    font-size: clamp(1.04rem, 1.9vw, 1.18rem);
+    line-height: 1.78;
 }
 
 .viager-seo-actions,
@@ -2231,6 +2240,16 @@ section[id] { scroll-margin-top: 6rem; }
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
+}
+
+.viager-seo-actions .button.primary,
+.viager-section-cta .button.primary,
+.viager-example-card .button.primary,
+.viager-final-actions .button.primary {
+    min-width: min(100%, 16.5rem);
+    min-height: 3.1rem;
+    justify-content: center;
+    font-size: 0.94rem;
 }
 
 .viager-hero-card {
@@ -2331,6 +2350,8 @@ section[id] { scroll-margin-top: 6rem; }
 
 .viager-panel,
 .viager-note-card,
+.viager-family-card,
+.viager-example-card,
 .viager-local-panel,
 .viager-final-cta {
     padding: clamp(1.25rem, 3vw, 2.4rem);
@@ -2338,6 +2359,8 @@ section[id] { scroll-margin-top: 6rem; }
 
 .viager-panel h2,
 .viager-section-head h2,
+.viager-family-card h2,
+.viager-example-card h2,
 .viager-faq-grid h2,
 .viager-local-panel h2,
 .viager-final-cta h2 {
@@ -2347,12 +2370,15 @@ section[id] { scroll-margin-top: 6rem; }
 }
 
 .viager-panel p,
+.viager-family-card p,
+.viager-example-card p,
 .viager-local-panel p,
 .viager-final-cta p,
 .viager-faq-grid > div > p {
     margin-top: 0.95rem;
-    color: var(--color-muted);
-    line-height: 1.75;
+    color: #51615d;
+    font-size: 1.03rem;
+    line-height: 1.82;
 }
 
 .viager-note-card {
@@ -2421,8 +2447,78 @@ section[id] { scroll-margin-top: 6rem; }
 
 .viager-info-card p {
     margin-top: 0.75rem;
-    color: var(--color-muted);
-    line-height: 1.65;
+    color: #51615d;
+    font-size: 0.98rem;
+    line-height: 1.72;
+}
+
+.viager-family-card {
+    border: 1px solid rgba(23, 63, 49, 0.08);
+    border-radius: 1.65rem;
+    background:
+        linear-gradient(135deg, rgba(23, 63, 49, 0.07), rgba(218, 183, 132, 0.16)),
+        rgba(255, 255, 255, 0.82);
+}
+
+.viager-family-card h2,
+.viager-family-card p {
+    max-width: 56rem;
+}
+
+.viager-example-card {
+    display: grid;
+    gap: 1.2rem;
+    border: 1px solid rgba(23, 63, 49, 0.08);
+    border-radius: 1.8rem;
+    background: rgba(255, 255, 255, 0.86);
+}
+
+@media (min-width: 920px) {
+    .viager-example-card { grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.72fr); align-items: center; }
+}
+
+.viager-example-copy .button {
+    margin-top: 1rem;
+}
+
+.viager-example-warning {
+    margin-top: 1rem;
+    padding: 0.95rem 1rem;
+    border-radius: 1rem;
+    background: rgba(218, 183, 132, 0.18);
+    color: var(--color-primary);
+    font-weight: 800;
+    line-height: 1.55;
+}
+
+.viager-example-numbers {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.viager-example-numbers div {
+    padding: 1rem;
+    border-radius: 1.2rem;
+    background: var(--color-primary);
+    color: white;
+}
+
+.viager-example-numbers span {
+    display: block;
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.viager-example-numbers strong {
+    display: block;
+    margin-top: 0.35rem;
+    color: white;
+    font-family: var(--font-display);
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    line-height: 1.05;
 }
 
 .viager-section-cta {
@@ -2482,8 +2578,9 @@ section[id] { scroll-margin-top: 6rem; }
 .viager-factor-item p,
 .viager-faq-item p {
     padding: 0 1.15rem 1.1rem;
-    color: var(--color-muted);
-    line-height: 1.65;
+    color: #51615d;
+    font-size: 0.98rem;
+    line-height: 1.72;
 }
 
 .viager-local-panel {
@@ -2550,9 +2647,10 @@ section[id] { scroll-margin-top: 6rem; }
     .viager-seo-hero { padding-block: 0.85rem 0.55rem; }
     .viager-seo-hero-copy { padding: 1.05rem; border-radius: 1.25rem; }
     .viager-seo-hero-copy .eyebrow { font-size: 0.64rem; }
-    .viager-seo-hero-copy h1 { margin-top: 0.55rem; font-size: clamp(2rem, 11vw, 3rem); }
+    .viager-seo-hero-copy h1 { margin-top: 0.55rem; max-width: 12ch; font-size: clamp(1.95rem, 10vw, 2.85rem); }
     .viager-seo-hero-copy h2 { display: none; }
-    .viager-seo-hero-copy .hero-text { margin-top: 0.7rem; font-size: 0.94rem; line-height: 1.48; }
+    .viager-local-line { margin-top: 0.65rem; font-size: 0.76rem; line-height: 1.45; }
+    .viager-seo-hero-copy .hero-text { margin-top: 0.7rem; font-size: 0.99rem; line-height: 1.58; }
     .viager-seo-actions { margin-top: 0.95rem; display: grid; }
     .viager-seo-actions .button,
     .viager-final-actions .button,
@@ -2566,22 +2664,31 @@ section[id] { scroll-margin-top: 6rem; }
     .viager-seo-section { padding-block: 0.95rem; }
     .viager-panel,
     .viager-note-card,
+    .viager-family-card,
+    .viager-example-card,
     .viager-local-panel,
     .viager-final-cta { padding: 1rem; border-radius: 1.2rem; }
     .viager-panel h2,
     .viager-section-head h2,
+    .viager-family-card h2,
+    .viager-example-card h2,
     .viager-faq-grid h2,
     .viager-local-panel h2,
     .viager-final-cta h2 { font-size: clamp(1.45rem, 8vw, 2.05rem); }
     .viager-panel p,
+    .viager-family-card p,
+    .viager-example-card p,
     .viager-local-panel p,
     .viager-final-cta p,
-    .viager-faq-grid > div > p { line-height: 1.55; }
+    .viager-faq-grid > div > p { font-size: 0.98rem; line-height: 1.62; }
     .viager-note-card { font-size: 1.05rem; }
     .viager-info-card { padding: 0; overflow: hidden; }
     .viager-info-card:not(details) { padding: 1rem; }
     .viager-info-card summary { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem; }
     .viager-info-card p { padding: 0 1rem 1rem; margin-top: 0; line-height: 1.55; }
+    .viager-example-numbers { gap: 0.55rem; }
+    .viager-example-numbers div { padding: 0.85rem; }
+    .viager-example-numbers strong { font-size: 1.45rem; }
     .viager-card-grid { gap: 0.65rem; }
     .viager-section-head { margin-bottom: 0.8rem; }
     .viager-factor-item summary,
